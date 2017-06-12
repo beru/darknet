@@ -48,7 +48,9 @@ void train_captcha(char *cfgfile, char *weightfile)
     char **paths = (char **)list_to_array(plist);
     printf("%d\n", plist->size);
     clock_t time;
+#ifdef THREAD
     pthread_t load_thread;
+#endif
     data train;
     data buffer;
 
@@ -63,11 +65,16 @@ void train_captcha(char *cfgfile, char *weightfile)
     args.d = &buffer;
     args.type = CLASSIFICATION_DATA;
 
+#ifdef THREAD
     load_thread = load_data_in_thread(args);
+#else
+#endif
     while(1){
         ++i;
         time=clock();
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         train = buffer;
         fix_data_captcha(train, solved);
 
@@ -76,8 +83,9 @@ void train_captcha(char *cfgfile, char *weightfile)
            show_image(im, "training");
            cvWaitKey(0);
          */
-
+#ifdef THREAD
         load_thread = load_data_in_thread(args);
+#endif
         printf("Loaded: %lf seconds\n", sec(clock()-time));
         time=clock();
         float loss = train_network(net, train);
@@ -128,7 +136,7 @@ void test_captcha(char *cfgfile, char *weightfile, char *filename)
         }
         printf("\n");
         fflush(stdout);
-        free_image(im);
+        free_image(&im);
         if (filename) break;
     }
 }
@@ -169,7 +177,7 @@ void valid_captcha(char *cfgfile, char *weightfile, char *filename)
         }
         printf("\n");
         fflush(stdout);
-        free_image(im);
+        free_image(&im);
         if (filename) break;
     }
 }
@@ -237,7 +245,7 @@ void valid_captcha(char *cfgfile, char *weightfile, char *filename)
 #ifdef OPENCV
 cvWaitKey(0);
 #endif
-free_image(im);
+free_image(&im);
 }
 }
 
@@ -337,7 +345,7 @@ void test_captcha(char *cfgfile, char *weightfile)
         float *X = im.data;
         float *predictions = network_predict(net, X);
         print_letters(predictions, 10);
-        free_image(im);
+        free_image(&im);
     }
 }
     */

@@ -63,8 +63,9 @@ void train_regressor(char *datacfg,
     load_args args = {0};
     args.w = net.w;
     args.h = net.h;
+#ifdef THREAD
     args.threads = 32;
-
+#endif
     args.min = net.min_crop;
     args.max = net.max_crop;
     args.angle = net.angle;
@@ -81,18 +82,23 @@ void train_regressor(char *datacfg,
 
     data train;
     data buffer;
+#ifdef THREAD
     pthread_t load_thread;
+#endif
     args.d = &buffer;
+#ifdef THREAD
     load_thread = load_data(args);
-
+#endif
     int epoch = (*net.seen)/N;
     while(get_current_batch(net) < net.max_batches || net.max_batches == 0){
         time=clock();
-
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         train = buffer;
+#ifdef THREAD
         load_thread = load_data(args);
-
+#endif
         printf("Loaded: %lf seconds\n", sec(clock()-time));
         time=clock();
 
@@ -162,8 +168,8 @@ void predict_regressor(char *cfgfile, char *weightfile, char *filename)
         float *predictions = network_predict(net, X);
         printf("Predicted: %f\n", predictions[0]);
         printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
-        free_image(im);
-        free_image(sized);
+        free_image(&im);
+        free_image(&sized);
         if (filename) break;
     }
 }
@@ -209,8 +215,8 @@ void demo_regressor(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
 
         printf("People: %f\n", predictions[0]);
 
-        free_image(in_s);
-        free_image(in);
+        free_image(&in_s);
+        free_image(&in);
 
         cvWaitKey(10);
 

@@ -100,7 +100,7 @@ float bilinear_interpolate(image im, float x, float y, int c);
 
 image get_image_layer(image m, int l);
 
-void free_image(image m);
+void free_image(image *m);
 void test_resize(char *filename);
 #endif
 

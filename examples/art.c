@@ -48,8 +48,8 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
         }
         printf("]\n");
 
-        free_image(in_s);
-        free_image(in);
+        free_image(&in_s);
+        free_image(&in);
 
         cvWaitKey(1);
     }

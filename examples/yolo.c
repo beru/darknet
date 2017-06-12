@@ -47,15 +47,21 @@ void train_yolo(char *cfgfile, char *weightfile)
     args.saturation = net.saturation;
     args.hue = net.hue;
 
+#ifdef THREAD
     pthread_t load_thread = load_data_in_thread(args);
+#endif
     clock_t time;
     //while(i*imgs < N*120){
     while(get_current_batch(net) < net.max_batches){
         i += 1;
         time=clock();
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         train = buffer;
+#ifdef THREAD
         load_thread = load_data_in_thread(args);
+#endif
 
         printf("Loaded: %lf seconds\n", sec(clock()-time));
 
@@ -136,6 +142,7 @@ void validate_yolo(char *cfgfile, char *weightfile)
     int nms = 1;
     float iou_thresh = .5;
 
+#ifdef THREAD
     int nthreads = 8;
     image *val = calloc(nthreads, sizeof(image));
     image *val_resized = calloc(nthreads, sizeof(image));
@@ -179,10 +186,40 @@ void validate_yolo(char *cfgfile, char *weightfile)
             if (nms) do_nms_sort(boxes, probs, l.side*l.side*l.n, classes, iou_thresh);
             print_yolo_detections(fps, id, boxes, probs, l.side*l.side*l.n, classes, w, h);
             free(id);
-            free_image(val[t]);
-            free_image(val_resized[t]);
+            free_image(&val[t]);
+            free_image(&val_resized[t]);
         }
     }
+#else
+    image val;
+    image val_resized;
+
+    load_args args = {0};
+    args.w = net.w;
+    args.h = net.h;
+    args.type = IMAGE_DATA;
+    args.im = &val;
+    args.resized = &val_resized;
+
+    time_t start = time(0);
+    for(i = 0; i < m; ++i){
+        fprintf(stderr, "%d\n", i);
+        args.path = paths[i];
+        load_data(args);
+        char *path = paths[i];
+        char *id = basecfg(path);
+        float *X = val_resized.data;
+        network_predict(net, X);
+        int w = val.w;
+        int h = val.h;
+        get_detection_boxes(l, w, h, thresh, probs, boxes, 0);
+        if (nms) do_nms_sort(boxes, probs, l.side*l.side*l.n, classes, iou_thresh);
+        print_yolo_detections(fps, id, boxes, probs, l.side*l.side*l.n, classes, w, h);
+        free(id);
+        free_image(&val);
+        free_image(&val_resized);
+    }
+#endif
     fprintf(stderr, "Total Detection Time: %f Seconds\n", (double)(time(0) - start));
 }
 
@@ -267,8 +304,8 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
 
         fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
         free(id);
-        free_image(orig);
-        free_image(sized);
+        free_image(&orig);
+        free_image(&sized);
     }
 }
 
@@ -313,8 +350,8 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
         save_image(im, "predictions");
         show_image(im, "predictions");
 
-        free_image(im);
-        free_image(sized);
+        free_image(&im);
+        free_image(&sized);
 #ifdef OPENCV
         cvWaitKey(0);
         cvDestroyAllWindows();

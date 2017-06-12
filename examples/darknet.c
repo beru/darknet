@@ -383,12 +383,12 @@ void mkimg(char *cfgfile, char *weightfile, int h, int w, int num, char *prefix)
             int dx = rand()%(w-r.w);
             int dy = rand()%(h-r.h);
             ghost_image(r, im, dx, dy);
-            free_image(r);
+            free_image(&r);
         }
         char buff[256];
         sprintf(buff, "%s/gen_%d", prefix, z);
         save_image(im, buff);
-        free_image(im);
+        free_image(&im);
     }
 }
 

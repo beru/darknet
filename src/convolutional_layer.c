@@ -586,7 +586,7 @@ image *visualize_convolutional_layer(convolutional_layer l, char *window, image 
     sprintf(buff, "%s: Output", window);
     //show_image(dc, buff);
     //save_image(dc, buff);
-    free_image(dc);
+    free_image(&dc);
     return single_weights;
 }
 

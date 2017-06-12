@@ -70,7 +70,9 @@ void train_classifier(char *datacfg,
     load_args args = {0};
     args.w = net.w;
     args.h = net.h;
+#ifdef THREAD
     args.threads = 32;
+#endif
     args.hierarchy = net.hierarchy;
 
     args.min = net.min_crop;
@@ -91,18 +93,25 @@ void train_classifier(char *datacfg,
 
     data train;
     data buffer;
-    pthread_t load_thread;
     args.d = &buffer;
+#ifdef THREAD
+    pthread_t load_thread;
     load_thread = load_data(args);
+#else
+#endif
 
     int epoch = (*net.seen)/N;
     while(get_current_batch(net) < net.max_batches || net.max_batches == 0){
         time=clock();
 
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         train = buffer;
+#ifdef THREAD
         load_thread = load_data(args);
-
+#else
+#endif
         printf("Loaded: %lf seconds\n", sec(clock()-time));
         time=clock();
 
@@ -177,8 +186,9 @@ void train_classifier(char *datacfg,
    load_args args = {0};
    args.w = net.w;
    args.h = net.h;
+#ifdef THREAD
    args.threads = 8;
-
+#endif
    args.min = net.min_crop;
    args.max = net.max_crop;
    args.angle = net.angle;
@@ -198,17 +208,25 @@ void train_classifier(char *datacfg,
 
    data train;
    data buffer;
+#ifdef THREAD
    pthread_t load_thread;
+#endif
    args.d = &buffer;
+#ifdef THREAD
    load_thread = load_data(args);
+#endif
 
    int epoch = (*net.seen)/N;
    while(get_current_batch(net) < net.max_batches || net.max_batches == 0){
    time=clock();
 
+#ifdef THREAD
    pthread_join(load_thread, 0);
+#endif
    train = buffer;
+#ifdef THREAD
    load_thread = load_data(args);
+#endif
 
    printf("Loaded: %lf seconds\n", sec(clock()-time));
    time=clock();
@@ -297,18 +315,24 @@ void validate_classifier_crop(char *datacfg, char *filename, char *weightfile)
     args.d = &buffer;
     args.type = OLD_CLASSIFICATION_DATA;
 
+#ifdef THREAD
     pthread_t load_thread = load_data_in_thread(args);
+#else
+#endif
     for(i = 1; i <= splits; ++i){
         time=clock();
-
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         val = buffer;
 
         num = (i+1)*m/splits - i*m/splits;
         char **part = paths+(i*m/splits);
         if(i != splits){
             args.paths = part;
+#ifdef THREAD
             load_thread = load_data_in_thread(args);
+#endif
         }
         printf("Loaded: %d images in %lf seconds\n", val.X.rows, sec(clock()-time));
 
@@ -379,9 +403,9 @@ void validate_classifier_10(char *datacfg, char *filename, char *weightfile)
             float *p = network_predict(net, images[j].data);
             if(net.hierarchy) hierarchy_predictions(p, net.outputs, net.hierarchy, 1, 1);
             axpy_cpu(classes, 1, p, 1, pred, 1);
-            free_image(images[j]);
+            free_image(&images[j]);
         }
-        free_image(im);
+        free_image(&im);
         top_k(pred, classes, topk, indexes);
         free(pred);
         if(indexes[0] == class) avg_acc += 1;
@@ -440,8 +464,8 @@ void validate_classifier_full(char *datacfg, char *filename, char *weightfile)
         float *pred = network_predict(net, resized.data);
         if(net.hierarchy) hierarchy_predictions(pred, net.outputs, net.hierarchy, 1, 1);
 
-        free_image(im);
-        free_image(resized);
+        free_image(&im);
+        free_image(&resized);
         top_k(pred, classes, topk, indexes);
 
         if(indexes[0] == class) avg_acc += 1;
@@ -502,9 +526,9 @@ void validate_classifier_single(char *datacfg, char *filename, char *weightfile)
         float *pred = network_predict(net, crop.data);
         if(net.hierarchy) hierarchy_predictions(pred, net.outputs, net.hierarchy, 1, 1);
 
-        if(resized.data != im.data) free_image(resized);
-        free_image(im);
-        free_image(crop);
+        if(resized.data != im.data) free_image(&resized);
+        free_image(&im);
+        free_image(&crop);
         top_k(pred, classes, topk, indexes);
 
         if(indexes[0] == class) avg_acc += 1;
@@ -566,9 +590,9 @@ void validate_classifier_multi(char *datacfg, char *filename, char *weightfile)
             flip_image(r);
             p = network_predict(net, r.data);
             axpy_cpu(classes, 1, p, 1, pred, 1);
-            if(r.data != im.data) free_image(r);
+            if(r.data != im.data) free_image(&r);
         }
-        free_image(im);
+        free_image(&im);
         top_k(pred, classes, topk, indexes);
         free(pred);
         if(indexes[0] == class) avg_acc += 1;
@@ -656,7 +680,7 @@ void try_classifier(char *datacfg, char *cfgfile, char *weightfile, char *filena
             int index = indexes[i];
             printf("%s: %f\n", names[index], predictions[index]);
         }
-        free_image(im);
+        free_image(&im);
         if (filename) break;
     }
 }
@@ -710,8 +734,8 @@ void predict_classifier(char *datacfg, char *cfgfile, char *weightfile, char *fi
             //else printf("%s: %f\n",names[index], predictions[index]);
             printf("%5.2f%%: %s\n", predictions[index]*100, names[index]);
         }
-        if(r.data != im.data) free_image(r);
-        free_image(im);
+        if(r.data != im.data) free_image(&r);
+        free_image(&im);
         if (filename) break;
     }
 }
@@ -746,9 +770,9 @@ void label_classifier(char *datacfg, char *filename, char *weightfile)
         image crop = crop_image(resized, (resized.w - net.w)/2, (resized.h - net.h)/2, net.w, net.h);
         float *pred = network_predict(net, crop.data);
 
-        if(resized.data != im.data) free_image(resized);
-        free_image(im);
-        free_image(crop);
+        if(resized.data != im.data) free_image(&resized);
+        free_image(&im);
+        free_image(&crop);
         int ind = max_index(pred, classes);
 
         printf("%s\n", labels[ind]);
@@ -791,17 +815,22 @@ void test_classifier(char *datacfg, char *cfgfile, char *weightfile, int target_
     args.d = &buffer;
     args.type = OLD_CLASSIFICATION_DATA;
 
+#ifdef THREAD
     pthread_t load_thread = load_data_in_thread(args);
+#endif
     for(curr = net.batch; curr < m; curr += net.batch){
         time=clock();
-
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         val = buffer;
 
         if(curr < m){
             args.paths = paths + curr;
             if (curr + net.batch > m) args.n = m - curr;
+#ifdef THREAD
             load_thread = load_data_in_thread(args);
+#endif
         }
         fprintf(stderr, "Loaded: %d images in %lf seconds\n", val.X.rows, sec(clock()-time));
 
@@ -950,8 +979,8 @@ void threat_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_i
             show_image(out, "Threat");
             cvWaitKey(10);
         }
-        free_image(in_s);
-        free_image(in);
+        free_image(&in_s);
+        free_image(&in);
 
         gettimeofday(&tval_after, NULL);
         timersub(&tval_after, &tval_before, &tval_result);
@@ -1028,8 +1057,8 @@ void gun_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
             }
         }
 
-        free_image(in_s);
-        free_image(in);
+        free_image(&in_s);
+        free_image(&in);
 
         cvWaitKey(10);
 
@@ -1095,8 +1124,8 @@ void demo_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_ind
             printf("%.1f%%: %s\n", predictions[index]*100, names[index]);
         }
 
-        free_image(in_s);
-        free_image(in);
+        free_image(&in_s);
+        free_image(&in);
 
         cvWaitKey(10);
 

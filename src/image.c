@@ -91,12 +91,12 @@ image get_label(image **characters, char *string, int size)
     while(*string){
         image l = characters[size][(int)*string];
         image n = tile_images(label, l, -size - 1 + (size+1)/2);
-        free_image(label);
+        free_image(&label);
         label = n;
         ++string;
     }
     image b = border_image(label, label.h*.25);
-    free_image(label);
+    free_image(&label);
     return b;
 }
 
@@ -235,7 +235,7 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
             if (alphabet) {
                 image label = get_label(alphabet, names[class], (im.h*.03)/10);
                 draw_label(im, top + width, left, label, rgb);
-                free_image(label);
+                free_image(&label);
             }
         }
     }
@@ -351,7 +351,7 @@ image collapse_image_layers(image source, int border)
         image layer = get_image_layer(source, i);
         int h_offset = i*(source.h+border);
         embed_image(layer, dest, 0, h_offset);
-        free_image(layer);
+        free_image(&layer);
     }
     return dest;
 }
@@ -482,7 +482,7 @@ void show_image(image p, const char *name)
     image copy = copy_image(p);
     constrain_image(copy);
     show_image_cv(copy, name, disp);
-    free_image(copy);
+    free_image(&copy);
     cvReleaseImage(&disp);
 #else
     fprintf(stderr, "Not compiled with OpenCV, saving to %s.png instead\n", name);
@@ -592,7 +592,7 @@ void save_image_jpg(image p, const char *name)
     }
     cvSaveImage(buff, disp,0);
     cvReleaseImage(&disp);
-    free_image(copy);
+    free_image(&copy);
 }
 #endif
 
@@ -631,7 +631,7 @@ void show_image_layers(image p, char *name)
         sprintf(buff, "%s - Layer %d", name, i);
         image layer = get_image_layer(p, i);
         show_image(layer, buff);
-        free_image(layer);
+        free_image(&layer);
     }
 }
 
@@ -639,7 +639,7 @@ void show_image_collapsed(image p, char *name)
 {
     image c = collapse_image_layers(p, 1);
     show_image(c, name);
-    free_image(c);
+    free_image(&c);
 }
 
 image make_empty_image(int w, int h, int c)
@@ -697,7 +697,7 @@ image center_crop_image(image im, int w, int h)
     int m = (im.w < im.h) ? im.w : im.h;   
     image c = crop_image(im, (im.w - m) / 2, (im.h - m)/2, m, m);
     image r = resize_image(c, w, h);
-    free_image(c);
+    free_image(&c);
     return r;
 }
 
@@ -785,8 +785,8 @@ int best_3d_shift_r(image a, image b, int min, int max)
     image c2 = crop_image(b, 0, mid+1, b.w, b.h);
     float d1 = dist_array(c1.data, a.data, a.w*a.h*a.c, 10);
     float d2 = dist_array(c2.data, a.data, a.w*a.h*a.c, 10);
-    free_image(c1);
-    free_image(c2);
+    free_image(&c1);
+    free_image(&c2);
     if(d1 < d2) return best_3d_shift_r(a, b, min, mid);
     else return best_3d_shift_r(a, b, mid+1, max);
 }
@@ -804,7 +804,7 @@ int best_3d_shift(image a, image b, int min, int max)
             best = i;
         }
         printf("%d %f\n", i, d);
-        free_image(c);
+        free_image(&c);
     }
     return best;
 }
@@ -857,7 +857,7 @@ void letterbox_image_into(image im, int w, int h, image boxed)
     }
     image resized = resize_image(im, new_w, new_h);
     embed_image(resized, boxed, (w-new_w)/2, (h-new_h)/2); 
-    free_image(resized);
+    free_image(&resized);
 }
 
 image letterbox_image(image im, int w, int h)
@@ -877,7 +877,7 @@ image letterbox_image(image im, int w, int h)
     //int i;
     //for(i = 0; i < boxed.w*boxed.h*boxed.c; ++i) boxed.data[i] = 0;
     embed_image(resized, boxed, (w-new_w)/2, (h-new_h)/2); 
-    free_image(resized);
+    free_image(&resized);
     return boxed;
 }
 
@@ -1302,7 +1302,7 @@ image resize_image(image im, int w, int h)
         }
     }
 
-    free_image(part);
+    free_image(&part);
     return resized;
 }
 
@@ -1334,7 +1334,7 @@ void test_resize(char *filename)
     while(1){
         image aug = random_augment_image(im, 0, .75, 320, 448, 320, 320);
         show_image(aug, "aug");
-        free_image(aug);
+        free_image(&aug);
 
 
         float exposure = 1.15;
@@ -1350,7 +1350,7 @@ void test_resize(char *filename)
         distort_image(c, dhue, dsat, dexp);
         show_image(c, "rand");
         printf("%f %f %f\n", dhue, dsat, dexp);
-        free_image(c);
+        free_image(&c);
         cvWaitKey(0);
     }
 #endif
@@ -1391,7 +1391,7 @@ image load_image(char *filename, int w, int h, int c)
 
     if((h && w) && (h != out.h || w != out.w)){
         image resized = resize_image(out, w, h);
-        free_image(out);
+        free_image(&out);
         out = resized;
     }
     return out;
@@ -1482,10 +1482,10 @@ image collapse_images_vert(image *ims, int n)
                 int w_offset = j*(ims[0].w+border);
                 image layer = get_image_layer(copy, j);
                 embed_image(layer, filters, w_offset, h_offset);
-                free_image(layer);
+                free_image(&layer);
             }
         }
-        free_image(copy);
+        free_image(&copy);
     }
     return filters;
 } 
@@ -1518,10 +1518,10 @@ image collapse_images_horz(image *ims, int n)
                 int h_offset = j*(size+border);
                 image layer = get_image_layer(copy, j);
                 embed_image(layer, filters, w_offset, h_offset);
-                free_image(layer);
+                free_image(&layer);
             }
         }
-        free_image(copy);
+        free_image(&copy);
     }
     return filters;
 } 
@@ -1531,7 +1531,7 @@ void show_image_normalized(image im, const char *name)
     image c = copy_image(im);
     normalize_image(c);
     show_image(c, name);
-    free_image(c);
+    free_image(&c);
 }
 
 void show_images(image *ims, int n, char *window)
@@ -1549,12 +1549,13 @@ void show_images(image *ims, int n, char *window)
     normalize_image(m);
     save_image(m, window);
     show_image(m, window);
-    free_image(m);
+    free_image(&m);
 }
 
-void free_image(image m)
+void free_image(image *m)
 {
-    if(m.data){
-        free(m.data);
+    if(m->data){
+        free(m->data);
+        m->data = NULL;
     }
 }

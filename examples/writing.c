@@ -121,9 +121,9 @@ void test_writing(char *cfgfile, char *weightfile, char *filename)
         cvDestroyAllWindows();
 #endif
 
-        free_image(upsampled);
-        free_image(thresh);
-        free_image(im);
+        free_image(&upsampled);
+        free_image(&thresh);
+        free_image(&im);
         if (filename) break;
     }
 }

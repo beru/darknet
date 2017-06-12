@@ -25,7 +25,9 @@ void train_compare(char *cfgfile, char *weightfile)
     int N = plist->size;
     printf("%d\n", N);
     clock_t time;
+#ifdef THREAD
     pthread_t load_thread;
+#endif
     data train;
     data buffer;
 
@@ -39,16 +41,22 @@ void train_compare(char *cfgfile, char *weightfile)
     args.d = &buffer;
     args.type = COMPARE_DATA;
 
+#ifdef THREAD
     load_thread = load_data_in_thread(args);
+#endif
     int epoch = *net.seen/N;
     int i = 0;
     while(1){
         ++i;
         time=clock();
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         train = buffer;
 
+#ifdef THREAD
         load_thread = load_data_in_thread(args);
+#endif
         printf("Loaded: %lf seconds\n", sec(clock()-time));
         time=clock();
         float loss = train_network(net, train);
@@ -70,7 +78,9 @@ void train_compare(char *cfgfile, char *weightfile)
             if(epoch%22 == 0) net.learning_rate *= .1;
         }
     }
+#ifdef THREAD
     pthread_join(load_thread, 0);
+#endif
     free_data(buffer);
     free_network(net);
     free_ptrs((void**)paths, plist->size);
@@ -111,18 +121,24 @@ void validate_compare(char *filename, char *weightfile)
     args.d = &buffer;
     args.type = COMPARE_DATA;
 
+#ifdef THREAD
     pthread_t load_thread = load_data_in_thread(args);
+#endif
     for(i = 1; i <= splits; ++i){
         time=clock();
 
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         val = buffer;
 
         num = (i+1)*N/splits - i*N/splits;
         char **part = paths+(i*N/splits);
         if(i != splits){
             args.paths = part;
+#ifdef THREAD
             load_thread = load_data_in_thread(args);
+#endif
         }
         printf("Loaded: %d images in %lf seconds\n", val.X.rows, sec(clock()-time));
 
@@ -181,8 +197,8 @@ int bbox_comparator(const void *a, const void *b)
     memcpy(X+im1.w*im1.h*im1.c, im2.data, im2.w*im2.h*im2.c*sizeof(float));
     float *predictions = network_predict(net, X);
     
-    free_image(im1);
-    free_image(im2);
+    free_image(&im1);
+    free_image(&im2);
     free(X);
     if (predictions[class*2] > predictions[class*2+1]){
         return 1;
@@ -219,8 +235,8 @@ void bbox_fight(network net, sortable_bbox *a, sortable_bbox *b, int classes, in
         }
     }
     
-    free_image(im1);
-    free_image(im2);
+    free_image(&im1);
+    free_image(&im2);
     free(X);
 }
 

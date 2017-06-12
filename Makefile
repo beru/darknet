@@ -22,7 +22,7 @@ NVCC=nvcc
 AR=ar
 ARFLAGS=-rv
 OPTS=-Ofast
-LDFLAGS= -lm -pthread 
+LDFLAGS= -lm 
 COMMON= -Iinclude/ -Isrc/
 CFLAGS=-Wall -Wfatal-errors 
 
@@ -31,6 +31,11 @@ OPTS=-O0 -g
 endif
 
 CFLAGS+=$(OPTS)
+
+ifeq ($(THREAD), 1)
+COMMON+= -DTHREAD
+CFLAGS+= -pthread
+endif
 
 ifeq ($(OPENCV), 1) 
 COMMON+= -DOPENCV

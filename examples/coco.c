@@ -53,17 +53,21 @@ void train_coco(char *cfgfile, char *weightfile)
     args.exposure = net.exposure;
     args.saturation = net.saturation;
     args.hue = net.hue;
-
+#ifdef THREAD
     pthread_t load_thread = load_data_in_thread(args);
+#endif
     clock_t time;
     //while(i*imgs < N*120){
     while(get_current_batch(net) < net.max_batches){
         i += 1;
         time=clock();
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         train = buffer;
+#ifdef THREAD
         load_thread = load_data_in_thread(args);
-
+#endif
         printf("Loaded: %lf seconds\n", sec(clock()-time));
 
         /*
@@ -71,7 +75,7 @@ void train_coco(char *cfgfile, char *weightfile)
            image copy = copy_image(im);
            draw_coco(copy, train.y.vals[113], 7, "truth");
            cvWaitKey(0);
-           free_image(copy);
+           free_image(&copy);
          */
 
         time=clock();
@@ -166,17 +170,18 @@ void validate_coco(char *cfgfile, char *weightfile)
     int nms = 1;
     float iou_thresh = .5;
 
+    load_args args = {0};
+    args.w = net.w;
+    args.h = net.h;
+    args.type = IMAGE_DATA;
+
+#ifdef THREAD
     int nthreads = 8;
     image *val = calloc(nthreads, sizeof(image));
     image *val_resized = calloc(nthreads, sizeof(image));
     image *buf = calloc(nthreads, sizeof(image));
     image *buf_resized = calloc(nthreads, sizeof(image));
     pthread_t *thr = calloc(nthreads, sizeof(pthread_t));
-
-    load_args args = {0};
-    args.w = net.w;
-    args.h = net.h;
-    args.type = IMAGE_DATA;
 
     for(t = 0; t < nthreads; ++t){
         args.path = paths[i+t];
@@ -208,10 +213,34 @@ void validate_coco(char *cfgfile, char *weightfile)
             get_detection_boxes(l, w, h, thresh, probs, boxes, 0);
             if (nms) do_nms_sort(boxes, probs, side*side*l.n, classes, iou_thresh);
             print_cocos(fp, image_id, boxes, probs, side*side*l.n, classes, w, h);
-            free_image(val[t]);
-            free_image(val_resized[t]);
+            free_image(&val[t]);
+            free_image(&val_resized[t]);
         }
     }
+#else
+    image val;
+    image val_resized;
+    args.im = &val;
+    args.resized = &val_resized;
+    time_t start = time(0);
+    for(i = 0; i < m; ++i){
+        fprintf(stderr, "%d\n", i);
+        args.path = paths[i];
+        load_data(args);
+        char *path = paths[i];
+        int image_id = get_coco_image_id(path);
+        float *X = val_resized.data;
+        network_predict(net, X);
+        int w = val.w;
+        int h = val.h;
+        get_detection_boxes(l, w, h, thresh, probs, boxes, 0);
+        if (nms) do_nms_sort(boxes, probs, side*side*l.n, classes, iou_thresh);
+        print_cocos(fp, image_id, boxes, probs, side*side*l.n, classes, w, h);
+        free_image(&val);
+        free_image(&val_resized);
+    }
+#endif
+
     fseek(fp, -2, SEEK_CUR); 
     fprintf(fp, "\n]\n");
     fclose(fp);
@@ -301,8 +330,8 @@ void validate_coco_recall(char *cfgfile, char *weightfile)
 
         fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
         free(id);
-        free_image(orig);
-        free_image(sized);
+        free_image(&orig);
+        free_image(&sized);
     }
 }
 
@@ -345,8 +374,8 @@ void test_coco(char *cfgfile, char *weightfile, char *filename, float thresh)
         draw_detections(im, l.side*l.side*l.n, thresh, boxes, probs, coco_classes, alphabet, 80);
         save_image(im, "prediction");
         show_image(im, "predictions");
-        free_image(im);
-        free_image(sized);
+        free_image(&im);
+        free_image(&sized);
 #ifdef OPENCV
         cvWaitKey(0);
         cvDestroyAllWindows();

@@ -443,7 +443,9 @@ typedef enum {
 } data_type;
 
 typedef struct load_args{
+#ifdef THREAD
     int threads;
+#endif
     char **paths;
     char *path;
     int n;
@@ -498,7 +500,11 @@ typedef struct list{
     node *back;
 } list;
 
+#ifdef THREAD
 pthread_t load_data(load_args args);
+#else
+void *load_data(load_args args);
+#endif
 list *read_data_cfg(char *filename);
 list *read_cfg(char *filename);
 

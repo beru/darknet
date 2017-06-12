@@ -425,7 +425,7 @@ void test_dcgan(char *cfgfile, char *weightfile)
         cvWaitKey(0);
 #endif
 
-        free_image(im);
+        free_image(&im);
     }
 }
 
@@ -1096,9 +1096,9 @@ void test_lsd(char *cfgfile, char *weightfile, char *filename, int gray)
         cvWaitKey(0);
 #endif
 
-        free_image(im);
-        free_image(resized);
-        free_image(crop);
+        free_image(&im);
+        free_image(&resized);
+        free_image(&crop);
         if (filename) break;
     }
 }

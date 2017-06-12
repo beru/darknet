@@ -77,7 +77,7 @@ matrix load_image_paths_gray(char **paths, int n, int w, int h)
         image im = load_image(paths[i], w, h, 3);
 
         image gray = grayscale_image(im);
-        free_image(im);
+        free_image(&im);
         im = gray;
 
         X.vals[i] = im.data;
@@ -127,7 +127,7 @@ matrix load_image_augment_paths(char **paths, int n, int min, int max, int size,
         show_image(crop, "crop");
         cvWaitKey(0);
         */
-        free_image(im);
+        free_image(&im);
         X.vals[i] = crop.data;
         X.cols = crop.h*crop.w*crop.c;
     }
@@ -572,7 +572,7 @@ image get_segmentation_image(char *path, int w, int h, int classes)
     }
     fill_bg_mask(mask);
     fclose(file);
-    free_image(part);
+    free_image(&part);
     return mask;
 }
 
@@ -609,15 +609,15 @@ data load_data_seg(int n, char **paths, int m, int w, int h, int classes, int mi
         if(flip) flip_image(sized_m);
         d.y.vals[i] = sized_m.data;
 
-        free_image(orig);
-        free_image(mask);
+        free_image(&orig);
+        free_image(&mask);
 
         /*
            image rgb = mask_to_rgb(sized_m, classes);
            show_image(rgb, "part");
            show_image(sized, "orig");
            cvWaitKey(0);
-           free_image(rgb);
+           free_image(&rgb);
          */
     }
     free(random_paths);
@@ -671,8 +671,8 @@ data load_data_region(int n, char **paths, int m, int w, int h, int size, int cl
 
         fill_truth_region(random_paths[i], d.y.vals[i], classes, size, flip, dx, dy, 1./sx, 1./sy);
 
-        free_image(orig);
-        free_image(cropped);
+        free_image(&orig);
+        free_image(&cropped);
     }
     free(random_paths);
     return d;
@@ -735,8 +735,8 @@ data load_data_compare(int n, char **paths, int m, int classes, int w, int h)
         fclose(fp1);
         fclose(fp2);
 
-        free_image(im1);
-        free_image(im2);
+        free_image(&im1);
+        free_image(&im2);
     }
     if(m) free(paths);
     return d;
@@ -789,8 +789,8 @@ data load_data_swag(char **paths, int n, int classes, float jitter)
 
     fill_truth_swag(random_path, d.y.vals[0], classes, flip, dx, dy, 1./sx, 1./sy);
 
-    free_image(orig);
-    free_image(cropped);
+    free_image(&orig);
+    free_image(&cropped);
 
     return d;
 }
@@ -841,16 +841,16 @@ data load_data_detection(int n, char **paths, int m, int w, int h, int boxes, in
 
         fill_truth_detection(random_paths[i], boxes, d.y.vals[i], classes, flip, -dx/w, -dy/h, nw/w, nh/h);
 
-        free_image(orig);
+        free_image(&orig);
     }
     free(random_paths);
     return d;
 }
 
-void *load_thread(void *ptr)
+void *load_data_impl(struct load_args *pa)
 {
     //printf("Loading data: %d\n", rand());
-    load_args a = *(struct load_args*)ptr;
+    load_args a = *pa;
     if(a.exposure == 0) a.exposure = 1;
     if(a.saturation == 0) a.saturation = 1;
     if(a.aspect == 0) a.aspect = 1;
@@ -884,8 +884,16 @@ void *load_thread(void *ptr)
     } else if (a.type == TAG_DATA){
         *a.d = load_data_tag(a.paths, a.n, a.m, a.classes, a.min, a.max, a.size, a.angle, a.aspect, a.hue, a.saturation, a.exposure);
     }
-    free(ptr);
     return 0;
+}
+
+#ifdef THREAD
+
+void *load_thread(void *ptr)
+{
+    void *ret = load_data_impl((struct load_args*)ptr);
+    free(ptr);
+    return ret;
 }
 
 pthread_t load_data_in_thread(load_args args)
@@ -941,6 +949,15 @@ pthread_t load_data(load_args args)
     if(pthread_create(&thread, 0, load_threads, ptr)) error("Thread creation failed");
     return thread;
 }
+
+#else
+
+void *load_data(load_args args)
+{
+    return load_data_impl(&args);
+}
+
+#endif
 
 data load_data_writing(char **paths, int n, int m, int w, int h, int out_w, int out_h)
 {
@@ -1005,7 +1022,7 @@ data load_data_super(char **paths, int n, int m, int w, int h, int scale)
         image resize = resize_image(crop, w, h);
         d.X.vals[i] = resize.data;
         d.y.vals[i] = crop.data;
-        free_image(im);
+        free_image(&im);
     }
 
     if(m) free(paths);

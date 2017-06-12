@@ -94,7 +94,7 @@ void test_dice(char *cfgfile, char *weightfile, char *filename)
             int index = indexes[i];
             printf("%s: %f\n", names[index], predictions[index]);
         }
-        free_image(im);
+        free_image(&im);
         if (filename) break;
     }
 }

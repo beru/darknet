@@ -131,7 +131,7 @@ void test_cifar_multi(char *filename, char *weightfile)
         int index = max_index(pred, 10);
         int class = max_index(test.y.vals[i], 10);
         if(index == class) avg_acc += 1;
-        free_image(im);
+        free_image(&im);
         printf("%4d: %.2f%%\n", i, 100.*avg_acc/(i+1));
     }
 }

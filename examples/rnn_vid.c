@@ -45,8 +45,8 @@ float_pair get_rnn_vid_data(network net, char **files, int n, int batch, int ste
             //show_image(re, "loaded");
             //cvWaitKey(10);
             memcpy(input + i*input_size, re.data, input_size*sizeof(float));
-            free_image(im);
-            free_image(re);
+            free_image(&im);
+            free_image(&re);
         }
         float *output = network_predict(net, input);
 
@@ -140,7 +140,7 @@ image save_reconstruction(network net, image *init, float *feat, char *name, int
     char buff[256];
     sprintf(buff, "%s%d", name, i);
     save_image(recon, buff);
-    free_image(update);
+    free_image(&update);
     return recon;
 }
 
@@ -174,17 +174,17 @@ void generate_vid_rnn(char *cfgfile, char *weightfile)
         }
         next = network_predict(net, feat);
 
-        free_image(im);
+        free_image(&im);
 
-        free_image(save_reconstruction(extractor, 0, feat, "feat", i));
-        free_image(save_reconstruction(extractor, 0, next, "next", i));
+        free_image(&save_reconstruction(extractor, 0, feat, "feat", i));
+        free_image(&save_reconstruction(extractor, 0, next, "next", i));
         if (i==24) last = copy_image(re);
-        free_image(re);
+        free_image(&re);
     }
     for(i = 0; i < 30; ++i){
         next = network_predict(net, next);
         image new = save_reconstruction(extractor, &last, next, "new", i);
-        free_image(last);
+        free_image(&last);
         last = new;
     }
 }

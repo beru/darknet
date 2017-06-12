@@ -24,10 +24,10 @@ void extract_voxel(char *lfile, char *rfile, char *prefix)
         save_image(ls, buff);
         sprintf(buff, "%s_%05d_r", prefix, count);
         save_image(rs, buff);
-        free_image(l);
-        free_image(r);
-        free_image(ls);
-        free_image(rs);
+        free_image(&l);
+        free_image(&r);
+        free_image(&ls);
+        free_image(&rs);
         ++count;
     }
 
@@ -68,15 +68,21 @@ void train_voxel(char *cfgfile, char *weightfile)
     args.d = &buffer;
     args.type = SUPER_DATA;
 
+#ifdef THREAD
     pthread_t load_thread = load_data_in_thread(args);
+#endif
     clock_t time;
     //while(i*imgs < N*120){
     while(get_current_batch(net) < net.max_batches){
         i += 1;
         time=clock();
+#ifdef THREAD
         pthread_join(load_thread, 0);
+#endif
         train = buffer;
+#ifdef THREAD
         load_thread = load_data_in_thread(args);
+#endif
 
         printf("Loaded: %lf seconds\n", sec(clock()-time));
 
@@ -136,7 +142,7 @@ void test_voxel(char *cfgfile, char *weightfile, char *filename)
         printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
         save_image(out, "out");
 
-        free_image(im);
+        free_image(&im);
         if (filename) break;
     }
 }
