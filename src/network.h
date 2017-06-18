@@ -1,6 +1,6 @@
 // Oh boy, why am I about to do this....
-#ifndef NETWORK_H
-#define NETWORK_H
+#pragma once
+
 #include "darknet.h"
 
 #include "image.h"
@@ -52,5 +52,4 @@ int resize_network(network *net, int w, int h);
 void set_batch_network(network *net, int b);
 void calc_network_cost(network net);
 
-#endif
 

@@ -16,7 +16,7 @@ layer make_activation_layer(int batch, int inputs, ACTIVATION activation)
 
     l.inputs = inputs;
     l.outputs = inputs;
-    l.batch=batch;
+    l.batch = batch;
 
     l.output = calloc(batch*inputs, sizeof(float*));
     l.delta = calloc(batch*inputs, sizeof(float*));
@@ -60,4 +60,5 @@ void backward_activation_layer_gpu(layer l, network net)
     gradient_array_ongpu(l.output_gpu, l.outputs*l.batch, l.activation, l.delta_gpu);
     copy_ongpu(l.outputs*l.batch, l.delta_gpu, 1, net.delta_gpu, 1);
 }
+
 #endif

@@ -1,5 +1,5 @@
-#ifndef DATA_H
-#define DATA_H
+#pragma once
+
 #include <pthread.h>
 
 #include "darknet.h"
@@ -57,4 +57,3 @@ data concat_datas(data *d, int n);
 void fill_truth(char *path, char **labels, int k, float *truth);
 data copy_data(data d);
 
-#endif

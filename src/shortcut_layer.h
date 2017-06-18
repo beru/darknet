@@ -1,5 +1,4 @@
-#ifndef SHORTCUT_LAYER_H
-#define SHORTCUT_LAYER_H
+#pragma once
 
 #include "layer.h"
 #include "network.h"
@@ -13,4 +12,3 @@ void forward_shortcut_layer_gpu(const layer l, network net);
 void backward_shortcut_layer_gpu(const layer l, network net);
 #endif
 
-#endif

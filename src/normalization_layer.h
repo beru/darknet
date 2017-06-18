@@ -1,5 +1,4 @@
-#ifndef NORMALIZATION_LAYER_H
-#define NORMALIZATION_LAYER_H
+#pragma once
 
 #include "image.h"
 #include "layer.h"
@@ -16,4 +15,3 @@ void forward_normalization_layer_gpu(const layer layer, network net);
 void backward_normalization_layer_gpu(const layer layer, network net);
 #endif
 
-#endif

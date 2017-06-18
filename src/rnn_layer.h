@@ -1,6 +1,4 @@
-
-#ifndef RNN_LAYER_H
-#define RNN_LAYER_H
+#pragma once
 
 #include "activations.h"
 #include "layer.h"
@@ -19,7 +17,5 @@ void backward_rnn_layer_gpu(layer l, network net);
 void update_rnn_layer_gpu(layer l, int batch, float learning_rate, float momentum, float decay);
 void push_rnn_layer(layer l);
 void pull_rnn_layer(layer l);
-#endif
-
 #endif
 

@@ -1,5 +1,5 @@
-#ifndef SOFTMAX_LAYER_H
-#define SOFTMAX_LAYER_H
+#pragma once
+
 #include "layer.h"
 #include "network.h"
 
@@ -16,4 +16,3 @@ void forward_softmax_layer_gpu(const softmax_layer l, network net);
 void backward_softmax_layer_gpu(const softmax_layer l, network net);
 #endif
 
-#endif

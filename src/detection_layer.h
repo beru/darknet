@@ -1,5 +1,4 @@
-#ifndef DETECTION_LAYER_H
-#define DETECTION_LAYER_H
+#pragma once
 
 #include "layer.h"
 #include "network.h"
@@ -16,4 +15,3 @@ void forward_detection_layer_gpu(const detection_layer l, network net);
 void backward_detection_layer_gpu(detection_layer l, network net);
 #endif
 
-#endif

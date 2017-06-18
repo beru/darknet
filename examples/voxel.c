@@ -9,11 +9,11 @@ void extract_voxel(char *lfile, char *rfile, char *prefix)
     int count = 0;
     CvCapture *lcap = cvCaptureFromFile(lfile);
     CvCapture *rcap = cvCaptureFromFile(rfile);
-    while(1){
+    while (1) {
         image l = get_image_from_stream(lcap);
         image r = get_image_from_stream(rcap);
-        if(!l.w || !r.w) break;
-        if(count%100 == 0) {
+        if (!l.w || !r.w) break;
+        if (count%100 == 0) {
             shift = best_3d_shift_r(l, r, -l.h/100, l.h/100);
             printf("%d\n", shift);
         }
@@ -45,7 +45,7 @@ void train_voxel(char *cfgfile, char *weightfile)
     printf("%s\n", base);
     float avg_loss = -1;
     network net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
@@ -72,8 +72,8 @@ void train_voxel(char *cfgfile, char *weightfile)
     pthread_t load_thread = load_data_in_thread(args);
 #endif
     clock_t time;
-    //while(i*imgs < N*120){
-    while(get_current_batch(net) < net.max_batches){
+    //while (i*imgs < N*120) {
+    while (get_current_batch(net) < net.max_batches) {
         i += 1;
         time=clock();
 #ifdef THREAD
@@ -92,12 +92,12 @@ void train_voxel(char *cfgfile, char *weightfile)
         avg_loss = avg_loss*.9 + loss*.1;
 
         printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
-        if(i%1000==0){
+        if (i%1000==0) {
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
             save_weights(net, buff);
         }
-        if(i%100==0){
+        if (i%100==0) {
             char buff[256];
             sprintf(buff, "%s/%s.backup", backup_directory, base);
             save_weights(net, buff);
@@ -112,7 +112,7 @@ void train_voxel(char *cfgfile, char *weightfile)
 void test_voxel(char *cfgfile, char *weightfile, char *filename)
 {
     network net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
@@ -121,14 +121,14 @@ void test_voxel(char *cfgfile, char *weightfile, char *filename)
     clock_t time;
     char buff[256];
     char *input = buff;
-    while(1){
-        if(filename){
+    while (1) {
+        if (filename) {
             strncpy(input, filename, 256);
-        }else{
+        }else {
             printf("Enter Image Path: ");
             fflush(stdout);
             input = fgets(input, 256, stdin);
-            if(!input) return;
+            if (!input) return;
             strtok(input, "\n");
         }
         image im = load_image_color(input, 0, 0);
@@ -150,7 +150,7 @@ void test_voxel(char *cfgfile, char *weightfile, char *filename)
 
 void run_voxel(int argc, char **argv)
 {
-    if(argc < 4){
+    if (argc < 4) {
         fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
         return;
     }
@@ -158,10 +158,10 @@ void run_voxel(int argc, char **argv)
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
     char *filename = (argc > 5) ? argv[5] : 0;
-    if(0==strcmp(argv[2], "train")) train_voxel(cfg, weights);
-    else if(0==strcmp(argv[2], "test")) test_voxel(cfg, weights, filename);
-    else if(0==strcmp(argv[2], "extract")) extract_voxel(argv[3], argv[4], argv[5]);
+    if (0==strcmp(argv[2], "train")) train_voxel(cfg, weights);
+    else if (0==strcmp(argv[2], "test")) test_voxel(cfg, weights, filename);
+    else if (0==strcmp(argv[2], "extract")) extract_voxel(argv[3], argv[4], argv[5]);
     /*
-       else if(0==strcmp(argv[2], "valid")) validate_voxel(cfg, weights);
+        else if (0==strcmp(argv[2], "valid")) validate_voxel(cfg, weights);
      */
 }

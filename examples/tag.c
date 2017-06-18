@@ -8,10 +8,10 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
     char *backup_directory = "/home/pjreddie/backup/";
     printf("%s\n", base);
     network net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
-    if(clear) *net.seen = 0;
+    if (clear) *net.seen = 0;
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
     int imgs = 1024;
     list *plist = get_paths("/home/pjreddie/tag/train.list");
@@ -51,7 +51,7 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
     load_thread = load_data_in_thread(args);
 #endif
     int epoch = (*net.seen)/N;
-    while(get_current_batch(net) < net.max_batches || net.max_batches == 0){
+    while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
         time=clock();
 #ifdef THREAD
         pthread_join(load_thread, 0);
@@ -64,17 +64,17 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
         printf("Loaded: %lf seconds\n", sec(clock()-time));
         time=clock();
         float loss = train_network(net, train);
-        if(avg_loss == -1) avg_loss = loss;
+        if (avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
         printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), (float)(*net.seen)/N, loss, avg_loss, get_current_rate(net), sec(clock()-time), *net.seen);
         free_data(train);
-        if(*net.seen/N > epoch){
+        if (*net.seen/N > epoch) {
             epoch = *net.seen/N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights",backup_directory,base, epoch);
             save_weights(net, buff);
         }
-        if(get_current_batch(net)%100 == 0){
+        if (get_current_batch(net)%100 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s.backup",backup_directory,base);
             save_weights(net, buff);
@@ -97,7 +97,7 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
 void test_tag(char *cfgfile, char *weightfile, char *filename)
 {
     network net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
@@ -109,14 +109,14 @@ void test_tag(char *cfgfile, char *weightfile, char *filename)
     char buff[256];
     char *input = buff;
     int size = net.w;
-    while(1){
-        if(filename){
+    while (1) {
+        if (filename) {
             strncpy(input, filename, 256);
-        }else{
+        }else {
             printf("Enter Image Path: ");
             fflush(stdout);
             input = fgets(input, 256, stdin);
-            if(!input) return;
+            if (!input) return;
             strtok(input, "\n");
         }
         image im = load_image_color(input, 0, 0);
@@ -129,11 +129,11 @@ void test_tag(char *cfgfile, char *weightfile, char *filename)
         float *predictions = network_predict(net, X);
         top_predictions(net, 10, indexes);
         printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
-        for(i = 0; i < 10; ++i){
+        for (i = 0; i < 10; ++i) {
             int index = indexes[i];
             printf("%.1f%%: %s\n", predictions[index]*100, names[index]);
         }
-        if(r.data != im.data) free_image(&r);
+        if (r.data != im.data) free_image(&r);
         free_image(&im);
         if (filename) break;
     }
@@ -142,7 +142,7 @@ void test_tag(char *cfgfile, char *weightfile, char *filename)
 
 void run_tag(int argc, char **argv)
 {
-    if(argc < 4){
+    if (argc < 4) {
         fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
         return;
     }
@@ -151,7 +151,7 @@ void run_tag(int argc, char **argv)
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
     char *filename = (argc > 5) ? argv[5] : 0;
-    if(0==strcmp(argv[2], "train")) train_tag(cfg, weights, clear);
-    else if(0==strcmp(argv[2], "test")) test_tag(cfg, weights, filename);
+    if (0==strcmp(argv[2], "train")) train_tag(cfg, weights, clear);
+    else if (0==strcmp(argv[2], "test")) test_tag(cfg, weights, filename);
 }
 

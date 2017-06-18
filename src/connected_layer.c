@@ -12,7 +12,6 @@
 
 connected_layer make_connected_layer(int batch, int inputs, int outputs, ACTIVATION activation, int batch_normalize)
 {
-    int i;
     connected_layer l = {0};
     l.type = CONNECTED;
 
@@ -41,19 +40,19 @@ connected_layer make_connected_layer(int batch, int inputs, int outputs, ACTIVAT
     l.update = update_connected_layer;
 
     //float scale = 1./sqrt(inputs);
-    float scale = sqrt(2./inputs);
-    for(i = 0; i < outputs*inputs; ++i){
-        l.weights[i] = scale*rand_uniform(-1, 1);
+    float scale = sqrt(2. / inputs);
+    for (int i = 0; i < outputs * inputs; ++i) {
+        l.weights[i] = scale * rand_uniform(-1, 1);
     }
 
-    for(i = 0; i < outputs; ++i){
+    for (int i = 0; i < outputs; ++i) {
         l.biases[i] = 0;
     }
 
-    if(batch_normalize){
+    if (batch_normalize) {
         l.scales = calloc(outputs, sizeof(float));
         l.scale_updates = calloc(outputs, sizeof(float));
-        for(i = 0; i < outputs; ++i){
+        for (int i = 0; i < outputs; ++i) {
             l.scales[i] = 1;
         }
 
@@ -82,7 +81,7 @@ connected_layer make_connected_layer(int batch, int inputs, int outputs, ACTIVAT
 
     l.output_gpu = cuda_make_array(l.output, outputs*batch);
     l.delta_gpu = cuda_make_array(l.delta, outputs*batch);
-    if(batch_normalize){
+    if (batch_normalize) {
         l.scales_gpu = cuda_make_array(l.scales, outputs);
         l.scale_updates_gpu = cuda_make_array(l.scale_updates, outputs);
 
@@ -115,7 +114,7 @@ void update_connected_layer(connected_layer l, int batch, float learning_rate, f
     axpy_cpu(l.outputs, learning_rate/batch, l.bias_updates, 1, l.biases, 1);
     scal_cpu(l.outputs, momentum, l.bias_updates, 1);
 
-    if(l.batch_normalize){
+    if (l.batch_normalize) {
         axpy_cpu(l.outputs, learning_rate/batch, l.scale_updates, 1, l.scales, 1);
         scal_cpu(l.outputs, momentum, l.scale_updates, 1);
     }
@@ -127,7 +126,6 @@ void update_connected_layer(connected_layer l, int batch, float learning_rate, f
 
 void forward_connected_layer(connected_layer l, network net)
 {
-    int i;
     fill_cpu(l.outputs*l.batch, 0, l.output, 1);
     int m = l.batch;
     int k = l.inputs;
@@ -136,8 +134,8 @@ void forward_connected_layer(connected_layer l, network net)
     float *b = l.weights;
     float *c = l.output;
     gemm(0,1,m,n,k,1,a,k,b,k,1,c,n);
-    if(l.batch_normalize){
-        if(net.train){
+    if (l.batch_normalize) {
+        if (net.train) {
             mean_cpu(l.output, l.batch, l.outputs, 1, l.mean);
             variance_cpu(l.output, l.mean, l.batch, l.outputs, 1, l.variance);
 
@@ -149,12 +147,12 @@ void forward_connected_layer(connected_layer l, network net)
             copy_cpu(l.outputs*l.batch, l.output, 1, l.x, 1);
             normalize_cpu(l.output, l.mean, l.variance, l.batch, l.outputs, 1);   
             copy_cpu(l.outputs*l.batch, l.output, 1, l.x_norm, 1);
-        } else {
+        }else {
             normalize_cpu(l.output, l.rolling_mean, l.rolling_variance, l.batch, l.outputs, 1);
         }
         scale_bias(l.output, l.scales, l.batch, l.outputs, 1);
     }
-    for(i = 0; i < l.batch; ++i){
+    for (int i = 0; i < l.batch; ++i) {
         axpy_cpu(l.outputs, 1, l.biases, 1, l.output + i*l.outputs, 1);
     }
     activate_array(l.output, l.outputs*l.batch, l.activation);
@@ -162,12 +160,11 @@ void forward_connected_layer(connected_layer l, network net)
 
 void backward_connected_layer(connected_layer l, network net)
 {
-    int i;
     gradient_array(l.output, l.outputs*l.batch, l.activation, l.delta);
-    for(i = 0; i < l.batch; ++i){
+    for (int i = 0; i < l.batch; ++i) {
         axpy_cpu(l.outputs, 1, l.delta + i*l.outputs, 1, l.bias_updates, 1);
     }
-    if(l.batch_normalize){
+    if (l.batch_normalize) {
         backward_scale_cpu(l.x_norm, l.delta, l.batch, l.outputs, 1, l.scale_updates);
 
         scale_bias(l.delta, l.scales, l.batch, l.outputs, 1);
@@ -193,16 +190,15 @@ void backward_connected_layer(connected_layer l, network net)
     b = l.weights;
     c = net.delta;
 
-    if(c) gemm(0,0,m,n,k,1,a,k,b,n,1,c,n);
+    if (c) gemm(0,0,m,n,k,1,a,k,b,n,1,c,n);
 }
 
 
 void denormalize_connected_layer(layer l)
 {
-    int i, j;
-    for(i = 0; i < l.outputs; ++i){
+    for (int i = 0; i < l.outputs; ++i) {
         float scale = l.scales[i]/sqrt(l.rolling_variance[i] + .000001);
-        for(j = 0; j < l.inputs; ++j){
+        for (int j = 0; j < l.inputs; ++j) {
             l.weights[i*l.inputs + j] *= scale;
         }
         l.biases[i] -= l.rolling_mean[i] * scale;
@@ -215,7 +211,7 @@ void denormalize_connected_layer(layer l)
 
 void statistics_connected_layer(layer l)
 {
-    if(l.batch_normalize){
+    if (l.batch_normalize) {
         printf("Scales ");
         print_statistics(l.scales, l.outputs);
         /*
@@ -239,7 +235,7 @@ void pull_connected_layer(connected_layer l)
     cuda_pull_array(l.biases_gpu, l.biases, l.outputs);
     cuda_pull_array(l.weight_updates_gpu, l.weight_updates, l.inputs*l.outputs);
     cuda_pull_array(l.bias_updates_gpu, l.bias_updates, l.outputs);
-    if (l.batch_normalize){
+    if (l.batch_normalize) {
         cuda_pull_array(l.scales_gpu, l.scales, l.outputs);
         cuda_pull_array(l.rolling_mean_gpu, l.rolling_mean, l.outputs);
         cuda_pull_array(l.rolling_variance_gpu, l.rolling_variance, l.outputs);
@@ -252,7 +248,7 @@ void push_connected_layer(connected_layer l)
     cuda_push_array(l.biases_gpu, l.biases, l.outputs);
     cuda_push_array(l.weight_updates_gpu, l.weight_updates, l.inputs*l.outputs);
     cuda_push_array(l.bias_updates_gpu, l.bias_updates, l.outputs);
-    if (l.batch_normalize){
+    if (l.batch_normalize) {
         cuda_push_array(l.scales_gpu, l.scales, l.outputs);
         cuda_push_array(l.rolling_mean_gpu, l.rolling_mean, l.outputs);
         cuda_push_array(l.rolling_variance_gpu, l.rolling_variance, l.outputs);
@@ -264,7 +260,7 @@ void update_connected_layer_gpu(connected_layer l, int batch, float learning_rat
     axpy_ongpu(l.outputs, learning_rate/batch, l.bias_updates_gpu, 1, l.biases_gpu, 1);
     scal_ongpu(l.outputs, momentum, l.bias_updates_gpu, 1);
 
-    if(l.batch_normalize){
+    if (l.batch_normalize) {
         axpy_ongpu(l.outputs, learning_rate/batch, l.scale_updates_gpu, 1, l.scales_gpu, 1);
         scal_ongpu(l.outputs, momentum, l.scale_updates_gpu, 1);
     }
@@ -276,7 +272,6 @@ void update_connected_layer_gpu(connected_layer l, int batch, float learning_rat
 
 void forward_connected_layer_gpu(connected_layer l, network net)
 {
-    int i;
     fill_ongpu(l.outputs*l.batch, 0, l.output_gpu, 1);
 
     int m = l.batch;
@@ -286,10 +281,10 @@ void forward_connected_layer_gpu(connected_layer l, network net)
     float * b = l.weights_gpu;
     float * c = l.output_gpu;
     gemm_ongpu(0,1,m,n,k,1,a,k,b,k,1,c,n);
-    if(l.batch_normalize){
+    if (l.batch_normalize) {
         forward_batchnorm_layer_gpu(l, net);
     }
-    for(i = 0; i < l.batch; ++i){
+    for (int i = 0; i < l.batch; ++i) {
         axpy_ongpu(l.outputs, 1, l.biases_gpu, 1, l.output_gpu + i*l.outputs, 1);
     }
     activate_array_ongpu(l.output_gpu, l.outputs*l.batch, l.activation);
@@ -297,14 +292,13 @@ void forward_connected_layer_gpu(connected_layer l, network net)
 
 void backward_connected_layer_gpu(connected_layer l, network net)
 {
-    int i;
     constrain_ongpu(l.outputs*l.batch, 1, l.delta_gpu, 1);
     gradient_array_ongpu(l.output_gpu, l.outputs*l.batch, l.activation, l.delta_gpu);
-    for(i = 0; i < l.batch; ++i){
+    for (int i = 0; i < l.batch; ++i) {
         axpy_ongpu(l.outputs, 1, l.delta_gpu + i*l.outputs, 1, l.bias_updates_gpu, 1);
     }
 
-    if(l.batch_normalize){
+    if (l.batch_normalize) {
         backward_batchnorm_layer_gpu(l, net);
     }
 
@@ -324,6 +318,7 @@ void backward_connected_layer_gpu(connected_layer l, network net)
     b = l.weights_gpu;
     c = net.delta_gpu;
 
-    if(c) gemm_ongpu(0,0,m,n,k,1,a,k,b,n,1,c,n);
+    if (c) gemm_ongpu(0,0,m,n,k,1,a,k,b,n,1,c,n);
 }
-#endif
+
+#endif // #ifdef GPU

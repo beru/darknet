@@ -1,5 +1,4 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+#pragma once
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -102,5 +101,4 @@ image get_image_layer(image m, int l);
 
 void free_image(image *m);
 void test_resize(char *filename);
-#endif
 

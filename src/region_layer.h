@@ -1,5 +1,4 @@
-#ifndef REGION_LAYER_H
-#define REGION_LAYER_H
+#pragma once
 
 #include "layer.h"
 #include "network.h"
@@ -16,4 +15,3 @@ void forward_region_layer_gpu(const layer l, network net);
 void backward_region_layer_gpu(layer l, network net);
 #endif
 
-#endif

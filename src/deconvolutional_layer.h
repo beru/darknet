@@ -1,5 +1,4 @@
-#ifndef DECONVOLUTIONAL_LAYER_H
-#define DECONVOLUTIONAL_LAYER_H
+#pragma once
 
 #include "cuda.h"
 #include "image.h"
@@ -20,6 +19,4 @@ void resize_deconvolutional_layer(layer *l, int h, int w);
 void forward_deconvolutional_layer(const layer l, network net);
 void update_deconvolutional_layer(layer l, int batch, float learning_rate, float momentum, float decay);
 void backward_deconvolutional_layer(layer l, network net);
-
-#endif
 

@@ -1,5 +1,5 @@
-#ifndef ROUTE_LAYER_H
-#define ROUTE_LAYER_H
+#pragma once
+
 #include "network.h"
 #include "layer.h"
 
@@ -15,4 +15,3 @@ void forward_route_layer_gpu(const route_layer l, network net);
 void backward_route_layer_gpu(const route_layer l, network net);
 #endif
 
-#endif

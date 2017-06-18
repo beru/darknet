@@ -37,23 +37,21 @@ void resize_dropout_layer(dropout_layer *l, int inputs)
 
 void forward_dropout_layer(dropout_layer l, network net)
 {
-    int i;
     if (!net.train) return;
-    for(i = 0; i < l.batch * l.inputs; ++i){
+    for (int i = 0; i < l.batch * l.inputs; ++i) {
         float r = rand_uniform(0, 1);
         l.rand[i] = r;
-        if(r < l.probability) net.input[i] = 0;
+        if (r < l.probability) net.input[i] = 0;
         else net.input[i] *= l.scale;
     }
 }
 
 void backward_dropout_layer(dropout_layer l, network net)
 {
-    int i;
-    if(!net.delta) return;
-    for(i = 0; i < l.batch * l.inputs; ++i){
+    if (!net.delta) return;
+    for (int i = 0; i < l.batch * l.inputs; ++i) {
         float r = l.rand[i];
-        if(r < l.probability) net.delta[i] = 0;
+        if (r < l.probability) net.delta[i] = 0;
         else net.delta[i] *= l.scale;
     }
 }

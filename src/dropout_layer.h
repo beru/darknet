@@ -1,5 +1,4 @@
-#ifndef DROPOUT_LAYER_H
-#define DROPOUT_LAYER_H
+#pragma once
 
 #include "layer.h"
 #include "network.h"
@@ -16,5 +15,4 @@ void resize_dropout_layer(dropout_layer *l, int inputs);
 void forward_dropout_layer_gpu(dropout_layer l, network net);
 void backward_dropout_layer_gpu(dropout_layer l, network net);
 
-#endif
 #endif

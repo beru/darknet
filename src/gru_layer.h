@@ -1,6 +1,4 @@
-
-#ifndef GRU_LAYER_H
-#define GRU_LAYER_H
+#pragma once
 
 #include "activations.h"
 #include "layer.h"
@@ -18,7 +16,5 @@ void backward_gru_layer_gpu(layer l, network net);
 void update_gru_layer_gpu(layer l, int batch, float learning_rate, float momentum, float decay);
 void push_gru_layer(layer l);
 void pull_gru_layer(layer l);
-#endif
-
 #endif
 

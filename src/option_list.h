@@ -1,5 +1,5 @@
-#ifndef OPTION_LIST_H
-#define OPTION_LIST_H
+#pragma once
+
 #include "list.h"
 
 typedef struct{
@@ -19,4 +19,3 @@ float option_find_float(list *l, char *key, float def);
 float option_find_float_quiet(list *l, char *key, float def);
 void option_unused(list *l);
 
-#endif

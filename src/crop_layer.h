@@ -1,5 +1,4 @@
-#ifndef CROP_LAYER_H
-#define CROP_LAYER_H
+#pragma once
 
 #include "image.h"
 #include "layer.h"
@@ -14,7 +13,5 @@ void resize_crop_layer(layer *l, int w, int h);
 
 #ifdef GPU
 void forward_crop_layer_gpu(crop_layer l, network net);
-#endif
-
 #endif
 

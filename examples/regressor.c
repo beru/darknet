@@ -11,8 +11,6 @@ void train_regressor(char *datacfg,
 #endif
                      int clear)
 {
-    int i;
-
     float avg_loss = -1;
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
@@ -22,24 +20,24 @@ void train_regressor(char *datacfg,
     network *nets = calloc(ngpus, sizeof(network));
     srand(time(0));
     int seed = rand();
-    for(i = 0; i < ngpus; ++i){
+    for (int i = 0; i < ngpus; ++i) {
         srand(seed);
         cuda_set_device(gpus[i]);
         nets[i] = parse_network_cfg(cfgfile);
-        if(weightfile){
+        if (weightfile) {
             load_weights(&nets[i], weightfile);
         }
-        if(clear) *nets[i].seen = 0;
+        if (clear) *nets[i].seen = 0;
         nets[i].learning_rate *= ngpus;
     }
     srand(time(0));
     network net = nets[0];
 #else
     network net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
-    if(clear) net.seen = 0;
+    if (clear) net.seen = 0;
 #endif
 
     int imgs = net.batch * net.subdivisions
@@ -90,7 +88,7 @@ void train_regressor(char *datacfg,
     load_thread = load_data(args);
 #endif
     int epoch = (*net.seen)/N;
-    while(get_current_batch(net) < net.max_batches || net.max_batches == 0){
+    while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
         time=clock();
 #ifdef THREAD
         pthread_join(load_thread, 0);
@@ -104,25 +102,25 @@ void train_regressor(char *datacfg,
 
         float loss = 0;
 #ifdef GPU
-        if(ngpus == 1){
+        if (ngpus == 1) {
             loss = train_network(net, train);
-        } else {
+        }else {
             loss = train_networks(nets, ngpus, train, 4);
         }
 #else
         loss = train_network(net, train);
 #endif
-        if(avg_loss == -1) avg_loss = loss;
+        if (avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
         printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), (float)(*net.seen)/N, loss, avg_loss, get_current_rate(net), sec(clock()-time), *net.seen);
         free_data(train);
-        if(*net.seen/N > epoch){
+        if (*net.seen/N > epoch) {
             epoch = *net.seen/N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights",backup_directory,base, epoch);
             save_weights(net, buff);
         }
-        if(get_current_batch(net)%100 == 0){
+        if (get_current_batch(net)%100 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s.backup",backup_directory,base);
             save_weights(net, buff);
@@ -141,7 +139,7 @@ void train_regressor(char *datacfg,
 void predict_regressor(char *cfgfile, char *weightfile, char *filename)
 {
     network net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
@@ -150,14 +148,14 @@ void predict_regressor(char *cfgfile, char *weightfile, char *filename)
     clock_t time;
     char buff[256];
     char *input = buff;
-    while(1){
-        if(filename){
+    while (1) {
+        if (filename) {
             strncpy(input, filename, 256);
-        }else{
+        }else {
             printf("Enter Image Path: ");
             fflush(stdout);
             input = fgets(input, 256, stdin);
-            if(!input) return;
+            if (!input) return;
             strtok(input, "\n");
         }
         image im = load_image_color(input, 0, 0);
@@ -180,7 +178,7 @@ void demo_regressor(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
 #ifdef OPENCV
     printf("Regressor Demo\n");
     network net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
@@ -188,18 +186,18 @@ void demo_regressor(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
     srand(2222222);
     CvCapture * cap;
 
-    if(filename){
+    if (filename) {
         cap = cvCaptureFromFile(filename);
-    }else{
+    }else {
         cap = cvCaptureFromCAM(cam_index);
     }
 
-    if(!cap) error("Couldn't connect to webcam.\n");
+    if (!cap) error("Couldn't connect to webcam.\n");
     cvNamedWindow("Regressor", CV_WINDOW_NORMAL); 
     cvResizeWindow("Regressor", 512, 512);
     float fps = 0;
 
-    while(1){
+    while (1) {
         struct timeval tval_before, tval_after, tval_result;
         gettimeofday(&tval_before, NULL);
 
@@ -231,7 +229,7 @@ void demo_regressor(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
 
 void run_regressor(int argc, char **argv)
 {
-    if(argc < 4){
+    if (argc < 4) {
         fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
         return;
     }
@@ -240,20 +238,19 @@ void run_regressor(int argc, char **argv)
     int *gpus = 0;
     int gpu = 0;
     int ngpus = 0;
-    if(gpu_list){
+    if (gpu_list) {
         printf("%s\n", gpu_list);
         int len = strlen(gpu_list);
         ngpus = 1;
-        int i;
-        for(i = 0; i < len; ++i){
+        for (int i = 0; i < len; ++i) {
             if (gpu_list[i] == ',') ++ngpus;
         }
         gpus = calloc(ngpus, sizeof(int));
-        for(i = 0; i < ngpus; ++i){
+        for (int i = 0; i < ngpus; ++i) {
             gpus[i] = atoi(gpu_list);
             gpu_list = strchr(gpu_list, ',')+1;
         }
-    } else {
+    }else {
         gpu = gpu_index;
         gpus = &gpu;
         ngpus = 1;
@@ -266,15 +263,15 @@ void run_regressor(int argc, char **argv)
     char *cfg = argv[4];
     char *weights = (argc > 5) ? argv[5] : 0;
     char *filename = (argc > 6) ? argv[6]: 0;
-    if(0==strcmp(argv[2], "test")) predict_regressor(data, cfg, weights);
-    else if(0==strcmp(argv[2], "train")) {
+    if (0==strcmp(argv[2], "test")) predict_regressor(data, cfg, weights);
+    else if (0==strcmp(argv[2], "train")) {
         train_regressor(data, cfg, weights,
 #ifdef GPU
                         gpus, ngpus,
 #endif
                         clear);
     }
-    else if(0==strcmp(argv[2], "demo")) demo_regressor(data, cfg, weights, cam_index, filename);
+    else if (0==strcmp(argv[2], "demo")) demo_regressor(data, cfg, weights, cam_index, filename);
 }
 
 

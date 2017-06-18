@@ -1,5 +1,4 @@
-#ifndef ACTIVATION_LAYER_H
-#define ACTIVATION_LAYER_H
+#pragma once
 
 #include "activations.h"
 #include "layer.h"
@@ -15,5 +14,4 @@ void forward_activation_layer_gpu(layer l, network net);
 void backward_activation_layer_gpu(layer l, network net);
 #endif
 
-#endif
 

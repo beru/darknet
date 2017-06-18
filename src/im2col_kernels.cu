@@ -17,7 +17,7 @@ __global__ void im2col_gpu_kernel(const int n, const float* data_im,
         const int height_col, const int width_col,
         float *data_col) {
     int index = blockIdx.x*blockDim.x+threadIdx.x;
-    for(; index < n; index += blockDim.x*gridDim.x){
+    for (; index < n; index += blockDim.x*gridDim.x) {
         int w_out = index % width_col;
         int h_index = index / width_col;
         int h_out = h_index % height_col;
@@ -47,7 +47,7 @@ __global__ void im2col_gpu_kernel(const int n, const float* data_im,
 
 void im2col_ongpu(float *im,
          int channels, int height, int width,
-         int ksize, int stride, int pad, float *data_col){
+         int ksize, int stride, int pad, float *data_col) {
     // We are going to launch channels * height_col * width_col kernels, each
     // kernel responsible for copying a single-channel grid.
     int height_col = (height + 2 * pad - ksize) / stride + 1;

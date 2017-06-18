@@ -10,8 +10,8 @@ image get_crop_image(crop_layer l)
     return float_to_image(w,h,c,l.output);
 }
 
-void backward_crop_layer(const crop_layer l, network net){}
-void backward_crop_layer_gpu(const crop_layer l, network net){}
+void backward_crop_layer(const crop_layer l, network net) {}
+void backward_crop_layer_gpu(const crop_layer l, network net) {}
 
 crop_layer make_crop_layer(int batch, int h, int w, int c, int crop_height, int crop_width, int flip, float angle, float saturation, float exposure)
 {
@@ -66,7 +66,7 @@ void resize_crop_layer(layer *l, int w, int h)
 
 void forward_crop_layer(const crop_layer l, network net)
 {
-    int i,j,c,b,row,col;
+    int row,col;
     int index;
     int count = 0;
     int flip = (l.flip && rand()%2);
@@ -74,22 +74,22 @@ void forward_crop_layer(const crop_layer l, network net)
     int dw = rand()%(l.w - l.out_w + 1);
     float scale = 2;
     float trans = -1;
-    if(l.noadjust){
+    if (l.noadjust) {
         scale = 1;
         trans = 0;
     }
-    if(!net.train){
+    if (!net.train) {
         flip = 0;
         dh = (l.h - l.out_h)/2;
         dw = (l.w - l.out_w)/2;
     }
-    for(b = 0; b < l.batch; ++b){
-        for(c = 0; c < l.c; ++c){
-            for(i = 0; i < l.out_h; ++i){
-                for(j = 0; j < l.out_w; ++j){
-                    if(flip){
+    for (int b = 0; b < l.batch; ++b) {
+        for (int c = 0; c < l.c; ++c) {
+            for (int i = 0; i < l.out_h; ++i) {
+                for (int j = 0; j < l.out_w; ++j) {
+                    if (flip) {
                         col = l.w - dw - j - 1;    
-                    }else{
+                    }else {
                         col = j + dw;
                     }
                     row = i + dh;

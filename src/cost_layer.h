@@ -1,5 +1,5 @@
-#ifndef COST_LAYER_H
-#define COST_LAYER_H
+#pragma once
+
 #include "layer.h"
 #include "network.h"
 
@@ -17,4 +17,3 @@ void forward_cost_layer_gpu(cost_layer l, network net);
 void backward_cost_layer_gpu(const cost_layer l, network net);
 #endif
 
-#endif

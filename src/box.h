@@ -1,5 +1,5 @@
-#ifndef BOX_H
-#define BOX_H
+#pragma once
+
 #include "darknet.h"
 
 typedef struct{
@@ -16,4 +16,3 @@ void do_nms_obj(box *boxes, float **probs, int total, int classes, float thresh)
 box decode_box(box b, box anchor);
 box encode_box(box b, box anchor);
 
-#endif

@@ -50,11 +50,11 @@ void check_error(cudaError_t status)
     } 
 }
 
-dim3 cuda_gridsize(size_t n){
+dim3 cuda_gridsize(size_t n) {
     size_t k = (n-1) / BLOCK + 1;
     size_t x = k;
     size_t y = 1;
-    if(x > 65535){
+    if (x > 65535) {
         x = ceil(sqrt(k));
         y = (n-1)/(x*BLOCK) + 1;
     }
@@ -69,7 +69,7 @@ cudnnHandle_t cudnn_handle()
     static int init[16] = {0};
     static cudnnHandle_t handle[16];
     int i = cuda_get_device();
-    if(!init[i]) {
+    if (!init[i]) {
         cudnnCreate(&handle[i]);
         init[i] = 1;
     }
@@ -82,7 +82,7 @@ cublasHandle_t blas_handle()
     static int init[16] = {0};
     static cublasHandle_t handle[16];
     int i = cuda_get_device();
-    if(!init[i]) {
+    if (!init[i]) {
         cublasCreate(&handle[i]);
         init[i] = 1;
     }
@@ -95,11 +95,11 @@ float *cuda_make_array(float *x, size_t n)
     size_t size = sizeof(float)*n;
     cudaError_t status = cudaMalloc((void **)&x_gpu, size);
     check_error(status);
-    if(x){
+    if (x) {
         status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
         check_error(status);
     }
-    if(!x_gpu) error("Cuda malloc failed\n");
+    if (!x_gpu) error("Cuda malloc failed\n");
     return x_gpu;
 }
 
@@ -108,7 +108,7 @@ void cuda_random(float *x_gpu, size_t n)
     static curandGenerator_t gen[16];
     static int init[16] = {0};
     int i = cuda_get_device();
-    if(!init[i]){
+    if (!init[i]) {
         curandCreateGenerator(&gen[i], CURAND_RNG_PSEUDO_DEFAULT);
         curandSetPseudoRandomGeneratorSeed(gen[i], time(0));
         init[i] = 1;
@@ -121,8 +121,7 @@ float cuda_compare(float *x_gpu, float *x, size_t n, char *s)
 {
     float *tmp = calloc(n, sizeof(float));
     cuda_pull_array(x_gpu, tmp, n);
-    //int i;
-    //for(i = 0; i < n; ++i) printf("%f %f\n", tmp[i], x[i]);
+    //for (int i = 0; i < n; ++i) printf("%f %f\n", tmp[i], x[i]);
     axpy_cpu(n, -1, x, 1, tmp, 1);
     float err = dot_cpu(n, tmp, 1, tmp, 1);
     printf("Error %s: %f\n", s, sqrt(err/n));
@@ -136,11 +135,11 @@ int *cuda_make_int_array(int *x, size_t n)
     size_t size = sizeof(int)*n;
     cudaError_t status = cudaMalloc((void **)&x_gpu, size);
     check_error(status);
-    if(x){
+    if (x) {
         status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
         check_error(status);
     }
-    if(!x_gpu) error("Cuda malloc failed\n");
+    if (!x_gpu) error("Cuda malloc failed\n");
     return x_gpu;
 }
 

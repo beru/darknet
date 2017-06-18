@@ -4,9 +4,8 @@
 
 float abs_mean(float *x, int n)
 {
-    int i;
     float sum = 0;
-    for (i = 0; i < n; ++i){
+    for (int i = 0; i < n; ++i) {
         sum += fabs(x[i]);
     }
     return sum/n;
@@ -14,11 +13,10 @@ float abs_mean(float *x, int n)
 
 void calculate_loss(float *output, float *delta, int n, float thresh)
 {
-    int i;
     float mean = mean_array(output, n); 
     float var = variance_array(output, n);
-    for(i = 0; i < n; ++i){
-        if(delta[i] > mean + thresh*sqrt(var)) delta[i] = output[i];
+    for (int i = 0; i < n; ++i) {
+        if (delta[i] > mean + thresh*sqrt(var)) delta[i] = output[i];
         else delta[i] = 0;
     }
 }
@@ -35,7 +33,7 @@ void optimize_picture(network *net, image orig, int max_layer, float scale, floa
 
     image crop = crop_image(orig, dx, dy, orig.w, orig.h);
     image im = resize_image(crop, (int)(orig.w * scale), (int)(orig.h * scale));
-    if(flip) flip_image(im);
+    if (flip) flip_image(im);
 
     resize_network(net, im.w, im.h);
     layer last = net->layers[net->n-1];
@@ -68,7 +66,7 @@ void optimize_picture(network *net, image orig, int max_layer, float scale, floa
     backward_network(*net);
 #endif
 
-    if(flip) flip_image(delta);
+    if (flip) flip_image(delta);
     //normalize_array(delta.data, delta.w*delta.h*delta.c);
     image resized = resize_image(delta, orig.w, orig.h);
     image out = crop_image(resized, -dx, -dy, orig.w, orig.h);
@@ -81,7 +79,7 @@ void optimize_picture(network *net, image orig, int max_layer, float scale, floa
 
     //rate = rate / abs_mean(out.data, out.w*out.h*out.c);
 
-    if(norm) normalize_array(out.data, out.w*out.h*out.c);
+    if (norm) normalize_array(out.data, out.w*out.h*out.c);
     axpy_cpu(orig.w*orig.h*orig.c, rate, out.data, 1, orig.data, 1);
 
     /*
@@ -106,15 +104,13 @@ void optimize_picture(network *net, image orig, int max_layer, float scale, floa
 
 void smooth(image recon, image update, float lambda, int num)
 {
-    int i, j, k;
-    int ii, jj;
-    for(k = 0; k < recon.c; ++k){
-        for(j = 0; j < recon.h; ++j){
-            for(i = 0; i < recon.w; ++i){
+    for (int k = 0; k < recon.c; ++k) {
+        for (int j = 0; j < recon.h; ++j) {
+            for (int i = 0; i < recon.w; ++i) {
                 int out_index = i + recon.w*(j + recon.h*k);
-                for(jj = j-num; jj <= j + num && jj < recon.h; ++jj){
+                for (int jj = j-num; jj <= j + num && jj < recon.h; ++jj) {
                     if (jj < 0) continue;
-                    for(ii = i-num; ii <= i + num && ii < recon.w; ++ii){
+                    for (int ii = i-num; ii <= i + num && ii < recon.w; ++ii) {
                         if (ii < 0) continue;
                         int in_index = ii + recon.w*(jj + recon.h*k);
                         update.data[out_index] += lambda * (recon.data[in_index] - recon.data[out_index]);
@@ -174,7 +170,7 @@ void reconstruct_picture(network net, float *features, image recon, image update
 void run_lsd(int argc, char **argv)
 {
     srand(0);
-    if(argc < 3){
+    if (argc < 3) {
         fprintf(stderr, "usage: %s %s [cfg] [weights] [image] [options! (optional)]\n", argv[0], argv[1]);
         return;
     }
@@ -203,7 +199,7 @@ void run_lsd(int argc, char **argv)
 
     float *features = 0;
     image update;
-    if (reconstruct){
+    if (reconstruct) {
         im = letterbox_image(im, net.w, net.h);
 
         int zz = 0;
@@ -220,8 +216,7 @@ void run_lsd(int argc, char **argv)
         f_im = resize_image(f_im, f_im.w, f_im.h);
         features = f_im.data;
 
-        int i;
-        for(i = 0; i < 14*14*512; ++i){
+        for (int i = 0; i < 14*14*512; ++i) {
             features[i] += rand_uniform(-.19, .19);
         }
 
@@ -233,20 +228,20 @@ void run_lsd(int argc, char **argv)
 
     int e;
     int n;
-    for(e = 0; e < rounds; ++e){
+    for (e = 0; e < rounds; ++e) {
         fprintf(stderr, "Iteration: ");
         fflush(stderr);
-        for(n = 0; n < iters; ++n){  
+        for (n = 0; n < iters; ++n) {  
             fprintf(stderr, "%d, ", n);
             fflush(stderr);
-            if(reconstruct){
+            if (reconstruct) {
                 reconstruct_picture(net, features, im, update, rate, momentum, lambda, smooth_size, 1);
                 //if ((n+1)%30 == 0) rate *= .5;
                 show_image(im, "reconstruction");
 #ifdef OPENCV
                 cvWaitKey(10);
 #endif
-            }else{
+            }else {
                 int layer = max_layer + rand()%range - range/2;
                 int octave = rand()%octaves;
                 optimize_picture(&net, im, layer, 1/pow(1.33333333, octave), rate, thresh, norm);
@@ -254,9 +249,9 @@ void run_lsd(int argc, char **argv)
         }
         fprintf(stderr, "done\n");
         char buff[256];
-        if (prefix){
+        if (prefix) {
             sprintf(buff, "%s/%s_%s_%d_%06d",prefix, imbase, cfgbase, max_layer, e);
-        }else{
+        }else {
             sprintf(buff, "%s_%s_%d_%06d",imbase, cfgbase, max_layer, e);
         }
         printf("%d %s\n", e, buff);
@@ -264,7 +259,7 @@ void run_lsd(int argc, char **argv)
         //show_image(im, buff);
         //cvWaitKey(0);
 
-        if(rotate){
+        if (rotate) {
             image rot = rotate_image(im, rotate);
             free_image(&im);
             im = rot;
@@ -281,7 +276,7 @@ void run_lsd(int argc, char **argv)
 void run_nightmare(int argc, char **argv)
 {
     srand(0);
-    if(argc < 4){
+    if (argc < 4) {
         fprintf(stderr, "usage: %s %s [cfg] [weights] [image] [layer] [options! (optional)]\n", argv[0], argv[1]);
         return;
     }
@@ -313,10 +308,10 @@ void run_nightmare(int argc, char **argv)
 
     set_batch_network(&net, 1);
     image im = load_image_color(input, 0, 0);
-    if(0){
+    if (0) {
         float scale = 1;
-        if(im.w > 512 || im.h > 512){
-            if(im.w > im.h) scale = 512.0/im.w;
+        if (im.w > 512 || im.h > 512) {
+            if (im.w > im.h) scale = 512.0/im.w;
             else scale = 512.0/im.h;
         }
         image resized = resize_image(im, scale*im.w, scale*im.h);
@@ -327,13 +322,13 @@ void run_nightmare(int argc, char **argv)
 
     float *features = 0;
     image update;
-    if (reconstruct){
+    if (reconstruct) {
         net.n = max_layer;
         im = letterbox_image(im, net.w, net.h);
         //resize_network(&net, im.w, im.h);
 
         network_predict(net, im.data);
-        if(net.layers[net.n-1].type == REGION){
+        if (net.layers[net.n-1].type == REGION) {
             printf("region!\n");
             zero_objectness(net.layers[net.n-1]);
         }
@@ -349,8 +344,7 @@ void run_nightmare(int argc, char **argv)
         features = out_im.data;
 
         /*
-        int i;
-           for(i = 0; i < 14*14*512; ++i){
+        for (int i = 0; i < 14*14*512; ++i) {
         //features[i] += rand_uniform(-.19, .19);
         }
         free_image(&im);
@@ -361,35 +355,35 @@ void run_nightmare(int argc, char **argv)
 
     int e;
     int n;
-    for(e = 0; e < rounds; ++e){
+    for (e = 0; e < rounds; ++e) {
         fprintf(stderr, "Iteration: ");
         fflush(stderr);
-        for(n = 0; n < iters; ++n){  
+        for (n = 0; n < iters; ++n) {  
             fprintf(stderr, "%d, ", n);
             fflush(stderr);
-            if(reconstruct){
+            if (reconstruct) {
                 reconstruct_picture(net, features, im, update, rate, momentum, lambda, smooth_size, 1);
                 //if ((n+1)%30 == 0) rate *= .5;
                 show_image(im, "reconstruction");
 #ifdef OPENCV
                 cvWaitKey(10);
 #endif
-            }else{
+            }else {
                 int layer = max_layer + rand()%range - range/2;
                 int octave = rand()%octaves;
                 optimize_picture(&net, im, layer, 1/pow(1.33333333, octave), rate, thresh, norm);
             }
         }
         fprintf(stderr, "done\n");
-        if(0){
+        if (0) {
             image g = grayscale_image(im);
             free_image(&im);
             im = g;
         }
         char buff[256];
-        if (prefix){
+        if (prefix) {
             sprintf(buff, "%s/%s_%s_%d_%06d",prefix, imbase, cfgbase, max_layer, e);
-        }else{
+        }else {
             sprintf(buff, "%s_%s_%d_%06d",imbase, cfgbase, max_layer, e);
         }
         printf("%d %s\n", e, buff);
@@ -397,7 +391,7 @@ void run_nightmare(int argc, char **argv)
         //show_image(im, buff);
         //cvWaitKey(0);
 
-        if(rotate){
+        if (rotate) {
             image rot = rotate_image(im, rotate);
             free_image(&im);
             im = rot;

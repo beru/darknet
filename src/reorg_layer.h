@@ -1,5 +1,4 @@
-#ifndef REORG_LAYER_H
-#define REORG_LAYER_H
+#pragma once
 
 #include "image.h"
 #include "cuda.h"
@@ -14,7 +13,5 @@ void backward_reorg_layer(const layer l, network net);
 #ifdef GPU
 void forward_reorg_layer_gpu(layer l, network net);
 void backward_reorg_layer_gpu(layer l, network net);
-#endif
-
 #endif
 

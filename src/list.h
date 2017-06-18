@@ -1,5 +1,5 @@
-#ifndef LIST_H
-#define LIST_H
+#pragma once
+
 #include "darknet.h"
 
 list *make_list();
@@ -12,4 +12,3 @@ void **list_to_array(list *l);
 void free_list(list *l);
 void free_list_contents(list *l);
 
-#endif

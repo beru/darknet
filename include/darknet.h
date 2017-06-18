@@ -1,5 +1,5 @@
-#ifndef DARKNET_API
-#define DARKNET_API
+#pragma once
+
 #include <stdlib.h>
 
 #ifdef THREAD
@@ -380,7 +380,7 @@ typedef struct network{
     float saturation;
     float hue;
 
-#ifdef GPIU
+#ifdef GPU
     int gpu_index;
 #endif
     tree *hierarchy;
@@ -551,4 +551,4 @@ list *read_cfg(char *filename);
 #include "stb_image_write.h"
 #include "tree.h"
 #include "utils.h"
-#endif
+

@@ -44,7 +44,7 @@ double demo_time;
 double get_wall_time()
 {
     struct timeval time;
-    if (gettimeofday(&time,NULL)){
+    if (gettimeofday(&time,NULL)) {
         return 0;
     }
     return (double)time.tv_sec + (double)time.tv_usec * .000001;
@@ -62,12 +62,12 @@ void *detect_in_thread(void *ptr)
     memcpy(predictions[demo_index], prediction, l.outputs*sizeof(float));
     mean_arrays(predictions, demo_frame, l.outputs, avg);
     l.output = last_avg2;
-    if(demo_delay == 0) l.output = avg;
-    if(l.type == DETECTION){
+    if (demo_delay == 0) l.output = avg;
+    if (l.type == DETECTION) {
         get_detection_boxes(l, 1, 1, demo_thresh, probs, boxes, 0);
-    } else if (l.type == REGION){
+    }else if (l.type == REGION) {
         get_region_boxes(l, buff[0].w, buff[0].h, net.w, net.h, demo_thresh, probs, boxes, 0, 0, demo_hier, 1);
-    } else {
+    }else {
         error("Last layer must produce detections\n");
     }
     if (nms > 0) do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
@@ -88,7 +88,7 @@ void *fetch_in_thread(void *ptr)
 {
     int status = fill_image_from_stream(cap, buff[buff_index]);
     letterbox_image_into(buff[buff_index], net.w, net.h, buff_letter[buff_index]);
-    if(status == 0) demo_done = 1;
+    if (status == 0) demo_done = 1;
     return 0;
 }
 
@@ -97,38 +97,38 @@ void *display_in_thread(void *ptr)
     show_image_cv(buff[(buff_index + 1)%3], "Demo", ipl);
     int c = cvWaitKey(1);
     if (c != -1) c = c%256;
-    if (c == 10){
-        if(demo_delay == 0) demo_delay = 60;
-        else if(demo_delay == 5) demo_delay = 0;
-        else if(demo_delay == 60) demo_delay = 5;
+    if (c == 10) {
+        if (demo_delay == 0) demo_delay = 60;
+        else if (demo_delay == 5) demo_delay = 0;
+        else if (demo_delay == 60) demo_delay = 5;
         else demo_delay = 0;
-    } else if (c == 27) {
+    }else if (c == 27) {
         demo_done = 1;
         return 0;
-    } else if (c == 82) {
+    }else if (c == 82) {
         demo_thresh += .02;
-    } else if (c == 84) {
+    }else if (c == 84) {
         demo_thresh -= .02;
-        if(demo_thresh <= .02) demo_thresh = .02;
-    } else if (c == 83) {
+        if (demo_thresh <= .02) demo_thresh = .02;
+    }else if (c == 83) {
         demo_hier += .02;
-    } else if (c == 81) {
+    }else if (c == 81) {
         demo_hier -= .02;
-        if(demo_hier <= .0) demo_hier = .0;
+        if (demo_hier <= .0) demo_hier = .0;
     }
     return 0;
 }
 
 void *display_loop(void *ptr)
 {
-    while(1){
+    while (1) {
         display_in_thread(0);
     }
 }
 
 void *detect_loop(void *ptr)
 {
-    while(1){
+    while (1) {
         detect_in_thread(0);
     }
 }
@@ -146,7 +146,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
     demo_hier = hier;
     printf("Demo\n");
     net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
@@ -155,24 +155,24 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
 
     srand(2222222);
 
-    if(filename){
+    if (filename) {
         printf("video file: %s\n", filename);
         cap = cvCaptureFromFile(filename);
-    }else{
+    }else {
         cap = cvCaptureFromCAM(cam_index);
 
-        if(w){
+        if (w) {
             cvSetCaptureProperty(cap, CV_CAP_PROP_FRAME_WIDTH, w);
         }
-        if(h){
+        if (h) {
             cvSetCaptureProperty(cap, CV_CAP_PROP_FRAME_HEIGHT, h);
         }
-        if(frames){
+        if (frames) {
             cvSetCaptureProperty(cap, CV_CAP_PROP_FPS, frames);
         }
     }
 
-    if(!cap) error("Couldn't connect to webcam.\n");
+    if (!cap) error("Couldn't connect to webcam.\n");
 
     layer l = net.layers[net.n-1];
     demo_detections = l.n*l.w*l.h;
@@ -181,11 +181,11 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
     avg = (float *) calloc(l.outputs, sizeof(float));
     last_avg  = (float *) calloc(l.outputs, sizeof(float));
     last_avg2 = (float *) calloc(l.outputs, sizeof(float));
-    for(j = 0; j < demo_frame; ++j) predictions[j] = (float *) calloc(l.outputs, sizeof(float));
+    for (j = 0; j < demo_frame; ++j) predictions[j] = (float *) calloc(l.outputs, sizeof(float));
 
     boxes = (box *)calloc(l.w*l.h*l.n, sizeof(box));
     probs = (float **)calloc(l.w*l.h*l.n, sizeof(float *));
-    for(j = 0; j < l.w*l.h*l.n; ++j) probs[j] = (float *)calloc(l.classes+1, sizeof(float));
+    for (j = 0; j < l.w*l.h*l.n; ++j) probs[j] = (float *)calloc(l.classes+1, sizeof(float));
 
     buff[0] = get_image_from_stream(cap);
     buff[1] = copy_image(buff[0]);
@@ -196,11 +196,11 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
     ipl = cvCreateImage(cvSize(buff[0].w,buff[0].h), IPL_DEPTH_8U, buff[0].c);
 
     int count = 0;
-    if(!prefix){
+    if (!prefix) {
         cvNamedWindow("Demo", CV_WINDOW_NORMAL); 
-        if(fullscreen){
+        if (fullscreen) {
             cvSetWindowProperty("Demo", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-        } else {
+        }else {
             cvMoveWindow("Demo", 0, 0);
             cvResizeWindow("Demo", 1352, 1013);
         }
@@ -208,12 +208,12 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
 
     demo_time = get_wall_time();
 
-    while(!demo_done){
+    while (!demo_done) {
         buff_index = (buff_index + 1) %3;
-        if(pthread_create(&fetch_thread, 0, fetch_in_thread, 0)) error("Thread creation failed");
-        if(pthread_create(&detect_thread, 0, detect_in_thread, 0)) error("Thread creation failed");
-        if(!prefix){
-            if(count % (demo_delay+1) == 0){
+        if (pthread_create(&fetch_thread, 0, fetch_in_thread, 0)) error("Thread creation failed");
+        if (pthread_create(&detect_thread, 0, detect_in_thread, 0)) error("Thread creation failed");
+        if (!prefix) {
+            if (count % (demo_delay+1) == 0) {
                 fps = 1./(get_wall_time() - demo_time);
                 demo_time = get_wall_time();
                 float *swap = last_avg;
@@ -222,7 +222,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
                 memcpy(last_avg, avg, l.outputs*sizeof(float));
             }
             display_in_thread(0);
-        }else{
+        }else {
             char name[256];
             sprintf(name, "%s_%08d", prefix, count);
             save_image(buff[(buff_index + 1)%3], name);

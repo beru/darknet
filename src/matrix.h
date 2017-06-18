@@ -1,5 +1,5 @@
-#ifndef MATRIX_H
-#define MATRIX_H
+#pragma once
+
 #include "darknet.h"
 
 matrix make_matrix(int rows, int cols);
@@ -17,4 +17,3 @@ matrix resize_matrix(matrix m, int size);
 
 float *pop_column(matrix *m, int c);
 
-#endif

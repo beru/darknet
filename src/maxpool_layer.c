@@ -78,7 +78,6 @@ void resize_maxpool_layer(maxpool_layer *l, int w, int h)
 
 void forward_maxpool_layer(const maxpool_layer l, network net)
 {
-    int b,i,j,k,m,n;
     int w_offset = -l.pad;
     int h_offset = -l.pad;
 
@@ -86,15 +85,15 @@ void forward_maxpool_layer(const maxpool_layer l, network net)
     int w = l.out_w;
     int c = l.c;
 
-    for(b = 0; b < l.batch; ++b){
-        for(k = 0; k < c; ++k){
-            for(i = 0; i < h; ++i){
-                for(j = 0; j < w; ++j){
+    for (int b = 0; b < l.batch; ++b) {
+        for (int k = 0; k < c; ++k) {
+            for (int i = 0; i < h; ++i) {
+                for (int j = 0; j < w; ++j) {
                     int out_index = j + w*(i + h*(k + c*b));
                     float max = -FLT_MAX;
                     int max_i = -1;
-                    for(n = 0; n < l.size; ++n){
-                        for(m = 0; m < l.size; ++m){
+                    for (int n = 0; n < l.size; ++n) {
+                        for (int m = 0; m < l.size; ++m) {
                             int cur_h = h_offset + i*l.stride + n;
                             int cur_w = w_offset + j*l.stride + m;
                             int index = cur_w + l.w*(cur_h + l.h*(k + b*l.c));
@@ -115,11 +114,10 @@ void forward_maxpool_layer(const maxpool_layer l, network net)
 
 void backward_maxpool_layer(const maxpool_layer l, network net)
 {
-    int i;
     int h = l.out_h;
     int w = l.out_w;
     int c = l.c;
-    for(i = 0; i < h*w*c*l.batch; ++i){
+    for (int i = 0; i < h*w*c*l.batch; ++i) {
         int index = l.indexes[i];
         net.delta[index] += l.delta[i];
     }

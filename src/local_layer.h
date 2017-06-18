@@ -1,5 +1,4 @@
-#ifndef LOCAL_LAYER_H
-#define LOCAL_LAYER_H
+#pragma once
 
 #include "cuda.h"
 #include "image.h"
@@ -26,6 +25,4 @@ void update_local_layer(local_layer layer, int batch, float learning_rate, float
 
 void bias_output(float *output, float *biases, int batch, int n, int size);
 void backward_bias(float *bias_updates, float *delta, int batch, int n, int size);
-
-#endif
 

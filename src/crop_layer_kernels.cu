@@ -11,7 +11,7 @@ extern "C" {
 
 __device__ float get_pixel_kernel(float *image, int w, int h, int x, int y, int c)
 {
-    if(x < 0 || x >= w || y < 0 || y >= h) return 0;
+    if (x < 0 || x >= w || y < 0 || y >= h) return 0;
     return image[x + w*(y + c*h)];
 }
 
@@ -26,16 +26,16 @@ __device__ float3 rgb_to_hsv_kernel(float3 rgb)
     float min = (r < g) ? ( (r < b) ? r : b) : ( (g < b) ? g : b);
     float delta = max - min;
     v = max;
-    if(max == 0){
+    if (max == 0) {
         s = 0;
         h = -1;
-    }else{
+    }else {
         s = delta/max;
-        if(r == max){
+        if (r == max) {
             h = (g - b) / delta;
-        } else if (g == max) {
+        }else if (g == max) {
             h = 2 + (b - r) / delta;
-        } else {
+        }else {
             h = 4 + (r - g) / delta;
         }
         if (h < 0) h += 6;
@@ -54,23 +54,23 @@ __device__ float3 hsv_to_rgb_kernel(float3 hsv)
 
     if (s == 0) {
         r = g = b = v;
-    } else {
+    }else {
         int index = (int) floorf(h);
         f = h - index;
         p = v*(1-s);
         q = v*(1-s*f);
         t = v*(1-s*(1-f));
-        if(index == 0){
+        if (index == 0) {
             r = v; g = t; b = p;
-        } else if(index == 1){
+        }else if (index == 1) {
             r = q; g = v; b = p;
-        } else if(index == 2){
+        }else if (index == 2) {
             r = p; g = v; b = t;
-        } else if(index == 3){
+        }else if (index == 3) {
             r = p; g = q; b = v;
-        } else if(index == 4){
+        }else if (index == 4) {
             r = t; g = p; b = v;
-        } else {
+        }else {
             r = v; g = p; b = q;
         }
     }
@@ -99,7 +99,7 @@ __global__ void levels_image_kernel(float *image, float *rand, int batch, int w,
 {
     int size = batch * w * h;
     int id = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if(id >= size) return;
+    if (id >= size) return;
     int x = id % w;
     id /= w;
     int y = id % h;
@@ -123,12 +123,12 @@ __global__ void levels_image_kernel(float *image, float *rand, int batch, int w,
     float g = image[x + w*(y + h*1)];
     float b = image[x + w*(y + h*2)];
     float3 rgb = make_float3(r,g,b);
-    if(train){
+    if (train) {
         float3 hsv = rgb_to_hsv_kernel(rgb);
         hsv.y *= saturation;
         hsv.z *= exposure;
         rgb = hsv_to_rgb_kernel(hsv);
-    } else {
+    }else {
         shift = 0;
     }
     image[x + w*(y + h*0)] = rgb.x*scale + translate + (rshift - .5)*shift;
@@ -139,7 +139,7 @@ __global__ void levels_image_kernel(float *image, float *rand, int batch, int w,
 __global__ void forward_crop_layer_kernel(float *input, float *rand, int size, int c, int h, int w, int crop_height, int crop_width, int train, int flip, float angle, float *output)
 {
     int id = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if(id >= size) return;
+    if (id >= size) return;
 
     float cx = w/2.;
     float cy = h/2.;
@@ -162,7 +162,7 @@ __global__ void forward_crop_layer_kernel(float *input, float *rand, int size, i
     float dh = (h - crop_height)*r5;
     flip = (flip && (r6 > .5));
     angle = 2*angle*r7 - angle;
-    if(!train){
+    if (!train) {
         dw = (w - crop_width)/2.;
         dh = (h - crop_height)/2.;
         flip = 0;
@@ -188,7 +188,7 @@ extern "C" void forward_crop_layer_gpu(crop_layer layer, network net)
 
     float scale = 2;
     float translate = -1;
-    if(layer.noadjust){
+    if (layer.noadjust) { 
         scale = 1;
         translate = 0;
     }

@@ -1,5 +1,4 @@
-#ifndef CUDA_H
-#define CUDA_H
+#pragma once
 
 #include "darknet.h"
 
@@ -22,5 +21,4 @@ float cuda_mag_array(float *x_gpu, size_t n);
 cudnnHandle_t cudnn_handle();
 #endif
 
-#endif
-#endif
+#endif // #ifdef GPU

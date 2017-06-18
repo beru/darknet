@@ -8,7 +8,7 @@ void train_writing(char *cfgfile, char *weightfile)
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
     network net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
@@ -35,7 +35,7 @@ void train_writing(char *cfgfile, char *weightfile)
 
     pthread_t load_thread = load_data_in_thread(args);
     int epoch = (*net.seen)/N;
-    while(get_current_batch(net) < net.max_batches || net.max_batches == 0){
+    while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
         time=clock();
         pthread_join(load_thread, 0);
         train = buffer;
@@ -61,16 +61,16 @@ void train_writing(char *cfgfile, char *weightfile)
            cvWaitKey(0);
          */
 
-        if(avg_loss == -1) avg_loss = loss;
+        if (avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
         printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), (float)(*net.seen)/N, loss, avg_loss, get_current_rate(net), sec(clock()-time), *net.seen);
         free_data(train);
-        if(get_current_batch(net)%100 == 0){
+        if (get_current_batch(net)%100 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s_batch_%d.weights", backup_directory, base, get_current_batch(net));
             save_weights(net, buff);
         }
-        if(*net.seen/N > epoch){
+        if (*net.seen/N > epoch) {
             epoch = *net.seen/N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights",backup_directory,base, epoch);
@@ -82,7 +82,7 @@ void train_writing(char *cfgfile, char *weightfile)
 void test_writing(char *cfgfile, char *weightfile, char *filename)
 {
     network net = parse_network_cfg(cfgfile);
-    if(weightfile){
+    if (weightfile) {
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
@@ -90,14 +90,14 @@ void test_writing(char *cfgfile, char *weightfile, char *filename)
     clock_t time;
     char buff[256];
     char *input = buff;
-    while(1){
-        if(filename){
+    while (1) {
+        if (filename) {
             strncpy(input, filename, 256);
-        }else{
+        }else {
             printf("Enter Image Path: ");
             fflush(stdout);
             input = fgets(input, 256, stdin);
-            if(!input) return;
+            if (!input) return;
             strtok(input, "\n");
         }
 
@@ -130,7 +130,7 @@ void test_writing(char *cfgfile, char *weightfile, char *filename)
 
 void run_writing(int argc, char **argv)
 {
-    if(argc < 4){
+    if (argc < 4) {
         fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
         return;
     }
@@ -138,7 +138,7 @@ void run_writing(int argc, char **argv)
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
     char *filename = (argc > 5) ? argv[5] : 0;
-    if(0==strcmp(argv[2], "train")) train_writing(cfg, weights);
-    else if(0==strcmp(argv[2], "test")) test_writing(cfg, weights, filename);
+    if (0==strcmp(argv[2], "train")) train_writing(cfg, weights);
+    else if (0==strcmp(argv[2], "test")) test_writing(cfg, weights, filename);
 }
 

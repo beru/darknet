@@ -14,7 +14,7 @@ __global__ void forward_maxpool_layer_kernel(int n, int in_h, int in_w, int in_c
     int c = in_c;
 
     int id = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if(id >= n) return;
+    if (id >= n) return;
 
     int j = id % w;
     id /= w;
@@ -31,8 +31,8 @@ __global__ void forward_maxpool_layer_kernel(int n, int in_h, int in_w, int in_c
     float max = -INFINITY;
     int max_i = -1;
     int l, m;
-    for(l = 0; l < size; ++l){
-        for(m = 0; m < size; ++m){
+    for (l = 0; l < size; ++l) {
+        for (m = 0; m < size; ++m) {
             int cur_h = h_offset + i*stride + l;
             int cur_w = w_offset + j*stride + m;
             int index = cur_w + in_w*(cur_h + in_h*(k + b*in_c));
@@ -55,7 +55,7 @@ __global__ void backward_maxpool_layer_kernel(int n, int in_h, int in_w, int in_
     int area = (size-1)/stride;
 
     int id = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if(id >= n) return;
+    if (id >= n) return;
 
     int index = id;
     int j = id % in_w;
@@ -71,8 +71,8 @@ __global__ void backward_maxpool_layer_kernel(int n, int in_h, int in_w, int in_
 
     float d = 0;
     int l, m;
-    for(l = -area; l < area+1; ++l){
-        for(m = -area; m < area+1; ++m){
+    for (l = -area; l < area+1; ++l) {
+        for (m = -area; m < area+1; ++m) {
             int out_w = (j-w_offset)/stride + m;
             int out_h = (i-h_offset)/stride + l;
             int out_index = out_w + w*(out_h + h*(k + c*b));

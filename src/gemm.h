@@ -1,5 +1,4 @@
-#ifndef GEMM_H
-#define GEMM_H
+#pragma once
 
 void gemm_bin(int M, int N, int K, float ALPHA, 
         char  *A, int lda, 
@@ -30,5 +29,5 @@ void gemm_gpu(int TA, int TB, int M, int N, int K, float ALPHA,
         float *B, int ldb,
         float BETA,
         float *C, int ldc);
-#endif
-#endif
+#endif // #ifdef GPU
+

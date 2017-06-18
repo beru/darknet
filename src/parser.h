@@ -1,5 +1,5 @@
-#ifndef PARSER_H
-#define PARSER_H
+#pragma once
+
 #include "network.h"
 
 network parse_network_cfg(char *filename);
@@ -10,4 +10,3 @@ void save_weights_double(network net, char *filename);
 void load_weights(network *net, char *filename);
 void load_weights_upto(network *net, char *filename, int start, int cutoff);
 
-#endif
