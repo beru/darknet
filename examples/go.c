@@ -880,7 +880,7 @@ void run_go(int argc, char **argv)
             if (gpu_list[i] == ',') ++ngpus;
         }
         gpus = calloc(ngpus, sizeof(int));
-        for (i = 0; i < ngpus; ++i) {
+        for (int i = 0; i < ngpus; ++i) {
             gpus[i] = atoi(gpu_list);
             gpu_list = strchr(gpu_list, ',')+1;
         }

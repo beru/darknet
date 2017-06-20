@@ -30,6 +30,17 @@
 #include "parser.h"
 #include "data.h"
 
+#include <sys/time.h>
+
+inline
+long long current_timestamp() {
+    struct timeval te; 
+    gettimeofday(&te, NULL); // get current time
+    long long milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // caculate milliseconds
+    // printf("milliseconds: %lld\n", milliseconds);
+    return milliseconds;
+}
+
 load_args get_base_args(network net)
 {
     load_args args = {0};
@@ -176,7 +187,10 @@ void forward_network(network net)
         if (l.delta) {
             fill_cpu(l.outputs * l.batch, 0, l.delta, 1);
         }
+long long t0 = current_timestamp();
         l.forward(l, net);
+long long t1 = current_timestamp();
+printf("[%d] %s %lld\n", i, get_layer_string(l.type), t1 - t0);
         net.input = l.output;
         if (l.truth) {
             net.truth = l.output;

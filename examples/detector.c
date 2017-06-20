@@ -105,7 +105,7 @@ void train_detector(char *datacfg,
 #endif
 
 #ifdef GPU
-            for (i = 0; i < ngpus; ++i) {
+            for (int i = 0; i < ngpus; ++i) {
                 resize_network(nets + i, dim, dim);
             }
             net = nets[0];

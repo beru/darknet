@@ -12,6 +12,17 @@
 #include "xnor_layer.h"
 #endif
 
+#include <sys/time.h>
+
+inline
+long long current_timestamp() {
+    struct timeval te; 
+    gettimeofday(&te, NULL); // get current time
+    long long milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // caculate milliseconds
+    // printf("milliseconds: %lld\n", milliseconds);
+    return milliseconds;
+}
+
 void swap_binary(convolutional_layer *l)
 {
     float *swap = l->weights;
@@ -129,7 +140,7 @@ void cudnn_convolutional_setup(layer *l)
     cudnnSetTensor4dDescriptor(l->dstTensorDesc, CUDNN_TENSOR_NCHW, CUDNN_DATA_FLOAT, l->batch, l->out_c, l->out_h, l->out_w); 
     cudnnSetTensor4dDescriptor(l->normTensorDesc, CUDNN_TENSOR_NCHW, CUDNN_DATA_FLOAT, 1, l->out_c, 1, 1); 
     cudnnSetFilter4dDescriptor(l->weightDesc, CUDNN_DATA_FLOAT, CUDNN_TENSOR_NCHW, l->n, l->c, l->size, l->size); 
-    cudnnSetConvolution2dDescriptor(l->convDesc, l->pad, l->pad, l->stride, l->stride, 1, 1, CUDNN_CROSS_CORRELATION);
+    cudnnSetConvolution2dDescriptor(l->convDesc, l->pad, l->pad, l->stride, l->stride, 1, 1, CUDNN_CROSS_CORRELATION, CUDNN_DATA_FLOAT);
     cudnnGetConvolutionForwardAlgorithm(cudnn_handle(),
             l->srcTensorDesc,
             l->weightDesc,
@@ -444,6 +455,7 @@ void forward_convolutional_layer(convolutional_layer l, network net)
     float *b = net.workspace;
     float *c = l.output;
 
+long long t0 = current_timestamp();
     for (int i = 0; i < l.batch; ++i) {
         im2col_cpu(net.input, l.c, l.h, l.w, 
                 l.size, l.stride, l.pad, b);
@@ -451,6 +463,8 @@ void forward_convolutional_layer(convolutional_layer l, network net)
         c += n*m;
         net.input += l.c*l.h*l.w;
     }
+long long t1 = current_timestamp();
+printf("\t %s %lld\n", "gemm", t1 - t0);
 
     if (l.batch_normalize) {
         forward_batchnorm_layer(l, net);

@@ -476,7 +476,9 @@ void train_dcgan(char *cfg, char *weight, char *acfg, char *aweight, int clear, 
     args.m = plist->size;
     args.d = &buffer;
     args.type = CLASSIFICATION_DATA;
+#ifdef THREAD
     args.threads=16;
+#endif
     args.classes = 1;
     char *ls[2] = {"imagenet", "zzzzzzzz"};
     args.labels = ls;
@@ -696,7 +698,7 @@ void train_colorizer(char *cfg, char *weight, char *acfg, char *aweight, int cle
         time = clock();
         float gloss = 0;
 
-        for (j = 0; j < net.subdivisions; ++j) {
+        for (int j = 0; j < net.subdivisions; ++j) {
             get_next_batch(train, net.batch, j*net.batch, pixs, 0);
             get_next_batch(gray, net.batch, j*net.batch, graypixs, 0);
             cuda_push_array(net.input_gpu, graypixs, net.inputs*net.batch);
