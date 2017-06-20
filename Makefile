@@ -25,7 +25,7 @@ ARFLAGS=-rv
 OPTS=-Ofast
 LDFLAGS= -lm 
 COMMON= -Iinclude/ -Isrc/
-CFLAGS=-Wall -Wfatal-errors 
+CFLAGS=-Wall -Wfatal-errors -std=c99
 
 ifeq ($(DEBUG), 1) 
 OPTS=-O0 -g
