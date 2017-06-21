@@ -26,7 +26,8 @@ static void increment_layer(layer *l, int steps)
 #endif
 }
 
-layer make_rnn_layer(int batch, int inputs, int hidden, int outputs, int steps, ACTIVATION activation, int batch_normalize, int log)
+layer make_rnn_layer(int batch, int inputs, int hidden, int outputs, int steps,
+                     ACTIVATION activation, int batch_normalize, int log)
 {
     fprintf(stderr, "RNN Layer: %d inputs, %d outputs\n", inputs, outputs);
     batch = batch / steps;
@@ -37,21 +38,21 @@ layer make_rnn_layer(int batch, int inputs, int hidden, int outputs, int steps, 
     l.hidden = hidden;
     l.inputs = inputs;
 
-    l.state = calloc(batch*hidden*(steps+1), sizeof(float));
+    l.state = calloc(batch * hidden * (steps + 1), sizeof(float));
 
     l.input_layer = malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
-    *(l.input_layer) = make_connected_layer(batch*steps, inputs, hidden, activation, batch_normalize);
+    *(l.input_layer) = make_connected_layer(batch * steps, inputs, hidden, activation, batch_normalize);
     l.input_layer->batch = batch;
 
     l.self_layer = malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
-    *(l.self_layer) = make_connected_layer(batch*steps, hidden, hidden, (log==2)?LOGGY:(log==1?LOGISTIC:activation), batch_normalize);
+    *(l.self_layer) = make_connected_layer(batch * steps, hidden, hidden, (log == 2) ? LOGGY : (log == 1 ? LOGISTIC : activation), batch_normalize);
     l.self_layer->batch = batch;
 
     l.output_layer = malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
-    *(l.output_layer) = make_connected_layer(batch*steps, hidden, outputs, activation, batch_normalize);
+    *(l.output_layer) = make_connected_layer(batch * steps, hidden, outputs, activation, batch_normalize);
     l.output_layer->batch = batch;
 
     l.outputs = outputs;
@@ -65,7 +66,7 @@ layer make_rnn_layer(int batch, int inputs, int hidden, int outputs, int steps, 
     l.forward_gpu = forward_rnn_layer_gpu;
     l.backward_gpu = backward_rnn_layer_gpu;
     l.update_gpu = update_rnn_layer_gpu;
-    l.state_gpu = cuda_make_array(l.state, batch*hidden*(steps+1));
+    l.state_gpu = cuda_make_array(l.state, batch * hidden * (steps + 1));
     l.output_gpu = l.output_layer->output_gpu;
     l.delta_gpu = l.output_layer->delta_gpu;
 #endif
@@ -113,7 +114,7 @@ void forward_rnn_layer(layer l, network net)
         s.input = l.state;
         forward_connected_layer(output_layer, s);
 
-        net.input += l.inputs*l.batch;
+        net.input += l.inputs * l.batch;
         increment_layer(&input_layer, 1);
         increment_layer(&self_layer, 1);
         increment_layer(&output_layer, 1);
@@ -157,7 +158,9 @@ void backward_rnn_layer(layer l, network net)
         backward_connected_layer(self_layer, s);
 
         copy_cpu(l.hidden*l.batch, self_layer.delta, 1, input_layer.delta, 1);
-        if (i > 0 && l.shortcut) axpy_cpu(l.hidden*l.batch, 1, self_layer.delta, 1, self_layer.delta - l.hidden*l.batch, 1);
+        if (i > 0 && l.shortcut) {
+            axpy_cpu(l.hidden*l.batch, 1, self_layer.delta, 1, self_layer.delta - l.hidden*l.batch, 1);
+        }
         s.input = net.input + i*l.inputs*l.batch;
         if (net.delta) s.delta = net.delta + i*l.inputs*l.batch;
         else s.delta = 0;
@@ -259,7 +262,10 @@ void backward_rnn_layer_gpu(layer l, network net)
         backward_connected_layer_gpu(self_layer, s);
 
         //copy_ongpu(l.hidden*l.batch, self_layer.delta_gpu, 1, input_layer.delta_gpu, 1);
-        if (i > 0 && l.shortcut) axpy_ongpu(l.hidden*l.batch, 1, self_layer.delta_gpu, 1, self_layer.delta_gpu - l.hidden*l.batch, 1);
+        if (i > 0 && l.shortcut) {
+            axpy_ongpu(l.hidden*l.batch, 1, self_layer.delta_gpu,
+                       1, self_layer.delta_gpu - l.hidden*l.batch, 1);
+        }
         s.input_gpu = net.input_gpu + i*l.inputs*l.batch;
         if (net.delta_gpu) s.delta_gpu = net.delta_gpu + i*l.inputs*l.batch;
         else s.delta_gpu = 0;
@@ -270,4 +276,5 @@ void backward_rnn_layer_gpu(layer l, network net)
         increment_layer(&output_layer, -1);
     }
 }
-#endif
+
+#endif  // #ifdef GPU

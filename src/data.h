@@ -1,6 +1,8 @@
 #pragma once
 
+#ifdef THREAD
 #include <pthread.h>
+#endif
 
 #include "darknet.h"
 #include "matrix.h"
@@ -20,7 +22,9 @@ static inline float distance_from_edge(int x, int max)
 }
 void load_data_blocking(load_args args);
 
+#ifdef THREAD
 pthread_t load_data_in_thread(load_args args);
+#endif
 
 void print_letters(float *pred, int n);
 data load_data_captcha(char **paths, int n, int m, int k, int w, int h);

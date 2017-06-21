@@ -35,7 +35,7 @@ char **read_tokens(char *filename, size_t *read)
     FILE *fp = fopen(filename, "r");
     char **d = calloc(size, sizeof(char *));
     char *line;
-    while ((line=fgetl(fp)) != 0) {
+    while ((line = fgetl(fp)) != 0) {
         ++count;
         if (count > size) {
             size = size*2;
@@ -469,10 +469,10 @@ void run_char_rnn(int argc, char **argv)
 
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
-    if (0==strcmp(argv[2], "train")) train_char_rnn(cfg, weights, filename, clear, tokenized);
-    else if (0==strcmp(argv[2], "valid")) valid_char_rnn(cfg, weights, seed);
-    else if (0==strcmp(argv[2], "validtactic")) valid_tactic_rnn(cfg, weights, seed);
-    else if (0==strcmp(argv[2], "vec")) vec_char_rnn(cfg, weights, seed);
-    else if (0==strcmp(argv[2], "generate")) test_char_rnn(cfg, weights, len, seed, temp, rseed, tokens);
-    else if (0==strcmp(argv[2], "generatetactic")) test_tactic_rnn(cfg, weights, len, temp, rseed, tokens);
+    if (0 == strcmp(argv[2], "train")) train_char_rnn(cfg, weights, filename, clear, tokenized);
+    else if (0 == strcmp(argv[2], "valid")) valid_char_rnn(cfg, weights, seed);
+    else if (0 == strcmp(argv[2], "validtactic")) valid_tactic_rnn(cfg, weights, seed);
+    else if (0 == strcmp(argv[2], "vec")) vec_char_rnn(cfg, weights, seed);
+    else if (0 == strcmp(argv[2], "generate")) test_char_rnn(cfg, weights, len, seed, temp, rseed, tokens);
+    else if (0 == strcmp(argv[2], "generatetactic")) test_tactic_rnn(cfg, weights, len, temp, rseed, tokens);
 }

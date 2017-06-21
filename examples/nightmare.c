@@ -369,9 +369,9 @@ void run_nightmare(int argc, char **argv)
                 cvWaitKey(10);
 #endif
             }else {
-                int layer = max_layer + rand()%range - range/2;
+                int layer = max_layer + rand() % range - range / 2;
                 int octave = rand()%octaves;
-                optimize_picture(&net, im, layer, 1/pow(1.33333333, octave), rate, thresh, norm);
+                optimize_picture(&net, im, layer, 1 / pow(1.33333333, octave), rate, thresh, norm);
             }
         }
         fprintf(stderr, "done\n");
@@ -382,9 +382,9 @@ void run_nightmare(int argc, char **argv)
         }
         char buff[256];
         if (prefix) {
-            sprintf(buff, "%s/%s_%s_%d_%06d",prefix, imbase, cfgbase, max_layer, e);
+            sprintf(buff, "%s/%s_%s_%d_%06d", prefix, imbase, cfgbase, max_layer, e);
         }else {
-            sprintf(buff, "%s_%s_%d_%06d",imbase, cfgbase, max_layer, e);
+            sprintf(buff, "%s_%s_%d_%06d", imbase, cfgbase, max_layer, e);
         }
         printf("%d %s\n", e, buff);
         save_image(im, buff);
@@ -396,7 +396,7 @@ void run_nightmare(int argc, char **argv)
             free_image(&im);
             im = rot;
         }
-        image crop = crop_image(im, im.w * (1. - zoom)/2., im.h * (1.-zoom)/2., im.w*zoom, im.h*zoom);
+        image crop = crop_image(im, im.w * (1. - zoom) / 2., im.h * (1. - zoom) / 2., im.w * zoom, im.h * zoom);
         image resized = resize_image(crop, im.w, im.h);
         free_image(&im);
         free_image(&crop);

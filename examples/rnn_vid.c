@@ -95,7 +95,7 @@ void train_vid_rnn(char *cfgfile, char *weightfile)
 
     while (get_current_batch(net) < net.max_batches) {
         i += 1;
-        time=clock();
+        time = clock();
         float_pair p = get_rnn_vid_data(extractor, paths, N, batch, steps);
 
         memcpy(net.input, p.x, net.inputs*net.batch);
@@ -176,7 +176,7 @@ void generate_vid_rnn(char *cfgfile, char *weightfile)
 
         free_image(&save_reconstruction(extractor, 0, feat, "feat", i));
         free_image(&save_reconstruction(extractor, 0, next, "next", i));
-        if (i==24) last = copy_image(re);
+        if (i == 24) last = copy_image(re);
         free_image(&re);
     }
     for (i = 0; i < 30; ++i) {
@@ -197,8 +197,8 @@ void run_vid_rnn(int argc, char **argv)
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
     //char *filename = (argc > 5) ? argv[5]: 0;
-    if (0==strcmp(argv[2], "train")) train_vid_rnn(cfg, weights);
-    else if (0==strcmp(argv[2], "generate")) generate_vid_rnn(cfg, weights);
+    if (0 == strcmp(argv[2], "train")) train_vid_rnn(cfg, weights);
+    else if (0 == strcmp(argv[2], "generate")) generate_vid_rnn(cfg, weights);
 }
 #else
 void run_vid_rnn(int argc, char **argv) {}

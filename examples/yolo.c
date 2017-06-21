@@ -54,18 +54,19 @@ void train_yolo(char *cfgfile, char *weightfile)
     //while (i*imgs < N*120) {
     while (get_current_batch(net) < net.max_batches) {
         i += 1;
-        time=clock();
+        time = clock();
 #ifdef THREAD
         pthread_join(load_thread, 0);
-#endif
         train = buffer;
-#ifdef THREAD
         load_thread = load_data_in_thread(args);
+#else
+        load_data(args);
+        train = buffer;
 #endif
 
         printf("Loaded: %lf seconds\n", sec(clock()-time));
 
-        time=clock();
+        time = clock();
         float loss = train_network(net, train);
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
@@ -86,10 +87,10 @@ void train_yolo(char *cfgfile, char *weightfile)
 void print_yolo_detections(FILE **fps, char *id, box *boxes, float **probs, int total, int classes, int w, int h)
 {
     for (int i = 0; i < total; ++i) {
-        float xmin = boxes[i].x - boxes[i].w/2.;
-        float xmax = boxes[i].x + boxes[i].w/2.;
-        float ymin = boxes[i].y - boxes[i].h/2.;
-        float ymax = boxes[i].y + boxes[i].h/2.;
+        float xmin = boxes[i].x - boxes[i].w / 2.;
+        float xmax = boxes[i].x + boxes[i].w / 2.;
+        float ymin = boxes[i].y - boxes[i].h / 2.;
+        float ymax = boxes[i].y + boxes[i].h / 2.;
 
         if (xmin < 0) xmin = 0;
         if (ymin < 0) ymin = 0;
@@ -134,14 +135,14 @@ void validate_yolo(char *cfgfile, char *weightfile)
     for (j = 0; j < l.side*l.side*l.n; ++j) probs[j] = calloc(classes, sizeof(float *));
 
     int m = plist->size;
-    int i=0;
-    int t;
+    int i = 0;
 
     float thresh = .001;
     int nms = 1;
     float iou_thresh = .5;
 
 #ifdef THREAD
+    int t;
     int nthreads = 8;
     image *val = calloc(nthreads, sizeof(image));
     image *val_resized = calloc(nthreads, sizeof(image));
@@ -252,7 +253,7 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
     for (j = 0; j < side*side*l.n; ++j) probs[j] = calloc(classes, sizeof(float *));
 
     int m = plist->size;
-    int i=0;
+    int i = 0;
 
     float thresh = .001;
     float iou_thresh = .5;
@@ -336,7 +337,7 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
             if (!input) return;
             strtok(input, "\n");
         }
-        image im = load_image_color(input,0,0);
+        image im = load_image_color(input, 0, 0);
         image sized = resize_image(im, net.w, net.h);
         float *X = sized.data;
         time=clock();
@@ -374,9 +375,9 @@ void run_yolo(int argc, char **argv)
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
     char *filename = (argc > 5) ? argv[5]: 0;
-    if (0==strcmp(argv[2], "test")) test_yolo(cfg, weights, filename, thresh);
-    else if (0==strcmp(argv[2], "train")) train_yolo(cfg, weights);
-    else if (0==strcmp(argv[2], "valid")) validate_yolo(cfg, weights);
-    else if (0==strcmp(argv[2], "recall")) validate_yolo_recall(cfg, weights);
-    else if (0==strcmp(argv[2], "demo")) demo(cfg, weights, thresh, cam_index, filename, voc_names, 20, frame_skip, prefix, avg, .5, 0,0,0,0);
+    if (0 == strcmp(argv[2], "test")) test_yolo(cfg, weights, filename, thresh);
+    else if (0 == strcmp(argv[2], "train")) train_yolo(cfg, weights);
+    else if (0 == strcmp(argv[2], "valid")) validate_yolo(cfg, weights);
+    else if (0 == strcmp(argv[2], "recall")) validate_yolo_recall(cfg, weights);
+    else if (0 == strcmp(argv[2], "demo")) demo(cfg, weights, thresh, cam_index, filename, voc_names, 20, frame_skip, prefix, avg, .5, 0,0,0,0);
 }

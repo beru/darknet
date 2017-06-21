@@ -4,7 +4,8 @@
 
 avgpool_layer make_avgpool_layer(int batch, int w, int h, int c)
 {
-    fprintf(stderr, "avg                     %4d x%4d x%4d   ->  %4d\n",  w, h, c, c);
+    fprintf(stderr, "avg                     %4d x%4d x%4d   ->  %4d\n",
+            w, h, c, c);
     avgpool_layer l = {0};
     l.type = AVGPOOL;
     l.batch = batch;
@@ -34,20 +35,20 @@ void resize_avgpool_layer(avgpool_layer *l, int w, int h)
 {
     l->w = w;
     l->h = h;
-    l->inputs = h*w*l->c;
+    l->inputs = h * w * l->c;
 }
 
 void forward_avgpool_layer(const avgpool_layer l, network net)
 {
     for (int b = 0; b < l.batch; ++b) {
         for (int k = 0; k < l.c; ++k) {
-            int out_index = k + b*l.c;
+            int out_index = k + b * l.c;
             l.output[out_index] = 0;
-            for (int i = 0; i < l.h*l.w; ++i) {
-                int in_index = i + l.h*l.w*(k + b*l.c);
+            for (int i = 0; i < l.h * l.w; ++i) {
+                int in_index = i + l.h * l.w * (k + b * l.c);
                 l.output[out_index] += net.input[in_index];
             }
-            l.output[out_index] /= l.h*l.w;
+            l.output[out_index] /= l.h * l.w;
         }
     }
 }
@@ -56,10 +57,10 @@ void backward_avgpool_layer(const avgpool_layer l, network net)
 {
     for (int b = 0; b < l.batch; ++b) {
         for (int k = 0; k < l.c; ++k) {
-            int out_index = k + b*l.c;
-            for (int i = 0; i < l.h*l.w; ++i) {
-                int in_index = i + l.h*l.w*(k + b*l.c);
-                net.delta[in_index] += l.delta[out_index] / (l.h*l.w);
+            int out_index = k + b * l.c;
+            for (int i = 0; i < l.h * l.w; ++i) {
+                int in_index = i + l.h * l.w * (k + b * l.c);
+                net.delta[in_index] += l.delta[out_index] / (l.h * l.w);
             }
         }
     }

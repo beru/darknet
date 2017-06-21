@@ -17,8 +17,8 @@ void extract_voxel(char *lfile, char *rfile, char *prefix)
             shift = best_3d_shift_r(l, r, -l.h/100, l.h/100);
             printf("%d\n", shift);
         }
-        image ls = crop_image(l, (l.w - w)/2, (l.h - h)/2, w, h);
-        image rs = crop_image(r, 105 + (r.w - w)/2, (r.h - h)/2 + shift, w, h);
+        image ls = crop_image(l, (l.w - w) / 2, (l.h - h) / 2, w, h);
+        image rs = crop_image(r, 105 + (r.w - w) / 2, (r.h - h) / 2 + shift, w, h);
         char buff[256];
         sprintf(buff, "%s_%05d_l", prefix, count);
         save_image(ls, buff);
@@ -75,18 +75,18 @@ void train_voxel(char *cfgfile, char *weightfile)
     //while (i*imgs < N*120) {
     while (get_current_batch(net) < net.max_batches) {
         i += 1;
-        time=clock();
+        time = clock();
 #ifdef THREAD
         pthread_join(load_thread, 0);
-#endif
         train = buffer;
-#ifdef THREAD
         load_thread = load_data_in_thread(args);
+#else
+        load_data(args);
+        train = buffer;
 #endif
-
         printf("Loaded: %lf seconds\n", sec(clock()-time));
 
-        time=clock();
+        time = clock();
         float loss = train_network(net, train);
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
@@ -158,10 +158,10 @@ void run_voxel(int argc, char **argv)
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
     char *filename = (argc > 5) ? argv[5] : 0;
-    if (0==strcmp(argv[2], "train")) train_voxel(cfg, weights);
-    else if (0==strcmp(argv[2], "test")) test_voxel(cfg, weights, filename);
-    else if (0==strcmp(argv[2], "extract")) extract_voxel(argv[3], argv[4], argv[5]);
+    if (0 == strcmp(argv[2], "train")) train_voxel(cfg, weights);
+    else if (0 == strcmp(argv[2], "test")) test_voxel(cfg, weights, filename);
+    else if (0 == strcmp(argv[2], "extract")) extract_voxel(argv[3], argv[4], argv[5]);
     /*
-        else if (0==strcmp(argv[2], "valid")) validate_voxel(cfg, weights);
+        else if (0 == strcmp(argv[2], "valid")) validate_voxel(cfg, weights);
      */
 }

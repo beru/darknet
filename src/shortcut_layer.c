@@ -8,7 +8,7 @@
 
 layer make_shortcut_layer(int batch, int index, int w, int h, int c, int w2, int h2, int c2)
 {
-    fprintf(stderr,"Shortcut Layer: %d\n", index);
+    fprintf(stderr, "Shortcut Layer: %d\n", index);
     layer l = {0};
     l.type = SHORTCUT;
     l.batch = batch;
@@ -18,7 +18,7 @@ layer make_shortcut_layer(int batch, int index, int w, int h, int c, int w2, int
     l.out_w = w;
     l.out_h = h;
     l.out_c = c;
-    l.outputs = w*h*c;
+    l.outputs = w * h * c;
     l.inputs = l.outputs;
 
     l.index = index;
@@ -32,8 +32,8 @@ layer make_shortcut_layer(int batch, int index, int w, int h, int c, int w2, int
     l.forward_gpu = forward_shortcut_layer_gpu;
     l.backward_gpu = backward_shortcut_layer_gpu;
 
-    l.delta_gpu =  cuda_make_array(l.delta, l.outputs*batch);
-    l.output_gpu = cuda_make_array(l.output, l.outputs*batch);
+    l.delta_gpu =  cuda_make_array(l.delta, l.outputs * batch);
+    l.output_gpu = cuda_make_array(l.output, l.outputs * batch);
 #endif
     return l;
 }
@@ -56,7 +56,8 @@ void backward_shortcut_layer(const layer l, network net)
 void forward_shortcut_layer_gpu(const layer l, network net)
 {
     copy_ongpu(l.outputs*l.batch, net.input_gpu, 1, l.output_gpu, 1);
-    shortcut_gpu(l.batch, l.w, l.h, l.c, net.layers[l.index].output_gpu, l.out_w, l.out_h, l.out_c, l.output_gpu);
+    shortcut_gpu(l.batch, l.w, l.h, l.c, net.layers[l.index].output_gpu,
+                 l.out_w, l.out_h, l.out_c, l.output_gpu);
     activate_array_ongpu(l.output_gpu, l.outputs*l.batch, l.activation);
 }
 
@@ -64,6 +65,8 @@ void backward_shortcut_layer_gpu(const layer l, network net)
 {
     gradient_array_ongpu(l.output_gpu, l.outputs*l.batch, l.activation, l.delta_gpu);
     axpy_ongpu(l.outputs*l.batch, 1, l.delta_gpu, 1, net.delta_gpu, 1);
-    shortcut_gpu(l.batch, l.out_w, l.out_h, l.out_c, l.delta_gpu, l.w, l.h, l.c, net.layers[l.index].delta_gpu);
+    shortcut_gpu(l.batch, l.out_w, l.out_h, l.out_c, l.delta_gpu,
+                 l.w, l.h, l.c, net.layers[l.index].delta_gpu);
 }
-#endif
+#endif  // #ifdef GPU
+

@@ -55,7 +55,7 @@ void train_lsd3(char *fcfg, char *fweight, char *gcfg, char *gweight, char *acfg
     float aloss_avg = -1;
     float floss_avg = -1;
 
-    fnet.train=1;
+    fnet.train = 1;
     int x_size = fnet.inputs*fnet.batch;
     int y_size = fnet.truths*fnet.batch;
     float *X = calloc(x_size, sizeof(float));
@@ -1116,16 +1116,16 @@ void run_lsd(int argc, char **argv)
     char *filename = (argc > 5) ? argv[5] : 0;
     char *acfg = argv[5];
     char *aweights = (argc > 6) ? argv[6] : 0;
-    //if (0==strcmp(argv[2], "train")) train_lsd(cfg, weights, clear);
-    //else if (0==strcmp(argv[2], "train2")) train_lsd2(cfg, weights, acfg, aweights, clear);
-    //else if (0==strcmp(argv[2], "traincolor")) train_colorizer(cfg, weights, acfg, aweights, clear);
-    //else if (0==strcmp(argv[2], "train3")) train_lsd3(argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], clear);
-    if (0==strcmp(argv[2], "traingan")) train_dcgan(cfg, weights, acfg, aweights, clear, display, file);
-    else if (0==strcmp(argv[2], "traincolor")) train_colorizer(cfg, weights, acfg, aweights, clear, display);
-    else if (0==strcmp(argv[2], "gan")) test_dcgan(cfg, weights);
-    else if (0==strcmp(argv[2], "test")) test_lsd(cfg, weights, filename, 0);
-    else if (0==strcmp(argv[2], "color")) test_lsd(cfg, weights, filename, 1);
+    //if (0 == strcmp(argv[2], "train")) train_lsd(cfg, weights, clear);
+    //else if (0 == strcmp(argv[2], "train2")) train_lsd2(cfg, weights, acfg, aweights, clear);
+    //else if (0 == strcmp(argv[2], "traincolor")) train_colorizer(cfg, weights, acfg, aweights, clear);
+    //else if (0 == strcmp(argv[2], "train3")) train_lsd3(argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], clear);
+    if (0 == strcmp(argv[2], "traingan")) train_dcgan(cfg, weights, acfg, aweights, clear, display, file);
+    else if (0 == strcmp(argv[2], "traincolor")) train_colorizer(cfg, weights, acfg, aweights, clear, display);
+    else if (0 == strcmp(argv[2], "gan")) test_dcgan(cfg, weights);
+    else if (0 == strcmp(argv[2], "test")) test_lsd(cfg, weights, filename, 0);
+    else if (0 == strcmp(argv[2], "color")) test_lsd(cfg, weights, filename, 1);
     /*
-       else if (0==strcmp(argv[2], "valid")) validate_lsd(cfg, weights);
+       else if (0 == strcmp(argv[2], "valid")) validate_lsd(cfg, weights);
      */
 }

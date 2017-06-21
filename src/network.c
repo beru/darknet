@@ -109,9 +109,9 @@ float get_current_rate(network net)
     case POLY:
         return net.learning_rate * pow(1 - (float)batch_num / net.max_batches, net.power);
     case RANDOM:
-        return net.learning_rate * pow(rand_uniform(0,1), net.power);
+        return net.learning_rate * pow(rand_uniform(0, 1), net.power);
     case SIG:
-        return net.learning_rate * (1./(1.+exp(net.gamma*(batch_num - net.step))));
+        return net.learning_rate * (1. / (1. + exp(net.gamma * (batch_num - net.step))));
     default:
         fprintf(stderr, "Policy is weird!\n");
         return net.learning_rate;
@@ -495,10 +495,10 @@ void print_network(network net)
         int n = l.outputs;
         float mean = mean_array(output, n);
         float vari = variance_array(output, n);
-        fprintf(stderr, "Layer %d - Mean: %f, Variance: %f\n",i,mean, vari);
+        fprintf(stderr, "Layer %d - Mean: %f, Variance: %f\n", i, mean, vari);
         if (n > 100) n = 100;
         for (int j = 0; j < n; ++j) fprintf(stderr, "%f, ", output[j]);
-        if (n == 100)fprintf(stderr,".....\n");
+        if (n == 100)fprintf(stderr, ".....\n");
         fprintf(stderr, "\n");
     }
 }
@@ -507,7 +507,7 @@ void compare_networks(network n1, network n2, data test)
 {
     matrix g1 = network_predict_data(n1, test);
     matrix g2 = network_predict_data(n2, test);
-    int a,b,c,d;
+    int a, b, c, d;
     a = b = c = d = 0;
     for (int i = 0; i < g1.rows; ++i) {
         int truth = max_index(test.y.vals[i], test.y.cols);
@@ -530,7 +530,7 @@ void compare_networks(network n1, network n2, data test)
 float network_accuracy(network net, data d)
 {
     matrix guess = network_predict_data(net, d);
-    float acc = matrix_topk_accuracy(d.y, guess,1);
+    float acc = matrix_topk_accuracy(d.y, guess, 1);
     free_matrix(guess);
     return acc;
 }
@@ -557,7 +557,7 @@ layer get_network_output_layer(network net)
 float network_accuracy_multi(network net, data d, int n)
 {
     matrix guess = network_predict_data_multi(net, d, n);
-    float acc = matrix_topk_accuracy(d.y, guess,1);
+    float acc = matrix_topk_accuracy(d.y, guess, 1);
     free_matrix(guess);
     return acc;
 }

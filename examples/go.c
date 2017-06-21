@@ -1,6 +1,7 @@
 #include "darknet.h"
 
 #include <unistd.h>
+#include <stdio.h>
 
 int inverted = 1;
 int noi = 1;
@@ -153,7 +154,7 @@ void train_go(char *cfgfile,
     printf("Moves: %d\n", N);
     int epoch = (*net.seen)/N;
     while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
-        clock_t time=clock();
+        clock_t time = clock();
 
         data train = random_go_moves(m,
                                      net.batch * net.subdivisions
@@ -477,8 +478,8 @@ int print_game(float *board, FILE *fp)
     fprintf(fp, "clear_board\n");
     for (int j = 0; j < 19; ++j) {
         for (int i = 0; i < 19; ++i) {
-            if (board[j*19 + i] == 1) fprintf(fp, "play black %c%d\n", 'A'+i+(i>=8), 19-j);
-            if (board[j*19 + i] == -1) fprintf(fp, "play white %c%d\n", 'A'+i+(i>=8), 19-j);
+            if (board[j*19 + i] == 1) fprintf(fp, "play black %c%d\n", 'A' + i + (i >= 8), 19 - j);
+            if (board[j*19 + i] == -1) fprintf(fp, "play white %c%d\n", 'A' + i + (i >= 8), 19 - j);
             if (board[j*19 + i]) ++count;
         }
     }
@@ -732,7 +733,7 @@ void test_go(char *cfg, char *weights, int multi)
                 if (num == 2) move_go(board, 1, row, col);
             }else if (c == 'p') {
                 // Pass
-            }else if (c=='b' || c == 'w') {
+            }else if (c == 'b' || c == 'w') {
                 char g;
                 int num = sscanf(line, "%c %c %d", &g, &c, &row);
                 row = (inverted)?19 - row : row-1;
@@ -809,7 +810,7 @@ void self_go(char *filename, char *weightfile, char *f2, char *w2, int multi)
     while (1) {
         if (done) {
             float score = score_game(board);
-            if ((score > 0) == (total%2==0)) ++p1;
+            if ((score > 0) == (total%2 == 0)) ++p1;
             else ++p2;
             ++total;
             fprintf(stderr, "Total: %d, Player 1: %f, Player 2: %f\n", total, (float)p1/total, (float)p2/total);
@@ -833,7 +834,7 @@ void self_go(char *filename, char *weightfile, char *f2, char *w2, int multi)
         }
         print_board(stderr, board, 1, 0);
         //sleep(1);
-        network use = ((total%2==0) == (player==1)) ? net : net2;
+        network use = ((total%2 == 0) == (player==1)) ? net : net2;
         int index = generate_move(use, player, board, multi, .4, 1, two, 0);
         if (index < 0) {
             done = 1;
@@ -897,7 +898,7 @@ void run_go(int argc, char **argv)
     char *c2 = (argc > 5) ? argv[5] : 0;
     char *w2 = (argc > 6) ? argv[6] : 0;
     int multi = find_arg(argc, argv, "-multi");
-    if (0==strcmp(argv[2], "train")) {
+    if (0 == strcmp(argv[2], "train")) {
         train_go(
             cfg, weights, c2,
 #ifdef GPU
@@ -906,10 +907,10 @@ void run_go(int argc, char **argv)
             clear
         );
     }
-    else if (0==strcmp(argv[2], "valid")) valid_go(cfg, weights, multi, c2);
-    else if (0==strcmp(argv[2], "self")) self_go(cfg, weights, c2, w2, multi);
-    else if (0==strcmp(argv[2], "test")) test_go(cfg, weights, multi);
-    else if (0==strcmp(argv[2], "engine")) engine_go(cfg, weights, multi);
+    else if (0 == strcmp(argv[2], "valid")) valid_go(cfg, weights, multi, c2);
+    else if (0 == strcmp(argv[2], "self")) self_go(cfg, weights, c2, w2, multi);
+    else if (0 == strcmp(argv[2], "test")) test_go(cfg, weights, multi);
+    else if (0 == strcmp(argv[2], "engine")) engine_go(cfg, weights, multi);
 }
 
 

@@ -1,5 +1,7 @@
 #include "darknet.h"
 
+#include <stdio.h>
+
 void train_tag(char *cfgfile, char *weightfile, int clear)
 {
     srand(time(0));
@@ -19,9 +21,6 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
     printf("%d\n", plist->size);
     int N = plist->size;
     clock_t time;
-#ifdef THREAD
-    pthread_t load_thread;
-#endif
     data train;
     data buffer;
 
@@ -50,19 +49,19 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
 #ifdef THREAD
     load_thread = load_data_in_thread(args);
 #endif
-    int epoch = (*net.seen)/N;
+    int epoch = (*net.seen) / N;
     while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
-        time=clock();
+        time = clock();
 #ifdef THREAD
         pthread_join(load_thread, 0);
-#endif
         train = buffer;
-
-#ifdef THREAD
         load_thread = load_data_in_thread(args);
+#else
+        load_data(args);
+        train = buffer;
 #endif
         printf("Loaded: %lf seconds\n", sec(clock()-time));
-        time=clock();
+        time = clock();
         float loss = train_network(net, train);
         if (avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
@@ -151,7 +150,7 @@ void run_tag(int argc, char **argv)
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
     char *filename = (argc > 5) ? argv[5] : 0;
-    if (0==strcmp(argv[2], "train")) train_tag(cfg, weights, clear);
-    else if (0==strcmp(argv[2], "test")) test_tag(cfg, weights, filename);
+    if (0 == strcmp(argv[2], "train")) train_tag(cfg, weights, clear);
+    else if (0 == strcmp(argv[2], "test")) test_tag(cfg, weights, filename);
 }
 

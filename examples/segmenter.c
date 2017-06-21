@@ -80,27 +80,21 @@ void train_segmenter(char *datacfg,
 
     data train;
     data buffer;
-    pthread_t load_thread;
     args.d = &buffer;
 #ifdef THREAD
-    load_thread = load_data(args);
-#else
-    load_data(args);
+    pthread_t load_thread = load_data(args);
 #endif
     int epoch = (*net.seen)/N;
     while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
-        time=clock();
-
+        time = clock();
 #ifdef THREAD
         pthread_join(load_thread, 0);
-#endif
         train = buffer;
-#ifdef THREAD
         load_thread = load_data(args);
 #else
         load_data(args);
+        train = buffer;
 #endif
-
         printf("Loaded: %lf seconds\n", sec(clock()-time));
         time=clock();
 
@@ -276,8 +270,8 @@ void run_segmenter(int argc, char **argv)
     char *cfg = argv[4];
     char *weights = (argc > 5) ? argv[5] : 0;
     char *filename = (argc > 6) ? argv[6]: 0;
-    if (0==strcmp(argv[2], "test")) predict_segmenter(data, cfg, weights, filename);
-    else if (0==strcmp(argv[2], "train")) {
+    if (0 == strcmp(argv[2], "test")) predict_segmenter(data, cfg, weights, filename);
+    else if (0 == strcmp(argv[2], "train")) {
         train_segmenter(data,
                         cfg,
                         weights,
@@ -286,7 +280,7 @@ void run_segmenter(int argc, char **argv)
 #endif
                         clear);
     }
-    else if (0==strcmp(argv[2], "demo")) demo_segmenter(data, cfg, weights, cam_index, filename);
+    else if (0 == strcmp(argv[2], "demo")) demo_segmenter(data, cfg, weights, cam_index, filename);
 }
 
 

@@ -17,7 +17,7 @@ double what_time_is_it_now()
 {
     struct timespec now;
     clock_gettime(CLOCK_REALTIME, &now);
-    return now.tv_sec + now.tv_nsec*1e-9;
+    return now.tv_sec + now.tv_nsec * 1e-9;
 }
 
 int *read_intlist(char *gpu_list, int *ngpus, int d)
@@ -49,10 +49,10 @@ int *read_map(char *filename)
     char *str;
     FILE *file = fopen(filename, "r");
     if (!file) file_error(filename);
-    while ((str=fgetl(file))) {
+    while ((str = fgetl(file))) {
         ++n;
-        map = realloc(map, n*sizeof(int));
-        map[n-1] = atoi(str);
+        map = realloc(map, n * sizeof(int));
+        map[n - 1] = atoi(str);
     }
     return map;
 }
@@ -61,10 +61,10 @@ void sorta_shuffle(void *arr, size_t n, size_t size, size_t sections)
 {
     size_t i;
     for (i = 0; i < sections; ++i) {
-        size_t start = n*i/sections;
-        size_t end = n*(i+1)/sections;
-        size_t num = end-start;
-        shuffle(arr+(start*size), num, size);
+        size_t start = n * i / sections;
+        size_t end = n * (i + 1) / sections;
+        size_t num = end - start;
+        shuffle(arr + (start * size), num, size);
     }
 }
 
@@ -72,18 +72,18 @@ void shuffle(void *arr, size_t n, size_t size)
 {
     size_t i;
     void *swp = calloc(1, size);
-    for (i = 0; i < n-1; ++i) {
-        size_t j = i + rand()/(RAND_MAX / (n-i)+1);
-        memcpy(swp,          arr+(j*size), size);
-        memcpy(arr+(j*size), arr+(i*size), size);
-        memcpy(arr+(i*size), swp,          size);
+    for (i = 0; i < n - 1; ++i) {
+        size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+        memcpy(swp,              arr + (j * size), size);
+        memcpy(arr + (j * size), arr + (i * size), size);
+        memcpy(arr + (i * size), swp,              size);
     }
 }
 
 void del_arg(int argc, char **argv, int index)
 {
     int i;
-    for (i = index; i < argc-1; ++i) argv[i] = argv[i+1];
+    for (i = index; i < argc - 1; ++i) argv[i] = argv[i+1];
     argv[i] = 0;
 }
 
@@ -91,7 +91,7 @@ int find_arg(int argc, char* argv[], char *arg)
 {
     for (int i = 0; i < argc; ++i) {
         if (!argv[i]) continue;
-        if (0==strcmp(argv[i], arg)) {
+        if (0 == strcmp(argv[i], arg)) {
             del_arg(argc, argv, i);
             return 1;
         }
@@ -103,8 +103,8 @@ int find_int_arg(int argc, char **argv, char *arg, int def)
 {
     for (int i = 0; i < argc-1; ++i) {
         if (!argv[i]) continue;
-        if (0==strcmp(argv[i], arg)) {
-            def = atoi(argv[i+1]);
+        if (0 == strcmp(argv[i], arg)) {
+            def = atoi(argv[i + 1]);
             del_arg(argc, argv, i);
             del_arg(argc, argv, i);
             break;
@@ -117,7 +117,7 @@ float find_float_arg(int argc, char **argv, char *arg, float def)
 {
     for (int i = 0; i < argc-1; ++i) {
         if (!argv[i]) continue;
-        if (0==strcmp(argv[i], arg)) {
+        if (0 == strcmp(argv[i], arg)) {
             def = atof(argv[i+1]);
             del_arg(argc, argv, i);
             del_arg(argc, argv, i);
@@ -131,7 +131,7 @@ char *find_char_arg(int argc, char **argv, char *arg, char *def)
 {
     for (int i = 0; i < argc-1; ++i) {
         if (!argv[i]) continue;
-        if (0==strcmp(argv[i], arg)) {
+        if (0 == strcmp(argv[i], arg)) {
             def = argv[i+1];
             del_arg(argc, argv, i);
             del_arg(argc, argv, i);
@@ -170,7 +170,7 @@ void pm(int M, int N, float *A)
     for (int i =0 ; i < M; ++i) {
         printf("%d ", i+1);
         for (int j = 0; j < N; ++j) {
-            printf("%2.4f, ", A[i*N+j]);
+            printf("%2.4f, ", A[i * N + j]);
         }
         printf("\n");
     }
@@ -190,7 +190,7 @@ void find_replace(char *str, char *orig, char *rep, char *output)
 
     *p = '\0';
 
-    sprintf(output, "%s%s%s", buffer, rep, p+strlen(orig));
+    sprintf(output, "%s%s%s", buffer, rep, p + strlen(orig));
 }
 
 float sec(clock_t clocks)
@@ -240,7 +240,7 @@ list *split_str(char *s, char delim)
     for (size_t i = 0; i < len; ++i) {
         if (s[i] == delim) {
             s[i] = '\0';
-            list_insert(l, &(s[i+1]));
+            list_insert(l, &(s[i + 1]));
         }
     }
     return l;
@@ -252,8 +252,8 @@ void strip(char *s)
     size_t offset = 0;
     for (size_t i = 0; i < len; ++i) {
         char c = s[i];
-        if (c==' '||c=='\t'||c=='\n') ++offset;
-        else s[i-offset] = c;
+        if (c == ' ' || c == '\t' || c == '\n') ++offset;
+        else s[i - offset] = c;
     }
     s[len-offset] = '\0';
 }
@@ -264,10 +264,10 @@ void strip_char(char *s, char bad)
     size_t offset = 0;
     for (size_t i = 0; i < len; ++i) {
         char c = s[i];
-        if (c==bad) ++offset;
-        else s[i-offset] = c;
+        if (c == bad) ++offset;
+        else s[i - offset] = c;
     }
-    s[len-offset] = '\0';
+    s[len - offset] = '\0';
 }
 
 void free_ptrs(void **ptrs, int n)
@@ -280,7 +280,7 @@ char *fgetl(FILE *fp)
 {
     if (feof(fp)) return 0;
     size_t size = 512;
-    char *line = malloc(size*sizeof(char));
+    char *line = malloc(size * sizeof(char));
     if (!fgets(line, size, fp)) {
         free(line);
         return 0;
@@ -291,7 +291,7 @@ char *fgetl(FILE *fp)
     while ((line[curr-1] != '\n') && !feof(fp)) {
         if (curr == size-1) {
             size *= 2;
-            line = realloc(line, size*sizeof(char));
+            line = realloc(line, size * sizeof(char));
             if (!line) {
                 printf("%ld\n", size);
                 malloc_error();
@@ -302,7 +302,7 @@ char *fgetl(FILE *fp)
         fgets(&line[curr], readsize, fp);
         curr = strlen(line);
     }
-    if (line[curr-1] == '\n') line[curr-1] = '\0';
+    if (line[curr - 1] == '\n') line[curr - 1] = '\0';
 
     return line;
 }
@@ -325,7 +325,7 @@ int read_all_fail(int fd, char *buffer, size_t bytes)
 {
     size_t n = 0;
     while (n < bytes) {
-        int next = read(fd, buffer + n, bytes-n);
+        int next = read(fd, buffer + n, bytes - n);
         if (next <= 0) return 1;
         n += next;
     }
@@ -336,7 +336,7 @@ int write_all_fail(int fd, char *buffer, size_t bytes)
 {
     size_t n = 0;
     while (n < bytes) {
-        size_t next = write(fd, buffer + n, bytes-n);
+        size_t next = write(fd, buffer + n, bytes - n);
         if (next <= 0) return 1;
         n += next;
     }
@@ -366,8 +366,8 @@ void write_all(int fd, char *buffer, size_t bytes)
 
 char *copy_string(char *s)
 {
-    char *copy = malloc(strlen(s)+1);
-    strncpy(copy, s, strlen(s)+1);
+    char *copy = malloc(strlen(s) + 1);
+    strncpy(copy, s, strlen(s) + 1);
     return copy;
 }
 
@@ -412,7 +412,7 @@ float *parse_fields(char *line, int n)
             *c = '\0';
             field[count] = strtod(p, &end);
             if (p == c) field[count] = nan("");
-            if (end != c && (end != c-1 || *end != '\r')) field[count] = nan(""); //DOS file formats!
+            if (end != c && (end != c - 1 || *end != '\r')) field[count] = nan(""); //DOS file formats!
             p = c+1;
             ++count;
         }
@@ -429,7 +429,7 @@ float sum_array(float *a, int n)
 
 float mean_array(float *a, int n)
 {
-    return sum_array(a,n)/n;
+    return sum_array(a, n) / n;
 }
 
 void mean_arrays(float **a, int n, int els, float *avg)
@@ -449,15 +449,16 @@ void print_statistics(float *a, int n)
 {
     float m = mean_array(a, n);
     float v = variance_array(a, n);
-    printf("MSE: %.6f, Mean: %.6f, Variance: %.6f\n", mse_array(a, n), m, v);
+    printf("MSE: %.6f, Mean: %.6f, Variance: %.6f\n",
+           mse_array(a, n), m, v);
 }
 
 float variance_array(float *a, int n)
 {
     float sum = 0;
     float mean = mean_array(a, n);
-    for (int i = 0; i < n; ++i) sum += (a[i] - mean)*(a[i]-mean);
-    float variance = sum/n;
+    for (int i = 0; i < n; ++i) sum += (a[i] - mean) * (a[i] - mean);
+    float variance = sum / n;
     return variance;
 }
 
@@ -478,26 +479,26 @@ float constrain(float min, float max, float a)
 float dist_array(float *a, float *b, int n, int sub)
 {
     float sum = 0;
-    for (int i = 0; i < n; i += sub) sum += pow(a[i]-b[i], 2);
+    for (int i = 0; i < n; i += sub) sum += pow(a[i] - b[i], 2);
     return sqrt(sum);
 }
 
 float mse_array(float *a, int n)
 {
     float sum = 0;
-    for (int i = 0; i < n; ++i) sum += a[i]*a[i];
+    for (int i = 0; i < n; ++i) sum += a[i] * a[i];
     return sqrt(sum/n);
 }
 
 void normalize_array(float *a, int n)
 {
-    float mu = mean_array(a,n);
-    float sigma = sqrt(variance_array(a,n));
+    float mu = mean_array(a, n);
+    float sigma = sqrt(variance_array(a, n));
     for (int i = 0; i < n; ++i) {
-        a[i] = (a[i] - mu)/sigma;
+        a[i] = (a[i] - mu) / sigma;
     }
-    mu = mean_array(a,n);
-    sigma = sqrt(variance_array(a,n));
+    mu = mean_array(a, n);
+    sigma = sqrt(variance_array(a, n));
 }
 
 void translate_array(float *a, int n, float s)
@@ -511,7 +512,7 @@ float mag_array(float *a, int n)
 {
     float sum = 0;
     for (int i = 0; i < n; ++i) {
-        sum += a[i]*a[i];   
+        sum += a[i] * a[i];   
     }
     return sqrt(sum);
 }
@@ -526,13 +527,13 @@ void scale_array(float *a, int n, float s)
 int sample_array(float *a, int n)
 {
     float sum = sum_array(a, n);
-    scale_array(a, n, 1./sum);
+    scale_array(a, n, 1. / sum);
     float r = rand_uniform(0, 1);
     for (int i = 0; i < n; ++i) {
         r = r - a[i];
         if (r <= 0) return i;
     }
-    return n-1;
+    return n - 1;
 }
 
 int max_index(float *a, int n)
@@ -610,14 +611,14 @@ float rand_uniform(float min, float max)
         min = max;
         max = swap;
     }
-    return ((float)rand()/RAND_MAX * (max - min)) + min;
+    return ((float)rand() / RAND_MAX * (max - min)) + min;
 }
 
 float rand_scale(float s)
 {
     float scale = rand_uniform(1, s);
-    if (rand()%2) return scale;
-    return 1./scale;
+    if (rand() % 2) return scale;
+    return 1. / scale;
 }
 
 float **one_hot_encode(float *a, int n, int k)

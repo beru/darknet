@@ -92,9 +92,7 @@ void train_classifier(char *datacfg,
     data buffer;
     args.d = &buffer;
 #ifdef THREAD
-    pthread_t load_thread;
-    load_thread = load_data(args);
-#else
+    pthread_t load_thread = load_data(args);
 #endif
 
     int epoch = (*net.seen)/N;
@@ -103,11 +101,11 @@ void train_classifier(char *datacfg,
 
 #ifdef THREAD
         pthread_join(load_thread, 0);
-#endif
         train = buffer;
-#ifdef THREAD
         load_thread = load_data(args);
 #else
+        load_data(args);
+        train = buffer;
 #endif
         printf("Loaded: %lf seconds\n", sec(clock()-time));
         time=clock();
@@ -129,7 +127,7 @@ void train_classifier(char *datacfg,
         if (*net.seen/N > epoch) {
             epoch = *net.seen/N;
             char buff[256];
-            sprintf(buff, "%s/%s_%d.weights",backup_directory,base, epoch);
+            sprintf(buff, "%s/%s_%d.weights", backup_directory, base, epoch);
             save_weights(net, buff);
         }
         if (get_current_batch(net)%1000 == 0) {
@@ -313,12 +311,13 @@ void validate_classifier_crop(char *datacfg, char *filename, char *weightfile)
 
 #ifdef THREAD
     pthread_t load_thread = load_data_in_thread(args);
-#else
 #endif
     for (i = 1; i <= splits; ++i) {
-        time=clock();
+        time = clock();
 #ifdef THREAD
         pthread_join(load_thread, 0);
+#else
+        load_data(args);
 #endif
         val = buffer;
 
@@ -332,7 +331,7 @@ void validate_classifier_crop(char *datacfg, char *filename, char *weightfile)
         }
         printf("Loaded: %d images in %lf seconds\n", val.X.rows, sec(clock()-time));
 
-        time=clock();
+        time = clock();
         float *acc = network_accuracies(net, val, topk);
         avg_acc += acc[0];
         avg_topk += acc[1];
@@ -810,9 +809,11 @@ void test_classifier(char *datacfg, char *cfgfile, char *weightfile, int target_
     pthread_t load_thread = load_data_in_thread(args);
 #endif
     for (curr = net.batch; curr < m; curr += net.batch) {
-        time=clock();
+        time = clock();
 #ifdef THREAD
         pthread_join(load_thread, 0);
+#else
+        load_data(args);
 #endif
         val = buffer;
 
@@ -823,9 +824,9 @@ void test_classifier(char *datacfg, char *cfgfile, char *weightfile, int target_
             load_thread = load_data_in_thread(args);
 #endif
         }
-        fprintf(stderr, "Loaded: %d images in %lf seconds\n", val.X.rows, sec(clock()-time));
+        fprintf(stderr, "Loaded: %d images in %lf seconds\n", val.X.rows, sec(clock() - time));
 
-        time=clock();
+        time = clock();
         matrix pred = network_predict_data(net, val);
 
         if (target_layer >= 0) {
@@ -842,7 +843,7 @@ void test_classifier(char *datacfg, char *cfgfile, char *weightfile, int target_
 
         free_matrix(pred);
 
-        fprintf(stderr, "%lf seconds, %d images, %d total\n", sec(clock()-time), val.X.rows, curr);
+        fprintf(stderr, "%lf seconds, %d images, %d total\n", sec(clock() - time), val.X.rows, curr);
         free_data(val);
     }
 }
@@ -920,30 +921,30 @@ void threat_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_i
         }
         threat = roll * curr_threat + (1-roll) * threat;
 
-        draw_box_width(out, x2 + border, y1 + .02*h, x2 + .5 * w, y1 + .02*h + border, border, 0,0,0);
+        draw_box_width(out, x2 + border, y1 + .02*h, x2 + .5 * w, y1 + .02*h + border, border, 0, 0, 0);
         if (threat > .97) {
             draw_box_width(out,  x2 + .5 * w + border,
                     y1 + .02*h - 2*border, 
                     x2 + .5 * w + 6*border, 
-                    y1 + .02*h + 3*border, 3*border, 1,0,0);
+                    y1 + .02*h + 3*border, 3*border, 1, 0, 0);
         }
         draw_box_width(out,  x2 + .5 * w + border,
                 y1 + .02*h - 2*border, 
                 x2 + .5 * w + 6*border, 
-                y1 + .02*h + 3*border, .5*border, 0,0,0);
-        draw_box_width(out, x2 + border, y1 + .42*h, x2 + .5 * w, y1 + .42*h + border, border, 0,0,0);
+                y1 + .02*h + 3*border, .5*border, 0, 0, 0);
+        draw_box_width(out, x2 + border, y1 + .42*h, x2 + .5 * w, y1 + .42*h + border, border, 0, 0, 0);
         if (threat > .57) {
             draw_box_width(out,  x2 + .5 * w + border,
                     y1 + .42*h - 2*border, 
                     x2 + .5 * w + 6*border, 
-                    y1 + .42*h + 3*border, 3*border, 1,1,0);
+                    y1 + .42*h + 3*border, 3*border, 1, 1, 0);
         }
         draw_box_width(out,  x2 + .5 * w + border,
                 y1 + .42*h - 2*border, 
                 x2 + .5 * w + 6*border, 
-                y1 + .42*h + 3*border, .5*border, 0,0,0);
+                y1 + .42*h + 3*border, .5*border, 0, 0, 0);
 
-        draw_box_width(out, x1, y1, x2, y2, border, 0,0,0);
+        draw_box_width(out, x1, y1, x2, y2, border, 0, 0, 0);
         for (int i = 0; i < threat * h ; ++i) {
             float ratio = (float) i / h;
             float r = (ratio < .5) ? (2*(ratio)) : 1;
@@ -1147,24 +1148,24 @@ void run_classifier(int argc, char **argv)
     char *filename = (argc > 6) ? argv[6]: 0;
     char *layer_s = (argc > 7) ? argv[7]: 0;
     int layer = layer_s ? atoi(layer_s) : -1;
-    if (0==strcmp(argv[2], "predict")) predict_classifier(data, cfg, weights, filename, top);
-    else if (0==strcmp(argv[2], "try")) try_classifier(data, cfg, weights, filename, atoi(layer_s));
-    else if (0==strcmp(argv[2], "train")) {
+    if (0 == strcmp(argv[2], "predict")) predict_classifier(data, cfg, weights, filename, top);
+    else if (0 == strcmp(argv[2], "try")) try_classifier(data, cfg, weights, filename, atoi(layer_s));
+    else if (0 == strcmp(argv[2], "train")) {
         train_classifier(data, cfg, weights,
 #ifdef GPU
                          gpus, ngpus,
 #endif
                          clear);
-    }else if (0==strcmp(argv[2], "demo")) demo_classifier(data, cfg, weights, cam_index, filename);
-    else if (0==strcmp(argv[2], "gun")) gun_classifier(data, cfg, weights, cam_index, filename);
-    else if (0==strcmp(argv[2], "threat")) threat_classifier(data, cfg, weights, cam_index, filename);
-    else if (0==strcmp(argv[2], "test")) test_classifier(data, cfg, weights, layer);
-    else if (0==strcmp(argv[2], "label")) label_classifier(data, cfg, weights);
-    else if (0==strcmp(argv[2], "valid")) validate_classifier_single(data, cfg, weights);
-    else if (0==strcmp(argv[2], "validmulti")) validate_classifier_multi(data, cfg, weights);
-    else if (0==strcmp(argv[2], "valid10")) validate_classifier_10(data, cfg, weights);
-    else if (0==strcmp(argv[2], "validcrop")) validate_classifier_crop(data, cfg, weights);
-    else if (0==strcmp(argv[2], "validfull")) validate_classifier_full(data, cfg, weights);
+    }else if (0 == strcmp(argv[2], "demo")) demo_classifier(data, cfg, weights, cam_index, filename);
+    else if (0 == strcmp(argv[2], "gun")) gun_classifier(data, cfg, weights, cam_index, filename);
+    else if (0 == strcmp(argv[2], "threat")) threat_classifier(data, cfg, weights, cam_index, filename);
+    else if (0 == strcmp(argv[2], "test")) test_classifier(data, cfg, weights, layer);
+    else if (0 == strcmp(argv[2], "label")) label_classifier(data, cfg, weights);
+    else if (0 == strcmp(argv[2], "valid")) validate_classifier_single(data, cfg, weights);
+    else if (0 == strcmp(argv[2], "validmulti")) validate_classifier_multi(data, cfg, weights);
+    else if (0 == strcmp(argv[2], "valid10")) validate_classifier_10(data, cfg, weights);
+    else if (0 == strcmp(argv[2], "validcrop")) validate_classifier_crop(data, cfg, weights);
+    else if (0 == strcmp(argv[2], "validfull")) validate_classifier_full(data, cfg, weights);
 }
 
 

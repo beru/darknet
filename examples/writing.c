@@ -33,16 +33,22 @@ void train_writing(char *cfgfile, char *weightfile)
     args.d = &buffer;
     args.type = WRITING_DATA;
 
+#ifdef THREAD
     pthread_t load_thread = load_data_in_thread(args);
-    int epoch = (*net.seen)/N;
+#endif
+    int epoch = (*net.seen) / N;
     while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
-        time=clock();
+        time = clock();
+#ifdef THREAD
         pthread_join(load_thread, 0);
         train = buffer;
         load_thread = load_data_in_thread(args);
-        printf("Loaded %lf seconds\n",sec(clock()-time));
-
-        time=clock();
+#else
+        load_data(args);
+        train = buffer;
+#endif
+        printf("Loaded %lf seconds\n", sec(clock() - time));
+        time = clock();
         float loss = train_network(net, train);
 
         /*
@@ -70,10 +76,10 @@ void train_writing(char *cfgfile, char *weightfile)
             sprintf(buff, "%s/%s_batch_%d.weights", backup_directory, base, get_current_batch(net));
             save_weights(net, buff);
         }
-        if (*net.seen/N > epoch) {
-            epoch = *net.seen/N;
+        if (*net.seen / N > epoch) {
+            epoch = *net.seen / N;
             char buff[256];
-            sprintf(buff, "%s/%s_%d.weights",backup_directory,base, epoch);
+            sprintf(buff, "%s/%s_%d.weights", backup_directory, base, epoch);
             save_weights(net, buff);
         }
     }
@@ -105,7 +111,7 @@ void test_writing(char *cfgfile, char *weightfile, char *filename)
         resize_network(&net, im.w, im.h);
         printf("%d %d %d\n", im.h, im.w, im.c);
         float *X = im.data;
-        time=clock();
+        time = clock();
         network_predict(net, X);
         printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
         image pred = get_network_image(net);
@@ -138,7 +144,7 @@ void run_writing(int argc, char **argv)
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
     char *filename = (argc > 5) ? argv[5] : 0;
-    if (0==strcmp(argv[2], "train")) train_writing(cfg, weights);
-    else if (0==strcmp(argv[2], "test")) test_writing(cfg, weights, filename);
+    if (0 == strcmp(argv[2], "train")) train_writing(cfg, weights);
+    else if (0 == strcmp(argv[2], "test")) test_writing(cfg, weights, filename);
 }
 

@@ -1,5 +1,4 @@
-#ifndef CONVOLUTIONAL_LAYER_H
-#define CONVOLUTIONAL_LAYER_H
+#pragma once
 
 #include "cuda.h"
 #include "image.h"
@@ -23,7 +22,7 @@ void adam_update_gpu(float *w, float *d, float *m, float *v, float B1, float B2,
 #ifdef CUDNN
 void cudnn_convolutional_setup(layer *l);
 #endif
-#endif
+#endif // #ifdef GPU
 
 convolutional_layer make_convolutional_layer(int batch, int h, int w, int c, int n, int size, int stride, int padding, ACTIVATION activation, int batch_normalize, int binary, int xnor, int adam);
 void denormalize_convolutional_layer(convolutional_layer l);
@@ -49,6 +48,4 @@ int convolutional_out_height(convolutional_layer layer);
 int convolutional_out_width(convolutional_layer layer);
 void rescale_weights(convolutional_layer l, float scale, float trans);
 void rgbgr_weights(convolutional_layer l);
-
-#endif
 

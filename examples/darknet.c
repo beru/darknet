@@ -245,7 +245,7 @@ void reset_normalize_net(char *cfgfile, char *weightfile, char *outfile)
 layer normalize_layer(layer l, int n)
 {
     int j;
-    l.batch_normalize=1;
+    l.batch_normalize = 1;
     l.scales = calloc(n, sizeof(float));
     for (j = 0; j < n; ++j) {
         l.scales[j] = 1;

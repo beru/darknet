@@ -38,12 +38,12 @@ void hierarchy_predictions(float *predictions, int n, tree *hier, int only_leave
     for (int j = 0; j < n; ++j) {
         int parent = hier->parent[j];
         if (parent >= 0) {
-            predictions[j*stride] *= predictions[parent*stride]; 
+            predictions[j*stride] *= predictions[parent * stride]; 
         }
     }
     if (only_leaves) {
         for (int j = 0; j < n; ++j) {
-            if (!hier->leaf[j]) predictions[j*stride] = 0;
+            if (!hier->leaf[j]) predictions[j * stride] = 0;
         }
     }
 }
@@ -58,14 +58,14 @@ int hierarchy_top_prediction(float *predictions, tree *hier, float thresh, int s
 
         for (int i = 0; i < hier->group_size[group]; ++i) {
             int index = i + hier->group_offset[group];
-            float val = predictions[(i + hier->group_offset[group])*stride];
+            float val = predictions[(i + hier->group_offset[group]) * stride];
             if (val > max) {
                 max_i = index;
                 max = val;
             }
         }
-        if (p*max > thresh) {
-            p = p*max;
+        if (p * max > thresh) {
+            p = p * max;
             group = hier->child[max_i];
             if (hier->child[max_i] < 0) return max_i;
         }else {
@@ -85,7 +85,7 @@ tree *read_tree(char *filename)
     int group_size = 0;
     int groups = 0;
     int n = 0;
-    while ((line=fgetl(fp)) != 0) {
+    while ((line = fgetl(fp)) != 0) {
         char *id = calloc(256, sizeof(char));
         int parent = -1;
         sscanf(line, "%s %d", id, &parent);
@@ -106,7 +106,7 @@ tree *read_tree(char *filename)
             group_size = 0;
             last_parent = parent;
         }
-        t.group = realloc(t.group, (n+1)*sizeof(int));
+        t.group = realloc(t.group, (n + 1) * sizeof(int));
         t.group[n] = groups;
         if (parent >= 0) {
             t.child[parent] = groups;

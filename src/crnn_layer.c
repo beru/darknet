@@ -12,7 +12,7 @@
 
 static void increment_layer(layer *l, int steps)
 {
-    int num = l->outputs*l->batch*steps;
+    int num = l->outputs * l->batch * steps;
     l->output += num;
     l->delta += num;
     l->x += num;
@@ -28,7 +28,8 @@ static void increment_layer(layer *l, int steps)
 
 layer make_crnn_layer(int batch, int h, int w, int c, int hidden_filters, int output_filters, int steps, ACTIVATION activation, int batch_normalize)
 {
-    fprintf(stderr, "CRNN Layer: %d x %d x %d image, %d filters\n", h,w,c,output_filters);
+    fprintf(stderr, "CRNN Layer: %d x %d x %d image, %d filters\n",
+            h, w, c, output_filters);
     batch = batch / steps;
     layer l = {0};
     l.batch = batch;
@@ -44,21 +45,21 @@ layer make_crnn_layer(int batch, int h, int w, int c, int hidden_filters, int ou
     l.hidden = h * w * hidden_filters;
     l.outputs = l.out_h * l.out_w * l.out_c;
 
-    l.state = calloc(l.hidden*batch*(steps+1), sizeof(float));
+    l.state = calloc(l.hidden * batch * (steps + 1), sizeof(float));
 
     l.input_layer = malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
-    *(l.input_layer) = make_convolutional_layer(batch*steps, h, w, c, hidden_filters, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
+    *(l.input_layer) = make_convolutional_layer(batch * steps, h, w, c, hidden_filters, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
     l.input_layer->batch = batch;
 
     l.self_layer = malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
-    *(l.self_layer) = make_convolutional_layer(batch*steps, h, w, hidden_filters, hidden_filters, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
+    *(l.self_layer) = make_convolutional_layer(batch * steps, h, w, hidden_filters, hidden_filters, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
     l.self_layer->batch = batch;
 
     l.output_layer = malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
-    *(l.output_layer) = make_convolutional_layer(batch*steps, h, w, hidden_filters, output_filters, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
+    *(l.output_layer) = make_convolutional_layer(batch * steps, h, w, hidden_filters, output_filters, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
     l.output_layer->batch = batch;
 
     l.output = l.output_layer->output;
@@ -73,7 +74,7 @@ layer make_crnn_layer(int batch, int h, int w, int c, int hidden_filters, int ou
     l.backward_gpu = backward_crnn_layer_gpu;
     l.update_gpu = update_crnn_layer_gpu;
 
-    l.state_gpu = cuda_make_array(l.state, l.hidden*batch*(steps+1));
+    l.state_gpu = cuda_make_array(l.state, l.hidden * batch * (steps + 1));
     l.output_gpu = l.output_layer->output_gpu;
     l.delta_gpu = l.output_layer->delta_gpu;
 #endif
@@ -135,11 +136,11 @@ void backward_crnn_layer(layer l, network net)
     layer self_layer = *(l.self_layer);
     layer output_layer = *(l.output_layer);
 
-    increment_layer(&input_layer, l.steps-1);
-    increment_layer(&self_layer, l.steps-1);
-    increment_layer(&output_layer, l.steps-1);
+    increment_layer(&input_layer, l.steps - 1);
+    increment_layer(&self_layer, l.steps - 1);
+    increment_layer(&output_layer, l.steps - 1);
 
-    l.state += l.hidden*l.batch*l.steps;
+    l.state += l.hidden * l.batch * l.steps;
     for (int i = l.steps-1; i >= 0; --i) {
         copy_cpu(l.hidden * l.batch, input_layer.output, 1, l.state, 1);
         axpy_cpu(l.hidden * l.batch, 1, self_layer.output, 1, l.state, 1);
@@ -260,14 +261,14 @@ void backward_crnn_layer_gpu(layer l, network net)
         l.state_gpu -= l.hidden*l.batch;
 
         s.input_gpu = l.state_gpu;
-        s.delta_gpu = self_layer.delta_gpu - l.hidden*l.batch;
+        s.delta_gpu = self_layer.delta_gpu - l.hidden * l.batch;
         if (i == 0) s.delta_gpu = 0;
         backward_convolutional_layer_gpu(self_layer, s);
 
         copy_ongpu(l.hidden*l.batch, self_layer.delta_gpu, 1, input_layer.delta_gpu, 1);
-        if (i > 0 && l.shortcut) axpy_ongpu(l.hidden*l.batch, 1, self_layer.delta_gpu, 1, self_layer.delta_gpu - l.hidden*l.batch, 1);
-        s.input_gpu = net.input_gpu + i*l.inputs*l.batch;
-        if (net.delta_gpu) s.delta_gpu = net.delta_gpu + i*l.inputs*l.batch;
+        if (i > 0 && l.shortcut) axpy_ongpu(l.hidden * l.batch, 1, self_layer.delta_gpu, 1, self_layer.delta_gpu - l.hidden*l.batch, 1);
+        s.input_gpu = net.input_gpu + i * l.inputs * l.batch;
+        if (net.delta_gpu) s.delta_gpu = net.delta_gpu + i * l.inputs * l.batch;
         else s.delta_gpu = 0;
         backward_convolutional_layer_gpu(input_layer, s);
 
@@ -276,4 +277,5 @@ void backward_crnn_layer_gpu(layer l, network net)
         increment_layer(&output_layer, -1);
     }
 }
-#endif
+#endif  // #ifdef GPU
+

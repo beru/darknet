@@ -97,11 +97,12 @@ void train_detector(char *datacfg,
 
 #ifdef THREAD
             pthread_join(load_thread, 0);
-#endif
             train = buffer;
             free_data(train);
-#ifdef THREAD
             load_thread = load_data(args);
+#else
+            load_data(args);
+            train = buffer;
 #endif
 
 #ifdef GPU
@@ -113,13 +114,14 @@ void train_detector(char *datacfg,
             resize_network(&net, dim, dim);
 #endif
         }
-        time=clock();
+        time = clock();
 #ifdef THREAD
         pthread_join(load_thread, 0);
-#endif
         train = buffer;
-#ifdef THREAD
         load_thread = load_data(args);
+#else
+        load_data(args);
+        train = buffer;
 #endif
         /*
         int k;
@@ -137,7 +139,7 @@ void train_detector(char *datacfg,
             for (k = 0; k < l.max_boxes; ++k) {
                 box b = float_to_box(train.y.vals[zz] + k*5);
                 printf("%f %f %f %f\n", b.x, b.y, b.w, b.h);
-                draw_bbox(im, b, 1, 1,0,0);
+                draw_bbox(im, b, 1, 1, 0, 0);
             }
             show_image(im, "truth11");
             cvWaitKey(0);
@@ -294,13 +296,13 @@ void validate_detector_flip(char *datacfg, char *cfgfile, char *weightfile, char
     FILE **fps = 0;
     int coco = 0;
     int imagenet = 0;
-    if (0==strcmp(type, "coco")) {
+    if (0 == strcmp(type, "coco")) {
         if (!outfile) outfile = "coco_results";
         snprintf(buff, 1024, "%s/%s.json", prefix, outfile);
         fp = fopen(buff, "w");
         fprintf(fp, "[\n");
         coco = 1;
-    }else if (0==strcmp(type, "imagenet")) {
+    }else if (0 == strcmp(type, "imagenet")) {
         if (!outfile) outfile = "imagenet-detection";
         snprintf(buff, 1024, "%s/%s.txt", prefix, outfile);
         fp = fopen(buff, "w");
@@ -321,8 +323,7 @@ void validate_detector_flip(char *datacfg, char *cfgfile, char *weightfile, char
     for (j = 0; j < l.w*l.h*l.n; ++j) probs[j] = calloc(classes+1, sizeof(float *));
 
     int m = plist->size;
-    int i=0;
-    int t;
+    int i = 0;
 
     float thresh = .005;
     float nms = .45;
@@ -334,6 +335,7 @@ void validate_detector_flip(char *datacfg, char *cfgfile, char *weightfile, char
     args.type = LETTERBOX_DATA;
 
 #ifdef THREAD
+    int t;
     int nthreads = 4;
     image *val = calloc(nthreads, sizeof(image));
     image *val_resized = calloc(nthreads, sizeof(image));
@@ -464,13 +466,13 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
     FILE **fps = 0;
     int coco = 0;
     int imagenet = 0;
-    if (0==strcmp(type, "coco")) {
+    if (0 == strcmp(type, "coco")) {
         if (!outfile) outfile = "coco_results";
         snprintf(buff, 1024, "%s/%s.json", prefix, outfile);
         fp = fopen(buff, "w");
         fprintf(fp, "[\n");
         coco = 1;
-    }else if (0==strcmp(type, "imagenet")) {
+    }else if (0 == strcmp(type, "imagenet")) {
         if (!outfile) outfile = "imagenet-detection";
         snprintf(buff, 1024, "%s/%s.txt", prefix, outfile);
         fp = fopen(buff, "w");
@@ -491,13 +493,13 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
     for (j = 0; j < l.w*l.h*l.n; ++j) probs[j] = calloc(classes+1, sizeof(float *));
 
     int m = plist->size;
-    int i=0;
-    int t;
+    int i = 0;
 
     float thresh = .005;
     float nms = .45;
 
 #ifdef THREAD
+    int t;
     int nthreads = 4;
     image *val = calloc(nthreads, sizeof(image));
     image *val_resized = calloc(nthreads, sizeof(image));
@@ -561,7 +563,6 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
     args.h = net.h;
     //args.type = IMAGE_DATA;
     args.type = LETTERBOX_DATA;
-    args.path = paths[i+t];
     args.im = &val;
     args.resized = &val_resized;
     time_t start = time(0);
@@ -622,7 +623,7 @@ void validate_detector_recall(char *cfgfile, char *weightfile)
     for (j = 0; j < l.w*l.h*l.n; ++j) probs[j] = calloc(classes+1, sizeof(float *));
 
     int m = plist->size;
-    int i=0;
+    int i = 0;
 
     float thresh = .001;
     float iou_thresh = .5;
@@ -706,7 +707,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
             if (!input) return;
             strtok(input, "\n");
         }
-        image im = load_image_color(input,0,0);
+        image im = load_image_color(input, 0, 0);
         image sized = letterbox_image(im, net.w, net.h);
         //image sized = resize_image(im, net.w, net.h);
         //image sized2 = resize_max(im, net.w);
@@ -796,17 +797,17 @@ void run_detector(int argc, char **argv)
     char *cfg = argv[4];
     char *weights = (argc > 5) ? argv[5] : 0;
     char *filename = (argc > 6) ? argv[6]: 0;
-    if (0==strcmp(argv[2], "test")) test_detector(datacfg, cfg, weights, filename, thresh, hier_thresh, outfile, fullscreen);
-    else if (0==strcmp(argv[2], "train")) {
+    if (0 == strcmp(argv[2], "test")) test_detector(datacfg, cfg, weights, filename, thresh, hier_thresh, outfile, fullscreen);
+    else if (0 == strcmp(argv[2], "train")) {
         train_detector(datacfg, cfg, weights,
 #ifdef GPU
                        gpus, ngpus,
 #endif
                        clear);
-    }else if (0==strcmp(argv[2], "valid")) validate_detector(datacfg, cfg, weights, outfile);
-    else if (0==strcmp(argv[2], "valid2")) validate_detector_flip(datacfg, cfg, weights, outfile);
-    else if (0==strcmp(argv[2], "recall")) validate_detector_recall(cfg, weights);
-    else if (0==strcmp(argv[2], "demo")) {
+    }else if (0 == strcmp(argv[2], "valid")) validate_detector(datacfg, cfg, weights, outfile);
+    else if (0 == strcmp(argv[2], "valid2")) validate_detector_flip(datacfg, cfg, weights, outfile);
+    else if (0 == strcmp(argv[2], "recall")) validate_detector_recall(cfg, weights);
+    else if (0 == strcmp(argv[2], "demo")) {
         list *options = read_data_cfg(datacfg);
         int classes = option_find_int(options, "classes", 20);
         char *name_list = option_find_str(options, "names", "data/names.list");

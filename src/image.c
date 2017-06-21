@@ -16,11 +16,11 @@ float colors[6][3] = { {1,0,1}, {0,0,1},{0,1,1},{0,1,0},{1,1,0},{1,0,0} };
 
 float get_color(int c, int x, int max)
 {
-    float ratio = ((float)x/max)*5;
+    float ratio = ((float)x / max) * 5;
     int i = floor(ratio);
     int j = ceil(ratio);
     ratio -= i;
-    float r = (1-ratio) * colors[i][c] + ratio*colors[j][c];
+    float r = (1 - ratio) * colors[i][c] + ratio * colors[j][c];
     //printf("%f\n", r);
     return r;
 }
@@ -30,14 +30,14 @@ image mask_to_rgb(image mask)
     int n = mask.c;
     image im = make_image(mask.w, mask.h, 3);
     for (int j = 0; j < n; ++j) {
-        int offset = j*123457 % n;
-        float red = get_color(2,offset,n);
-        float green = get_color(1,offset,n);
-        float blue = get_color(0,offset,n);
-        for (int i = 0; i < im.w*im.h; ++i) {
-            im.data[i + 0*im.w*im.h] = mask.data[j*im.h*im.w + i]*red;
-            im.data[i + 1*im.w*im.h] = mask.data[j*im.h*im.w + i]*green;
-            im.data[i + 2*im.w*im.h] = mask.data[j*im.h*im.w + i]*blue;
+        int offset = j * 123457 % n;
+        float red = get_color(2, offset, n);
+        float green = get_color(1, offset, n);
+        float blue = get_color(0, offset, n);
+        for (int i = 0; i < im.w * im.h; ++i) {
+            im.data[i + 0 * im.w * im.h] = mask.data[j * im.h * im.w + i] * red;
+            im.data[i + 1 * im.w * im.h] = mask.data[j * im.h * im.w + i] * green;
+            im.data[i + 2 * im.w * im.h] = mask.data[j * im.h * im.w + i] * blue;
         }
     }
     return im;
@@ -75,7 +75,7 @@ image tile_images(image a, image b, int dx)
 {
     if (a.w == 0) return copy_image(b);
     image c = make_image(a.w + b.w + dx, (a.h > b.h) ? a.h : b.h, (a.c > b.c) ? a.c : b.c);
-    fill_cpu(c.w*c.h*c.c, 1, c.data, 1);
+    fill_cpu(c.w * c.h * c.c, 1, c.data, 1);
     embed_image(a, c, 0, 0); 
     composite_image(b, c, a.w + dx, 0);
     return c;
@@ -92,7 +92,7 @@ image get_label(image **characters, char *string, int size)
         label = n;
         ++string;
     }
-    image b = border_image(label, label.h*.25);
+    image b = border_image(label, label.h * .25);
     free_image(&label);
     return b;
 }
@@ -127,24 +127,24 @@ void draw_box(image a, int x1, int y1, int x2, int y2, float r, float g, float b
     if (y2 >= a.h) y2 = a.h-1;
 
     for (int i = x1; i <= x2; ++i) {
-        a.data[i + y1*a.w + 0*a.w*a.h] = r;
-        a.data[i + y2*a.w + 0*a.w*a.h] = r;
+        a.data[i + y1 * a.w + 0 * a.w * a.h] = r;
+        a.data[i + y2 * a.w + 0 * a.w * a.h] = r;
 
-        a.data[i + y1*a.w + 1*a.w*a.h] = g;
-        a.data[i + y2*a.w + 1*a.w*a.h] = g;
+        a.data[i + y1 * a.w + 1 * a.w * a.h] = g;
+        a.data[i + y2 * a.w + 1 * a.w * a.h] = g;
 
-        a.data[i + y1*a.w + 2*a.w*a.h] = b;
-        a.data[i + y2*a.w + 2*a.w*a.h] = b;
+        a.data[i + y1 * a.w + 2 * a.w * a.h] = b;
+        a.data[i + y2 * a.w + 2 * a.w * a.h] = b;
     }
     for (int i = y1; i <= y2; ++i) {
-        a.data[x1 + i*a.w + 0*a.w*a.h] = r;
-        a.data[x2 + i*a.w + 0*a.w*a.h] = r;
+        a.data[x1 + i * a.w + 0 * a.w * a.h] = r;
+        a.data[x2 + i * a.w + 0 * a.w * a.h] = r;
 
-        a.data[x1 + i*a.w + 1*a.w*a.h] = g;
-        a.data[x2 + i*a.w + 1*a.w*a.h] = g;
+        a.data[x1 + i * a.w + 1 * a.w * a.h] = g;
+        a.data[x2 + i * a.w + 1 * a.w * a.h] = g;
 
-        a.data[x1 + i*a.w + 2*a.w*a.h] = b;
-        a.data[x2 + i*a.w + 2*a.w*a.h] = b;
+        a.data[x1 + i * a.w + 2 * a.w * a.h] = b;
+        a.data[x2 + i * a.w + 2 * a.w * a.h] = b;
     }
 }
 
@@ -157,13 +157,13 @@ void draw_box_width(image a, int x1, int y1, int x2, int y2, int w, float r, flo
 
 void draw_bbox(image a, box bbox, int w, float r, float g, float b)
 {
-    int left  = (bbox.x-bbox.w/2)*a.w;
-    int right = (bbox.x+bbox.w/2)*a.w;
-    int top   = (bbox.y-bbox.h/2)*a.h;
-    int bot   = (bbox.y+bbox.h/2)*a.h;
+    int left  = (bbox.x - bbox.w / 2) * a.w;
+    int right = (bbox.x + bbox.w / 2) * a.w;
+    int top   = (bbox.y - bbox.h / 2) * a.h;
+    int bot   = (bbox.y + bbox.h / 2) * a.h;
 
     for (int i = 0; i < w; ++i) {
-        draw_box(a, left+i, top+i, right-i, bot-i, r, g, b);
+        draw_box(a, left + i, top + i, right - i, bot - i, r, g, b);
     }
 }
 
@@ -182,7 +182,8 @@ image **load_alphabet()
     return alphabets;
 }
 
-void draw_detections(image im, int num, float thresh, box *boxes, float **probs, char **names, image **alphabet, int classes)
+void draw_detections(image im, int num, float thresh,
+                     box *boxes, float **probs, char **names, image **alphabet, int classes)
 {
     for (int i = 0; i < num; ++i) {
         int class = max_index(probs[i], classes);
@@ -211,19 +212,19 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
             rgb[2] = blue;
             box b = boxes[i];
 
-            int left  = (b.x-b.w/2.)*im.w;
-            int right = (b.x+b.w/2.)*im.w;
-            int top   = (b.y-b.h/2.)*im.h;
-            int bot   = (b.y+b.h/2.)*im.h;
+            int left  = (b.x - b.w / 2.) * im.w;
+            int right = (b.x + b.w / 2.) * im.w;
+            int top   = (b.y - b.h / 2.) * im.h;
+            int bot   = (b.y + b.h / 2.) * im.h;
 
             if (left < 0) left = 0;
-            if (right > im.w-1) right = im.w-1;
+            if (right > im.w - 1) right = im.w - 1;
             if (top < 0) top = 0;
-            if (bot > im.h-1) bot = im.h-1;
+            if (bot > im.h - 1) bot = im.h - 1;
 
             draw_box_width(im, left, top, right, bot, width, red, green, blue);
             if (alphabet) {
-                image label = get_label(alphabet, names[class], (im.h*.03)/10);
+                image label = get_label(alphabet, names[class], (im.h * .03) / 10);
                 draw_label(im, top + width, left, label, rgb);
                 free_image(&label);
             }
@@ -239,9 +240,9 @@ void transpose_image(image im)
     for (c = 0; c < im.c; ++c) {
         for (n = 0; n < im.w-1; ++n) {
             for (m = n + 1; m < im.w; ++m) {
-                float swap = im.data[m + im.w*(n + im.h*c)];
-                im.data[m + im.w*(n + im.h*c)] = im.data[n + im.w*(m + im.h*c)];
-                im.data[n + im.w*(m + im.h*c)] = swap;
+                float swap = im.data[m + im.w * (n + im.h * c)];
+                im.data[m + im.w * (n + im.h * c)] = im.data[n + im.w * (m + im.h * c)];
+                im.data[n + im.w * (m + im.h * c)] = swap;
             }
         }
     }
@@ -254,13 +255,13 @@ void rotate_image_cw(image im, int times)
     int n = im.w;
     for (int i = 0; i < times; ++i) {
         for (int c = 0; c < im.c; ++c) {
-            for (int x = 0; x < n/2; ++x) {
-                for (int y = 0; y < (n-1)/2 + 1; ++y) {
-                    float temp = im.data[y + im.w*(x + im.h*c)];
-                    im.data[y + im.w*(x + im.h*c)] = im.data[n-1-x + im.w*(y + im.h*c)];
-                    im.data[n-1-x + im.w*(y + im.h*c)] = im.data[n-1-y + im.w*(n-1-x + im.h*c)];
-                    im.data[n-1-y + im.w*(n-1-x + im.h*c)] = im.data[x + im.w*(n-1-y + im.h*c)];
-                    im.data[x + im.w*(n-1-y + im.h*c)] = temp;
+            for (int x = 0; x < n / 2; ++x) {
+                for (int y = 0; y < (n -1 ) / 2 + 1; ++y) {
+                    float temp = im.data[y + im.w * (x + im.h * c)];
+                    im.data[y + im.w * (x + im.h * c)] = im.data[n - 1 - x + im.w * (y + im.h * c)];
+                    im.data[n - 1 - x + im.w * (y + im.h * c)] = im.data[n - 1 - y + im.w * (n - 1 - x + im.h * c)];
+                    im.data[n - 1 - y + im.w * (n - 1 - x + im.h * c)] = im.data[x + im.w * (n - 1 - y + im.h * c)];
+                    im.data[x + im.w * (n - 1 - y + im.h * c)] = temp;
                 }
             }
         }
@@ -271,9 +272,9 @@ void flip_image(image a)
 {
     for (int k = 0; k < a.c; ++k) {
         for (int i = 0; i < a.h; ++i) {
-            for (int j = 0; j < a.w/2; ++j) {
-                int index = j + a.w*(i + a.h*(k));
-                int flip = (a.w - j - 1) + a.w*(i + a.h*(k));
+            for (int j = 0; j < a.w / 2; ++j) {
+                int index = j + a.w * (i + a.h * (k));
+                int flip = (a.w - j - 1) + a.w * (i + a.h * (k));
                 float swap = a.data[flip];
                 a.data[flip] = a.data[index];
                 a.data[index] = swap;

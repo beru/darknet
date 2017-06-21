@@ -12,9 +12,7 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
     set_batch_network(&net, 1);
 
     srand(2222222);
-    CvCapture * cap;
-
-    cap = cvCaptureFromCAM(cam_index);
+    CvCapture *cap = cvCaptureFromCAM(cam_index);
 
     char *window = "ArtJudgementBot9000!!!";
     if (!cap) error("Couldn't connect to webcam.\n");
@@ -41,9 +39,9 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
         score = score;
         printf("I APPRECIATE THIS ARTWORK: %10.7f%%\n", score*100);
         printf("[");
-	int upper = 30;
+	    int upper = 30;
         for (int i = 0; i < upper; ++i) {
-            printf("%c", ((i+.5) < score*upper) ? 219 : ' ');
+            printf("%c", ((i + .5) < score * upper) ? 219 : ' ');
         }
         printf("]\n");
 

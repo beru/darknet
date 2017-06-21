@@ -1,5 +1,4 @@
-#ifndef BLAS_H
-#define BLAS_H
+#pragma once
 
 void flatten(float *x, int size, int layers, int batch, int forward);
 void pm(int M, int N, float *A);
@@ -90,5 +89,5 @@ void adam_gpu(int n, float *x, float *m, float *v, float B1, float B2, float rat
 void flatten_ongpu(float *x, int spatial, int layers, int batch, int forward, float *out);
 void softmax_tree(float *input, int spatial, int batch, int stride, float temp, float *output, tree hier);
 
-#endif
-#endif
+#endif  // #ifdef GPU
+

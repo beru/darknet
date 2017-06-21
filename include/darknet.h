@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #ifdef THREAD
-    #include <pthread.h>
+#include <pthread.h>
 #endif
 
 #ifdef GPU

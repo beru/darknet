@@ -17,7 +17,7 @@ void im2col_cpu(float* data_im,
      int channels,  int height,  int width,
      int ksize,  int stride, int pad, float* data_col) 
 {
-    int c,h,w;
+    int c, h, w;
     int height_col = (height + 2*pad - ksize) / stride + 1;
     int width_col = (width + 2*pad - ksize) / stride + 1;
 

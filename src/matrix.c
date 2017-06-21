@@ -29,7 +29,7 @@ float matrix_topk_accuracy(matrix truth, matrix guess, int k)
         }
     }
     free(indexes);
-    return (float)correct/truth.rows;
+    return (float)correct / truth.rows;
 }
 
 void scale_matrix(matrix m, float scale)
@@ -162,7 +162,7 @@ void matrix_to_csv(matrix m)
 
 void print_matrix(matrix m)
 {
-    printf("%d X %d Matrix:\n",m.rows, m.cols);
+    printf("%d X %d Matrix:\n", m.rows, m.cols);
     printf(" __");
     for (int j = 0; j < 16*m.cols-1; ++j) printf(" ");
     printf("__ \n");

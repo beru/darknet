@@ -15,7 +15,7 @@ void train_swag(char *cfgfile, char *weightfile)
     }
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
     int imgs = net.batch*net.subdivisions;
-    int i = *net.seen/imgs;
+    int i = *net.seen / imgs;
     data train, buffer;
 
     layer l = net.layers[net.n - 1];
@@ -40,19 +40,25 @@ void train_swag(char *cfgfile, char *weightfile)
     args.d = &buffer;
     args.type = REGION_DATA;
 
+#ifdef THREAD
     pthread_t load_thread = load_data_in_thread(args);
+#endif
     clock_t time;
     //while (i*imgs < N*120) {
     while (get_current_batch(net) < net.max_batches) {
         i += 1;
-        time=clock();
+        time = clock();
+#ifdef THREAD
         pthread_join(load_thread, 0);
         train = buffer;
         load_thread = load_data_in_thread(args);
-
+#else
+        load_data(args);
+        train = buffer;
+#endif
         printf("Loaded: %lf seconds\n", sec(clock()-time));
 
-        time=clock();
+        time = clock();
         float loss = train_network(net, train);
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
@@ -79,5 +85,5 @@ void run_swag(int argc, char **argv)
 
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
-    if (0==strcmp(argv[2], "train")) train_swag(cfg, weights);
+    if (0 == strcmp(argv[2], "train")) train_swag(cfg, weights);
 }

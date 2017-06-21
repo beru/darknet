@@ -1,5 +1,4 @@
-#ifndef BATCHNORM_LAYER_H
-#define BATCHNORM_LAYER_H
+#pragma once
 
 #include "image.h"
 #include "layer.h"
@@ -16,4 +15,3 @@ void pull_batchnorm_layer(layer l);
 void push_batchnorm_layer(layer l);
 #endif
 
-#endif
