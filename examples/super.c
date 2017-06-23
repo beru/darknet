@@ -13,7 +13,8 @@ void train_super(char *cfgfile, char *weightfile, int clear)
         load_weights(&net, weightfile);
     }
     if (clear) *net.seen = 0;
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
     int imgs = net.batch * net.subdivisions;
     int i = *net.seen / imgs;
     data train, buffer;
@@ -56,13 +57,14 @@ void train_super(char *cfgfile, char *weightfile, int clear)
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
 
-        printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
-        if (i%1000==0) {
+        printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n",
+               i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+        if (i%1000 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
             save_weights(net, buff);
         }
-        if (i%100==0) {
+        if (i%100 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s.backup", backup_directory, base);
             save_weights(net, buff);
@@ -104,7 +106,7 @@ void test_super(char *cfgfile, char *weightfile, char *filename)
         time=clock();
         network_predict(net, X);
         image out = get_network_image(net);
-        printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
+        printf("%s: Predicted in %f seconds.\n", input, sec(clock() - time));
         save_image(out, "out");
 
         free_image(&im);
@@ -116,7 +118,8 @@ void test_super(char *cfgfile, char *weightfile, char *filename)
 void run_super(int argc, char **argv)
 {
     if (argc < 4) {
-        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
+        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n",
+                argv[0], argv[1]);
         return;
     }
 

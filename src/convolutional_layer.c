@@ -241,8 +241,8 @@ convolutional_layer make_convolutional_layer(int batch, int h, int w, int c, int
 
         l.rolling_mean = calloc(n, sizeof(float));
         l.rolling_variance = calloc(n, sizeof(float));
-        l.x = calloc(l.batch*l.outputs, sizeof(float));
-        l.x_norm = calloc(l.batch*l.outputs, sizeof(float));
+        l.x = calloc(l.batch * l.outputs, sizeof(float));
+        l.x_norm = calloc(l.batch * l.outputs, sizeof(float));
     }
     if (adam) {
         l.adam = 1;
@@ -314,7 +314,7 @@ convolutional_layer make_convolutional_layer(int batch, int h, int w, int c, int
         cudnn_convolutional_setup(&l);
 #endif
     }
-#endif
+#endif  // #ifdef GPU
     l.workspace_size = get_workspace_size(l);
     l.activation = activation;
 
@@ -400,7 +400,7 @@ void resize_convolutional_layer(convolutional_layer *l, int w, int h)
 #ifdef CUDNN
     cudnn_convolutional_setup(l);
 #endif
-#endif
+#endif  // #ifdef GPU
     l->workspace_size = get_workspace_size(*l);
 }
 
@@ -409,7 +409,7 @@ void add_bias(float *output, float *biases, int batch, int n, int size)
     for (int b = 0; b < batch; ++b) {
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < size; ++j) {
-                output[(b*n + i)*size + j] += biases[i];
+                output[(b * n + i) * size + j] += biases[i];
             }
         }
     }
@@ -420,7 +420,7 @@ void scale_bias(float *output, float *scales, int batch, int n, int size)
     for (int b = 0; b < batch; ++b) {
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < size; ++j) {
-                output[(b*n + i)*size + j] *= scales[i];
+                output[(b * n + i) * size + j] *= scales[i];
             }
         }
     }
@@ -475,7 +475,9 @@ printf("\t %s %lld\n", "gemm", t1 - t0);
     }
 
     activate_array(l.output, m * n * l.batch, l.activation);
-    if (l.binary || l.xnor) swap_binary(&l);
+    if (l.binary || l.xnor) {
+        swap_binary(&l);
+    }
 }
 
 void backward_convolutional_layer(convolutional_layer l, network net)
@@ -499,8 +501,7 @@ void backward_convolutional_layer(convolutional_layer l, network net)
 
         float *im = net.input + i * l.c * l.h * l.w;
 
-        im2col_cpu(im, l.c, l.h, l.w, 
-                   l.size, l.stride, l.pad, b);
+        im2col_cpu(im, l.c, l.h, l.w, l.size, l.stride, l.pad, b);
         gemm(0, 1, m, n, k, 1, a, k, b, k, 1, c, n);
 
         if (net.delta) {
@@ -532,7 +533,6 @@ void update_convolutional_layer(convolutional_layer l, int batch, float learning
     axpy_cpu(size, learning_rate / batch, l.weight_updates, 1, l.weights, 1);
     scal_cpu(size, momentum, l.weight_updates, 1);
 }
-
 
 image get_convolutional_weight(convolutional_layer l, int i)
 {

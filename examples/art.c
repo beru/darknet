@@ -15,7 +15,9 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
     CvCapture *cap = cvCaptureFromCAM(cam_index);
 
     char *window = "ArtJudgementBot9000!!!";
-    if (!cap) error("Couldn't connect to webcam.\n");
+    if (!cap) {
+        error("Couldn't connect to webcam.\n");
+    }
     cvNamedWindow(window, CV_WINDOW_NORMAL); 
     cvResizeWindow(window, 512, 512);
     int idx[] = {37, 401, 434};
@@ -34,7 +36,9 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
         float score = 0;
         for (int i = 0; i < n; ++i) {
             float s = p[idx[i]];
-            if (s > score) score = s;
+            if (s > score) {
+                score = s;
+            }
         }
         score = score;
         printf("I APPRECIATE THIS ARTWORK: %10.7f%%\n", score*100);
@@ -50,7 +54,7 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
 
         cvWaitKey(1);
     }
-#endif
+#endif  // #ifdef OPENCV
 }
 
 

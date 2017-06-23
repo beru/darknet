@@ -13,8 +13,9 @@ void train_swag(char *cfgfile, char *weightfile)
     if (weightfile) {
         load_weights(&net, weightfile);
     }
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
-    int imgs = net.batch*net.subdivisions;
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
+    int imgs = net.batch * net.subdivisions;
     int i = *net.seen / imgs;
     data train, buffer;
 
@@ -63,7 +64,8 @@ void train_swag(char *cfgfile, char *weightfile)
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
 
-        printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+        printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n",
+               i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
         if (i%1000==0 || i == 600) {
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
@@ -79,7 +81,8 @@ void train_swag(char *cfgfile, char *weightfile)
 void run_swag(int argc, char **argv)
 {
     if (argc < 4) {
-        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
+        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n",
+                argv[0], argv[1]);
         return;
     }
 

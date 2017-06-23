@@ -83,7 +83,9 @@ void shuffle(void *arr, size_t n, size_t size)
 void del_arg(int argc, char **argv, int index)
 {
     int i;
-    for (i = index; i < argc - 1; ++i) argv[i] = argv[i+1];
+    for (i = index; i < argc - 1; ++i) {
+        argv[i] = argv[i+1];
+    }
     argv[i] = 0;
 }
 
@@ -101,7 +103,7 @@ int find_arg(int argc, char* argv[], char *arg)
 
 int find_int_arg(int argc, char **argv, char *arg, int def)
 {
-    for (int i = 0; i < argc-1; ++i) {
+    for (int i = 0; i < argc - 1; ++i) {
         if (!argv[i]) continue;
         if (0 == strcmp(argv[i], arg)) {
             def = atoi(argv[i + 1]);
@@ -115,10 +117,10 @@ int find_int_arg(int argc, char **argv, char *arg, int def)
 
 float find_float_arg(int argc, char **argv, char *arg, float def)
 {
-    for (int i = 0; i < argc-1; ++i) {
+    for (int i = 0; i < argc - 1; ++i) {
         if (!argv[i]) continue;
         if (0 == strcmp(argv[i], arg)) {
-            def = atof(argv[i+1]);
+            def = atof(argv[i + 1]);
             del_arg(argc, argv, i);
             del_arg(argc, argv, i);
             break;
@@ -129,10 +131,10 @@ float find_float_arg(int argc, char **argv, char *arg, float def)
 
 char *find_char_arg(int argc, char **argv, char *arg, char *def)
 {
-    for (int i = 0; i < argc-1; ++i) {
+    for (int i = 0; i < argc - 1; ++i) {
         if (!argv[i]) continue;
         if (0 == strcmp(argv[i], arg)) {
-            def = argv[i+1];
+            def = argv[i + 1];
             del_arg(argc, argv, i);
             del_arg(argc, argv, i);
             break;
@@ -457,7 +459,9 @@ float variance_array(float *a, int n)
 {
     float sum = 0;
     float mean = mean_array(a, n);
-    for (int i = 0; i < n; ++i) sum += (a[i] - mean) * (a[i] - mean);
+    for (int i = 0; i < n; ++i) {
+        sum += (a[i] - mean) * (a[i] - mean);
+    }
     float variance = sum / n;
     return variance;
 }
@@ -479,14 +483,18 @@ float constrain(float min, float max, float a)
 float dist_array(float *a, float *b, int n, int sub)
 {
     float sum = 0;
-    for (int i = 0; i < n; i += sub) sum += pow(a[i] - b[i], 2);
+    for (int i = 0; i < n; i += sub) {
+        sum += pow(a[i] - b[i], 2);
+    }
     return sqrt(sum);
 }
 
 float mse_array(float *a, int n)
 {
     float sum = 0;
-    for (int i = 0; i < n; ++i) sum += a[i] * a[i];
+    for (int i = 0; i < n; ++i) {
+        sum += a[i] * a[i];
+    }
     return sqrt(sum/n);
 }
 
@@ -594,15 +602,15 @@ float rand_normal()
 
 size_t rand_size_t()
 {
-    return  ((size_t)(rand()&0xff) << 56) | 
-        ((size_t)(rand()&0xff) << 48) |
-        ((size_t)(rand()&0xff) << 40) |
-        ((size_t)(rand()&0xff) << 32) |
-        ((size_t)(rand()&0xff) << 24) |
-        ((size_t)(rand()&0xff) << 16) |
-        ((size_t)(rand()&0xff) << 8) |
-        ((size_t)(rand()&0xff) << 0);
-}
+    return  ((size_t)(rand() & 0xff) << 56) | 
+            ((size_t)(rand() & 0xff) << 48) |
+            ((size_t)(rand() & 0xff) << 40) |
+            ((size_t)(rand() & 0xff) << 32) |
+            ((size_t)(rand() & 0xff) << 24) |
+            ((size_t)(rand() & 0xff) << 16) |
+            ((size_t)(rand() & 0xff) << 8)  |
+            ((size_t)(rand() & 0xff) << 0);
+}    
 
 float rand_uniform(float min, float max)
 {

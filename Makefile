@@ -1,8 +1,8 @@
-GPU=0
-CUDNN=0
+GPU=1
+CUDNN=1
 OPENCV=0
 DEBUG=0
-THREAD=0
+THREAD=1
 
 ARCH= -gencode arch=compute_20,code=[sm_20,sm_21] \
       -gencode arch=compute_30,code=sm_30 \

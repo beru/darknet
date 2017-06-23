@@ -45,7 +45,7 @@ matrix resize_matrix(matrix m, int size)
 {
     if (m.rows == size) return m;
     if (m.rows < size) {
-        m.vals = realloc(m.vals, size*sizeof(float*));
+        m.vals = realloc(m.vals, size * sizeof(float*));
         for (int i = m.rows; i < size; ++i) {
             m.vals[i] = calloc(m.cols, sizeof(float));
         }
@@ -101,7 +101,7 @@ matrix hold_out_matrix(matrix *m, int n)
     h.cols = m->cols;
     h.vals = calloc(h.rows, sizeof(float *));
     for (int i = 0; i < n; ++i) {
-        int index = rand()%m->rows;
+        int index = rand() % m->rows;
         h.vals[i] = m->vals[index];
         m->vals[index] = m->vals[--(m->rows)];
     }
@@ -138,13 +138,13 @@ matrix csv_to_matrix(char *filename)
         if (m.cols == -1) m.cols = count_fields(line);
         if (n == size) {
             size *= 2;
-            m.vals = realloc(m.vals, size*sizeof(float*));
+            m.vals = realloc(m.vals, size * sizeof(float*));
         }
         m.vals[n] = parse_fields(line, m.cols);
         free(line);
         ++n;
     }
-    m.vals = realloc(m.vals, n*sizeof(float*));
+    m.vals = realloc(m.vals, n * sizeof(float*));
     m.rows = n;
     return m;
 }
@@ -164,11 +164,11 @@ void print_matrix(matrix m)
 {
     printf("%d X %d Matrix:\n", m.rows, m.cols);
     printf(" __");
-    for (int j = 0; j < 16*m.cols-1; ++j) printf(" ");
+    for (int j = 0; j < 16 * m.cols - 1; ++j) printf(" ");
     printf("__ \n");
 
     printf("|  ");
-    for (int j = 0; j < 16*m.cols-1; ++j) printf(" ");
+    for (int j = 0; j < 16 * m.cols - 1; ++j) printf(" ");
     printf("  |\n");
 
     for (int i = 0; i < m.rows; ++i) {
@@ -179,6 +179,7 @@ void print_matrix(matrix m)
         printf(" |\n");
     }
     printf("|__");
-    for (int j = 0; j < 16*m.cols-1; ++j) printf(" ");
+    for (int j = 0; j < 16 * m.cols - 1; ++j) printf(" ");
     printf("__|\n");
 }
+

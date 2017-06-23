@@ -1,8 +1,7 @@
+
 #ifdef GPU
 
 int gpu_index = 0;
-
-#ifdef GPU
 
 #include "cuda.h"
 #include "utils.h"
@@ -30,8 +29,7 @@ void check_error(cudaError_t status)
 {
     //cudaDeviceSynchronize();
     cudaError_t status2 = cudaGetLastError();
-    if (status != cudaSuccess)
-    {   
+    if (status != cudaSuccess) {   
         const char *s = cudaGetErrorString(status);
         char buffer[256];
         printf("CUDA Error: %s\n", s);
@@ -39,8 +37,7 @@ void check_error(cudaError_t status)
         snprintf(buffer, 256, "CUDA Error: %s", s);
         error(buffer);
     } 
-    if (status2 != cudaSuccess)
-    {   
+    if (status2 != cudaSuccess) {   
         const char *s = cudaGetErrorString(status);
         char buffer[256];
         printf("CUDA Error Prev: %s\n", s);
@@ -99,7 +96,9 @@ float *cuda_make_array(float *x, size_t n)
         status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
         check_error(status);
     }
-    if (!x_gpu) error("Cuda malloc failed\n");
+    if (!x_gpu) {
+        error("Cuda malloc failed\n");
+    }
     return x_gpu;
 }
 
@@ -139,7 +138,9 @@ int *cuda_make_int_array(int *x, size_t n)
         status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
         check_error(status);
     }
-    if (!x_gpu) error("Cuda malloc failed\n");
+    if (!x_gpu) {
+        error("Cuda malloc failed\n");
+    }
     return x_gpu;
 }
 
@@ -172,6 +173,4 @@ float cuda_mag_array(float *x_gpu, size_t n)
     return m;
 }
 
-#endif
-
-#endif
+#endif  // #ifdef GPU

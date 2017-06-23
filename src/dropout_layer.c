@@ -12,8 +12,8 @@ dropout_layer make_dropout_layer(int batch, int inputs, float probability)
     l.inputs = inputs;
     l.outputs = inputs;
     l.batch = batch;
-    l.rand = calloc(inputs*batch, sizeof(float));
-    l.scale = 1./(1.-probability);
+    l.rand = calloc(inputs * batch, sizeof(float));
+    l.scale = 1. / (1. - probability);
     l.forward = forward_dropout_layer;
     l.backward = backward_dropout_layer;
 #ifdef GPU
@@ -21,18 +21,18 @@ dropout_layer make_dropout_layer(int batch, int inputs, float probability)
     l.backward_gpu = backward_dropout_layer_gpu;
     l.rand_gpu = cuda_make_array(l.rand, inputs*batch);
 #endif
-    fprintf(stderr, "dropout       p = %.2f               %4d  ->  %4d\n", probability, inputs, inputs);
+    fprintf(stderr, "dropout       p = %.2f               %4d  ->  %4d\n",
+            probability, inputs, inputs);
     return l;
 } 
 
 void resize_dropout_layer(dropout_layer *l, int inputs)
 {
-    l->rand = realloc(l->rand, l->inputs*l->batch*sizeof(float));
-    #ifdef GPU
+    l->rand = realloc(l->rand, l->inputs * l->batch * sizeof(float));
+#ifdef GPU
     cuda_free(l->rand_gpu);
-
-    l->rand_gpu = cuda_make_array(l->rand, inputs*l->batch);
-    #endif
+    l->rand_gpu = cuda_make_array(l->rand, inputs * l->batch);
+#endif
 }
 
 void forward_dropout_layer(dropout_layer l, network net)

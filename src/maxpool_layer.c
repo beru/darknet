@@ -118,7 +118,7 @@ void backward_maxpool_layer(const maxpool_layer l, network net)
     int h = l.out_h;
     int w = l.out_w;
     int c = l.c;
-    for (int i = 0; i < h*w*c*l.batch; ++i) {
+    for (int i = 0; i < h * w * c * l.batch; ++i) {
         int index = l.indexes[i];
         net.delta[index] += l.delta[i];
     }

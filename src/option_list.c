@@ -22,7 +22,8 @@ list *read_data_cfg(char *filename)
             break;
         default:
             if (!read_option(line, options)) {
-                fprintf(stderr, "Config file error line %d, could parse: %s\n", nu, line);
+                fprintf(stderr, "Config file error line %d, could parse: %s\n",
+                        nu, line);
                 free(line);
             }
             break;
@@ -65,7 +66,8 @@ void option_unused(list *l)
     while (n) {
         kvp *p = (kvp*)n->val;
         if (!p->used) {
-            fprintf(stderr, "Unused field: '%s = %s'\n", p->key, p->val);
+            fprintf(stderr, "Unused field: '%s = %s'\n",
+                    p->key, p->val);
         }
         n = n->next;
     }
@@ -88,7 +90,10 @@ char *option_find_str(list *l, char *key, char *def)
 {
     char *v = option_find(l, key);
     if (v) return v;
-    if (def) fprintf(stderr, "%s: Using default '%s'\n", key, def);
+    if (def) {
+        fprintf(stderr, "%s: Using default '%s'\n",
+                key, def);
+    }
     return def;
 }
 

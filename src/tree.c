@@ -38,7 +38,7 @@ void hierarchy_predictions(float *predictions, int n, tree *hier, int only_leave
     for (int j = 0; j < n; ++j) {
         int parent = hier->parent[j];
         if (parent >= 0) {
-            predictions[j*stride] *= predictions[parent * stride]; 
+            predictions[j * stride] *= predictions[parent * stride]; 
         }
     }
     if (only_leaves) {
@@ -89,13 +89,13 @@ tree *read_tree(char *filename)
         char *id = calloc(256, sizeof(char));
         int parent = -1;
         sscanf(line, "%s %d", id, &parent);
-        t.parent = realloc(t.parent, (n+1)*sizeof(int));
+        t.parent = realloc(t.parent, (n + 1) * sizeof(int));
         t.parent[n] = parent;
 
-        t.child = realloc(t.child, (n+1)*sizeof(int));
+        t.child = realloc(t.child, (n + 1) * sizeof(int));
         t.child[n] = -1;
 
-        t.name = realloc(t.name, (n+1)*sizeof(char *));
+        t.name = realloc(t.name, (n + 1) * sizeof(char *));
         t.name[n] = id;
         if (parent != last_parent) {
             ++groups;
@@ -131,3 +131,4 @@ tree *read_tree(char *filename)
     //error(0);
     return tree_ptr;
 }
+

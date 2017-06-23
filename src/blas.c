@@ -20,7 +20,9 @@ void reorg_cpu(float *x, int w, int h, int c, int batch, int stride, int forward
                     int w2 = i * stride + offset % stride;
                     int h2 = j * stride + offset / stride;
                     int out_index = w2 + w * stride * (h2 + h * stride * (c2 + out_c * b));
-                    if (forward) out[out_index] = x[in_index];
+                    if (forward) {
+                        out[out_index] = x[in_index];
+                    }
                     else out[in_index] = x[out_index];
                 }
             }
@@ -199,7 +201,9 @@ void softmax(float *input, int n, float temp, int stride, float *output)
     float sum = 0;
     float largest = -FLT_MAX;
     for (int i = 0; i < n; ++i) {
-        if (input[i*stride] > largest) largest = input[i * stride];
+        if (input[i*stride] > largest) {
+            largest = input[i * stride];
+        }
     }
     for (int i = 0; i < n; ++i) {
         float e = exp(input[i * stride] / temp - largest / temp);

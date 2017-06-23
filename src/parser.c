@@ -789,7 +789,8 @@ list *read_cfg(char *filename)
             break;
         default:
             if (!read_option(line, current->options)) {
-                fprintf(stderr, "Config file error line %d, could parse: %s\n", nu, line);
+                fprintf(stderr, "Config file error line %d, could parse: %s\n",
+                        nu, line);
                 free(line);
             }
             break;

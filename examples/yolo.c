@@ -64,14 +64,17 @@ void train_yolo(char *cfgfile, char *weightfile)
         train = buffer;
 #endif
 
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
+        printf("Loaded: %lf seconds\n", sec(clock() - time));
 
         time = clock();
         float loss = train_network(net, train);
-        if (avg_loss < 0) avg_loss = loss;
-        avg_loss = avg_loss*.9 + loss*.1;
+        if (avg_loss < 0) {
+            avg_loss = loss;
+        }
+        avg_loss = avg_loss * .9 + loss * .1;
 
-        printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+        printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n",
+               i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
         if (i%1000==0 || (i < 1000 && i%100 == 0)) {
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
@@ -98,8 +101,11 @@ void print_yolo_detections(FILE **fps, char *id, box *boxes, float **probs, int 
         if (ymax > h) ymax = h;
 
         for (int j = 0; j < classes; ++j) {
-            if (probs[i][j]) fprintf(fps[j], "%s %f %f %f %f %f\n", id, probs[i][j],
-                    xmin, ymin, xmax, ymax);
+            if (probs[i][j]) {
+                fprintf(fps[j], "%s %f %f %f %f %f\n",
+                        id, probs[i][j],
+                        xmin, ymin, xmax, ymax);
+            }
         }
     }
 }
@@ -111,7 +117,8 @@ void validate_yolo(char *cfgfile, char *weightfile)
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
-    fprintf(stderr, "Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    fprintf(stderr, "Learning Rate: %g, Momentum: %g, Decay: %g\n",
+            net.learning_rate, net.momentum, net.decay);
     srand(time(0));
 
     char *base = "results/comp4_det_test_";
@@ -123,16 +130,17 @@ void validate_yolo(char *cfgfile, char *weightfile)
     layer l = net.layers[net.n-1];
     int classes = l.classes;
 
-    int j;
     FILE **fps = calloc(classes, sizeof(FILE *));
-    for (j = 0; j < classes; ++j) {
+    for (int j = 0; j < classes; ++j) {
         char buff[1024];
         snprintf(buff, 1024, "%s%s.txt", base, voc_names[j]);
         fps[j] = fopen(buff, "w");
     }
-    box *boxes = calloc(l.side*l.side*l.n, sizeof(box));
-    float **probs = calloc(l.side*l.side*l.n, sizeof(float *));
-    for (j = 0; j < l.side*l.side*l.n; ++j) probs[j] = calloc(classes, sizeof(float *));
+    box *boxes = calloc(l.side * l.side * l.n, sizeof(box));
+    float **probs = calloc(l.side * l.side * l.n, sizeof(float *));
+    for (int j = 0; j < l.side * l.side * l.n; ++j) {
+        probs[j] = calloc(classes, sizeof(float *));
+    }
 
     int m = plist->size;
     int i = 0;
@@ -156,35 +164,37 @@ void validate_yolo(char *cfgfile, char *weightfile)
     args.type = IMAGE_DATA;
 
     for (t = 0; t < nthreads; ++t) {
-        args.path = paths[i+t];
+        args.path = paths[i + t];
         args.im = &buf[t];
         args.resized = &buf_resized[t];
         thr[t] = load_data_in_thread(args);
     }
     time_t start = time(0);
-    for (i = nthreads; i < m+nthreads; i += nthreads) {
+    for (i = nthreads; i < m + nthreads; i += nthreads) {
         fprintf(stderr, "%d\n", i);
-        for (t = 0; t < nthreads && i+t-nthreads < m; ++t) {
+        for (t = 0; t < nthreads && i + t - nthreads < m; ++t) {
             pthread_join(thr[t], 0);
             val[t] = buf[t];
             val_resized[t] = buf_resized[t];
         }
-        for (t = 0; t < nthreads && i+t < m; ++t) {
-            args.path = paths[i+t];
+        for (t = 0; t < nthreads && i + t < m; ++t) {
+            args.path = paths[i + t];
             args.im = &buf[t];
             args.resized = &buf_resized[t];
             thr[t] = load_data_in_thread(args);
         }
-        for (t = 0; t < nthreads && i+t-nthreads < m; ++t) {
-            char *path = paths[i+t-nthreads];
+        for (t = 0; t < nthreads && i + t - nthreads < m; ++t) {
+            char *path = paths[i + t - nthreads];
             char *id = basecfg(path);
             float *X = val_resized[t].data;
             network_predict(net, X);
             int w = val[t].w;
             int h = val[t].h;
             get_detection_boxes(l, w, h, thresh, probs, boxes, 0);
-            if (nms) do_nms_sort(boxes, probs, l.side*l.side*l.n, classes, iou_thresh);
-            print_yolo_detections(fps, id, boxes, probs, l.side*l.side*l.n, classes, w, h);
+            if (nms) {
+                do_nms_sort(boxes, probs, l.side * l.side * l.n, classes, iou_thresh);
+            }
+            print_yolo_detections(fps, id, boxes, probs, l.side * l.side * l.n, classes, w, h);
             free(id);
             free_image(&val[t]);
             free_image(&val_resized[t]);
@@ -213,14 +223,17 @@ void validate_yolo(char *cfgfile, char *weightfile)
         int w = val.w;
         int h = val.h;
         get_detection_boxes(l, w, h, thresh, probs, boxes, 0);
-        if (nms) do_nms_sort(boxes, probs, l.side*l.side*l.n, classes, iou_thresh);
-        print_yolo_detections(fps, id, boxes, probs, l.side*l.side*l.n, classes, w, h);
+        if (nms) {
+            do_nms_sort(boxes, probs, l.side * l.side * l.n, classes, iou_thresh);
+        }
+        print_yolo_detections(fps, id, boxes, probs, l.side * l.side * l.n, classes, w, h);
         free(id);
         free_image(&val);
         free_image(&val_resized);
     }
-#endif
-    fprintf(stderr, "Total Detection Time: %f Seconds\n", (double)(time(0) - start));
+#endif  // #ifdef THREAD
+    fprintf(stderr, "Total Detection Time: %f Seconds\n",
+            (double)(time(0) - start));
 }
 
 void validate_yolo_recall(char *cfgfile, char *weightfile)
@@ -230,7 +243,8 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
-    fprintf(stderr, "Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    fprintf(stderr, "Learning Rate: %g, Momentum: %g, Decay: %g\n",
+            net.learning_rate, net.momentum, net.decay);
     srand(time(0));
 
     char *base = "results/comp4_det_test_";
@@ -248,9 +262,9 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
         snprintf(buff, 1024, "%s%s.txt", base, voc_names[j]);
         fps[j] = fopen(buff, "w");
     }
-    box *boxes = calloc(side*side*l.n, sizeof(box));
-    float **probs = calloc(side*side*l.n, sizeof(float *));
-    for (j = 0; j < side*side*l.n; ++j) probs[j] = calloc(classes, sizeof(float *));
+    box *boxes = calloc(side * side * l.n, sizeof(box));
+    float **probs = calloc(side * side * l.n, sizeof(float *));
+    for (j = 0; j < side * side * l.n; ++j) probs[j] = calloc(classes, sizeof(float *));
 
     int m = plist->size;
     int i = 0;
@@ -271,7 +285,9 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
         char *id = basecfg(path);
         network_predict(net, sized.data);
         get_detection_boxes(l, orig.w, orig.h, thresh, probs, boxes, 1);
-        if (nms) do_nms(boxes, probs, side*side*l.n, 1, nms);
+        if (nms) {
+            do_nms(boxes, probs, side * side * l.n, 1, nms);
+        }
 
         char labelpath[4096];
         find_replace(path, "images", "labels", labelpath);
@@ -281,7 +297,7 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
 
         int num_labels = 0;
         box_label *truth = read_boxes(labelpath, &num_labels);
-        for (k = 0; k < side*side*l.n; ++k) {
+        for (k = 0; k < side * side * l.n; ++k) {
             if (probs[k][0] > thresh) {
                 ++proposals;
             }
@@ -290,7 +306,7 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
             ++total;
             box t = {truth[j].x, truth[j].y, truth[j].w, truth[j].h};
             float best_iou = 0;
-            for (k = 0; k < side*side*l.n; ++k) {
+            for (k = 0; k < side * side * l.n; ++k) {
                 float iou = box_iou(boxes[k], t);
                 if (probs[k][0] > thresh && iou > best_iou) {
                     best_iou = iou;
@@ -302,7 +318,8 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
             }
         }
 
-        fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
+        fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n",
+                i, correct, total, (float)proposals / (i + 1), avg_iou * 100 / total, 100. * correct / total);
         free(id);
         free_image(&orig);
         free_image(&sized);
@@ -322,11 +339,12 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
     clock_t time;
     char buff[256];
     char *input = buff;
-    int j;
-    float nms=.4;
-    box *boxes = calloc(l.side*l.side*l.n, sizeof(box));
-    float **probs = calloc(l.side*l.side*l.n, sizeof(float *));
-    for (j = 0; j < l.side*l.side*l.n; ++j) probs[j] = calloc(l.classes, sizeof(float *));
+    float nms = .4;
+    box *boxes = calloc(l.side * l.side * l.n, sizeof(box));
+    float **probs = calloc(l.side * l.side * l.n, sizeof(float *));
+    for (int j = 0; j < l.side * l.side * l.n; ++j) {
+        probs[j] = calloc(l.classes, sizeof(float *));
+    }
     while (1) {
         if (filename) {
             strncpy(input, filename, 256);
@@ -334,7 +352,9 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
             printf("Enter Image Path: ");
             fflush(stdout);
             input = fgets(input, 256, stdin);
-            if (!input) return;
+            if (!input) {
+                return;
+            }
             strtok(input, "\n");
         }
         image im = load_image_color(input, 0, 0);
@@ -344,9 +364,11 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
         network_predict(net, X);
         printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
         get_detection_boxes(l, 1, 1, thresh, probs, boxes, 0);
-        if (nms) do_nms_sort(boxes, probs, l.side*l.side*l.n, l.classes, nms);
+        if (nms) {
+            do_nms_sort(boxes, probs, l.side * l.side * l.n, l.classes, nms);
+        }
         //draw_detections(im, l.side*l.side*l.n, thresh, boxes, probs, voc_names, alphabet, 20);
-        draw_detections(im, l.side*l.side*l.n, thresh, boxes, probs, voc_names, alphabet, 20);
+        draw_detections(im, l.side * l.side * l.n, thresh, boxes, probs, voc_names, alphabet, 20);
         save_image(im, "predictions");
         show_image(im, "predictions");
 
@@ -356,7 +378,9 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
         cvWaitKey(0);
         cvDestroyAllWindows();
 #endif
-        if (filename) break;
+        if (filename) {
+            break;
+        }
     }
 }
 
@@ -367,7 +391,8 @@ void run_yolo(int argc, char **argv)
     int cam_index = find_int_arg(argc, argv, "-c", 0);
     int frame_skip = find_int_arg(argc, argv, "-s", 0);
     if (argc < 4) {
-        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
+        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n",
+                argv[0], argv[1]);
         return;
     }
 

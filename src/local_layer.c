@@ -141,23 +141,23 @@ void backward_local_layer(local_layer l, network net)
             int n = l.size * l.size * l.c;
             int k = 1;
 
-            gemm(0,1,m,n,k,1,a,locations,b,locations,1,c,n);
+            gemm(0, 1, m, n, k, 1, a, locations, b, locations, 1, c, n);
         }
 
         if (net.delta) {
             for (int j = 0; j < locations; ++j) { 
-                float *a = l.weights + j*l.size*l.size*l.c*l.n;
-                float *b = l.delta + i*l.outputs + j;
+                float *a = l.weights + j * l.size * l.size * l.c * l.n;
+                float *b = l.delta + i * l.outputs + j;
                 float *c = net.workspace + j;
 
-                int m = l.size*l.size*l.c;
+                int m = l.size * l.size * l.c;
                 int n = 1;
                 int k = l.n;
 
-                gemm(1,0,m,n,k,1,a,m,b,locations,0,c,locations);
+                gemm(1, 0, m, n, k, 1, a, m, b, locations, 0, c, locations);
             }
 
-            col2im_cpu(net.workspace, l.c, l.h, l.w, l.size, l.stride, l.pad, net.delta + i*l.c*l.h*l.w);
+            col2im_cpu(net.workspace, l.c, l.h, l.w, l.size, l.stride, l.pad, net.delta + i * l.c * l.h * l.w);
         }
     }
 }
@@ -166,11 +166,11 @@ void update_local_layer(local_layer l, int batch, float learning_rate, float mom
 {
     int locations = l.out_w * l.out_h;
     int size = l.size * l.size * l.c * l.n * locations;
-    axpy_cpu(l.outputs, learning_rate/batch, l.bias_updates, 1, l.biases, 1);
+    axpy_cpu(l.outputs, learning_rate / batch, l.bias_updates, 1, l.biases, 1);
     scal_cpu(l.outputs, momentum, l.bias_updates, 1);
 
-    axpy_cpu(size, -decay*batch, l.weights, 1, l.weight_updates, 1);
-    axpy_cpu(size, learning_rate/batch, l.weight_updates, 1, l.weights, 1);
+    axpy_cpu(size, -decay * batch, l.weights, 1, l.weight_updates, 1);
+    axpy_cpu(size, learning_rate / batch, l.weight_updates, 1, l.weights, 1);
     scal_cpu(size, momentum, l.weight_updates, 1);
 }
 
@@ -208,11 +208,11 @@ void forward_local_layer_gpu(const local_layer l, network net)
 
 void backward_local_layer_gpu(local_layer l, network net)
 {
-    int locations = l.out_w*l.out_h;
+    int locations = l.out_w * l.out_h;
 
     gradient_array_ongpu(l.output_gpu, l.outputs * l.batch, l.activation, l.delta_gpu);
     for (int i = 0; i < l.batch; ++i) {
-        axpy_ongpu(l.outputs, 1, l.delta_gpu + i*l.outputs, 1, l.bias_updates_gpu, 1);
+        axpy_ongpu(l.outputs, 1, l.delta_gpu + i * l.outputs, 1, l.bias_updates_gpu, 1);
     }
 
     for (int i = 0; i < l.batch; ++i) {
@@ -258,7 +258,7 @@ void update_local_layer_gpu(local_layer l, int batch, float learning_rate, float
     axpy_ongpu(l.outputs, learning_rate / batch, l.bias_updates_gpu, 1, l.biases_gpu, 1);
     scal_ongpu(l.outputs, momentum, l.bias_updates_gpu, 1);
 
-    axpy_ongpu(size, -decay*batch, l.weights_gpu, 1, l.weight_updates_gpu, 1);
+    axpy_ongpu(size, -decay * batch, l.weights_gpu, 1, l.weight_updates_gpu, 1);
     axpy_ongpu(size, learning_rate / batch, l.weight_updates_gpu, 1, l.weights_gpu, 1);
     scal_ongpu(size, momentum, l.weight_updates_gpu, 1);
 }
@@ -278,4 +278,5 @@ void push_local_layer(local_layer l)
     cuda_push_array(l.weights_gpu, l.weights, size);
     cuda_push_array(l.biases_gpu, l.biases, l.outputs);
 }
-#endif
+#endif  // #ifdef GPU
+

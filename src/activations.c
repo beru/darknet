@@ -92,7 +92,9 @@ float activate(float x, ACTIVATION a)
     return 0;
 }
 
-void activate_array(float *x, const int n, const ACTIVATION a)
+void activate_array(float *x,
+                    const int n,
+                    const ACTIVATION a)
 {
     for (int i = 0; i < n; ++i) {
         x[i] = activate(x[i], a);
@@ -132,7 +134,10 @@ float gradient(float x, ACTIVATION a)
     return 0;
 }
 
-void gradient_array(const float *x, const int n, const ACTIVATION a, float *delta)
+void gradient_array(const float *x,
+                    const int n,
+                    const ACTIVATION a,
+                    float *delta)
 {
     for (int i = 0; i < n; ++i) {
         delta[i] *= gradient(x[i], a);

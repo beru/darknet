@@ -153,8 +153,7 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
 
     int streams = batch/steps;
     size_t *offsets = calloc(streams, sizeof(size_t));
-    int j;
-    for (j = 0; j < streams; ++j) {
+    for (int j = 0; j < streams; ++j) {
         offsets[j] = rand_size_t()%size;
     }
 
@@ -180,7 +179,7 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
         int chars = get_current_batch(net)*batch;
         fprintf(stderr, "%d: %f, %f avg, %f rate, %lf seconds, %f epochs\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), (float) chars/size);
 
-        for (j = 0; j < streams; ++j) {
+        for (int j = 0; j < streams; ++j) {
             //printf("%d\n", j);
             if (rand()%10 == 0) {
                 //fprintf(stderr, "Reset\n");

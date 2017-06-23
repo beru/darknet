@@ -24,7 +24,9 @@ void train_cifar(char *cfgfile, char *weightfile)
         clock_t time = clock();
 
         float loss = train_network_sgd(net, train, 1);
-        if (avg_loss == -1) avg_loss = loss;
+        if (avg_loss == -1) {
+            avg_loss = loss;
+        }
         avg_loss = avg_loss*.95 + loss*.05;
         printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n",
                get_current_batch(net),
@@ -32,7 +34,7 @@ void train_cifar(char *cfgfile, char *weightfile)
                get_current_rate(net),
                sec(clock() - time),
                *net.seen);
-        if (*net.seen/N > epoch) {
+        if (*net.seen / N > epoch) {
             epoch = *net.seen/N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, epoch);
@@ -86,8 +88,10 @@ void train_cifar_distill(char *cfgfile, char *weightfile)
         clock_t time = clock();
 
         float loss = train_network_sgd(net, train, 1);
-        if (avg_loss == -1) avg_loss = loss;
-        avg_loss = avg_loss*.95 + loss*.05;
+        if (avg_loss == -1) {
+            avg_loss = loss;
+        }
+        avg_loss = avg_loss * .95 + loss * .05;
         printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n",
                get_current_batch(net),
                (float)(*net.seen) / N,
@@ -142,9 +146,11 @@ void test_cifar_multi(char *filename, char *weightfile)
 
         int index = max_index(pred, 10);
         int class = max_index(test.y.vals[i], 10);
-        if (index == class) avg_acc += 1;
+        if (index == class) {
+            avg_acc += 1;
+        }
         free_image(&im);
-        printf("%4d: %.2f%%\n", i, 100.*avg_acc/(i+1));
+        printf("%4d: %.2f%%\n", i, 100. * avg_acc / (i + 1));
     }
 }
 
@@ -166,7 +172,7 @@ void test_cifar(char *filename, char *weightfile)
     float *acc = network_accuracies(net, test, 2);
     avg_acc += acc[0];
     avg_top5 += acc[1];
-    printf("top1: %f, %lf seconds, %d images\n", avg_acc, sec(clock()-time), test.X.rows);
+    printf("top1: %f, %lf seconds, %d images\n", avg_acc, sec(clock() - time), test.X.rows);
     free_data(test);
 }
 
@@ -213,7 +219,8 @@ void test_cifar_csv(char *filename, char *weightfile)
     matrix_add_matrix(pred2, pred);
 
     matrix_to_csv(pred);
-    fprintf(stderr, "Accuracy: %f\n", matrix_topk_accuracy(test.y, pred, 1));
+    fprintf(stderr, "Accuracy: %f\n",
+            matrix_topk_accuracy(test.y, pred, 1));
     free_data(test);
 }
 
@@ -239,7 +246,8 @@ void test_cifar_csvtrain(char *filename, char *weightfile)
     matrix_add_matrix(pred2, pred);
 
     matrix_to_csv(pred);
-    fprintf(stderr, "Accuracy: %f\n", matrix_topk_accuracy(test.y, pred, 1));
+    fprintf(stderr, "Accuracy: %f\n",
+            matrix_topk_accuracy(test.y, pred, 1));
     free_data(test);
 }
 
@@ -248,9 +256,11 @@ void eval_cifar_csv()
     data test = load_cifar10_data("data/cifar/cifar-10-batches-bin/test_batch.bin");
 
     matrix pred = csv_to_matrix("results/combined.csv");
-    fprintf(stderr, "%d %d\n", pred.rows, pred.cols);
+    fprintf(stderr, "%d %d\n",
+            pred.rows, pred.cols);
 
-    fprintf(stderr, "Accuracy: %f\n", matrix_topk_accuracy(test.y, pred, 1));
+    fprintf(stderr, "Accuracy: %f\n",
+            matrix_topk_accuracy(test.y, pred, 1));
     free_data(test);
     free_matrix(pred);
 }
@@ -259,7 +269,8 @@ void eval_cifar_csv()
 void run_cifar(int argc, char **argv)
 {
     if (argc < 4) {
-        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
+        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n",
+                argv[0], argv[1]);
         return;
     }
 

@@ -8,7 +8,7 @@ void free_layer(layer l)
     if (l.type == DROPOUT) {
         if (l.rand)           free(l.rand);
 #ifdef GPU
-        if (l.rand_gpu)             cuda_free(l.rand_gpu);
+        if (l.rand_gpu)       cuda_free(l.rand_gpu);
 #endif
         return;
     }

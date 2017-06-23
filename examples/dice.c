@@ -26,16 +26,20 @@ void train_dice(char *cfgfile, char *weightfile)
         ++i;
         time = clock();
         data train = load_data_old(paths, imgs, plist->size, labels, 6, net.w, net.h);
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
+        printf("Loaded: %lf seconds\n", sec(clock() - time));
 
         time=clock();
         float loss = train_network(net, train);
-        if (avg_loss == -1) avg_loss = loss;
-        avg_loss = avg_loss*.9 + loss*.1;
+        if (avg_loss == -1) {
+            avg_loss = loss;
+        }
+        avg_loss = avg_loss * .9 + loss * .1;
         printf("%d: %f, %f avg, %lf seconds, %d images\n",
-               i, loss, avg_loss, sec(clock()-time), *net.seen);
+               i, loss, avg_loss, sec(clock() - time), *net.seen);
         free_data(train);
-        if ((i % 100) == 0) net.learning_rate *= .1;
+        if ((i % 100) == 0) {
+            net.learning_rate *= .1;
+        }
         if (i % 100 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
@@ -85,7 +89,9 @@ void test_dice(char *cfgfile, char *weightfile, char *filename)
             printf("Enter Image Path: ");
             fflush(stdout);
             input = fgets(input, 256, stdin);
-            if (!input) return;
+            if (!input) {
+                return;
+            }
             strtok(input, "\n");
         }
         image im = load_image_color(input, net.w, net.h);
@@ -97,7 +103,9 @@ void test_dice(char *cfgfile, char *weightfile, char *filename)
             printf("%s: %f\n", names[index], predictions[index]);
         }
         free_image(&im);
-        if (filename) break;
+        if (filename) {
+            break;
+        }
     }
 }
 

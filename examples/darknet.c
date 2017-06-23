@@ -77,8 +77,8 @@ void average(int argc, char *argv[])
                 }
         }
         if (l.type == CONNECTED) {
-            scal_cpu(l.outputs, 1./n, l.biases, 1);
-            scal_cpu(l.outputs*l.inputs, 1./n, l.weights, 1);
+            scal_cpu(l.outputs, 1. / n, l.biases, 1);
+            scal_cpu(l.outputs * l.inputs, 1. / n, l.weights, 1);
         }
     }
     save_weights(sum, outfile);
@@ -86,18 +86,20 @@ void average(int argc, char *argv[])
 
 void speed(char *cfgfile, int tics)
 {
-    if (tics == 0) tics = 1000;
+    if (tics == 0) {
+        tics = 1000;
+    }
     network net = parse_network_cfg(cfgfile);
     set_batch_network(&net, 1);
     time_t start = time(0);
-    image im = make_image(net.w, net.h, net.c*net.batch);
+    image im = make_image(net.w, net.h, net.c * net.batch);
     for (int i = 0; i < tics; ++i) {
         network_predict(net, im.data);
     }
     double t = difftime(time(0), start);
     printf("\n%d evals, %f Seconds\n", tics, t);
-    printf("Speed: %f sec/eval\n", t/tics);
-    printf("Speed: %f Hz\n", tics/t);
+    printf("Speed: %f sec/eval\n", t / tics);
+    printf("Speed: %f Hz\n", tics / t);
 }
 
 void operations(char *cfgfile)
@@ -110,7 +112,7 @@ void operations(char *cfgfile)
     for (int i = 0; i < net.n; ++i) {
         layer l = net.layers[i];
         if (l.type == CONVOLUTIONAL) {
-            ops += 2l * l.n * l.size*l.size*l.c * l.out_h*l.out_w;
+            ops += 2l * l.n * l.size * l.size * l.c * l.out_h * l.out_w;
         }else if (l.type == CONNECTED) {
             ops += 2l * l.inputs * l.outputs;
         }
@@ -127,23 +129,23 @@ void oneoff(char *cfgfile, char *weightfile, char *outfile)
     network net = parse_network_cfg(cfgfile);
     int oldn = net.layers[net.n - 2].n;
     int c = net.layers[net.n - 2].c;
-    scal_cpu(oldn*c, .1, net.layers[net.n - 2].weights, 1);
+    scal_cpu(oldn * c, .1, net.layers[net.n - 2].weights, 1);
     scal_cpu(oldn, 0, net.layers[net.n - 2].biases, 1);
     net.layers[net.n - 2].n = 9418;
     net.layers[net.n - 2].biases += 5;
-    net.layers[net.n - 2].weights += 5*c;
+    net.layers[net.n - 2].weights += 5 * c;
     if (weightfile) {
         load_weights(&net, weightfile);
     }
     net.layers[net.n - 2].biases -= 5;
-    net.layers[net.n - 2].weights -= 5*c;
+    net.layers[net.n - 2].weights -= 5 * c;
     net.layers[net.n - 2].n = oldn;
     printf("%d\n", oldn);
     layer l = net.layers[net.n - 2];
-    copy_cpu(l.n/3, l.biases, 1, l.biases +   l.n/3, 1);
-    copy_cpu(l.n/3, l.biases, 1, l.biases + 2*l.n/3, 1);
-    copy_cpu(l.n/3*l.c, l.weights, 1, l.weights +   l.n/3*l.c, 1);
-    copy_cpu(l.n/3*l.c, l.weights, 1, l.weights + 2*l.n/3*l.c, 1);
+    copy_cpu(l.n / 3, l.biases, 1, l.biases +     l.n / 3, 1);
+    copy_cpu(l.n / 3, l.biases, 1, l.biases + 2 * l.n / 3, 1);
+    copy_cpu(l.n / 3 * l.c, l.weights, 1, l.weights +     l.n / 3 * l.c, 1);
+    copy_cpu(l.n / 3 * l.c, l.weights, 1, l.weights + 2 * l.n / 3 * l.c, 1);
     *net.seen = 0;
     save_weights(net, outfile);
 }
@@ -244,10 +246,9 @@ void reset_normalize_net(char *cfgfile, char *weightfile, char *outfile)
 
 layer normalize_layer(layer l, int n)
 {
-    int j;
     l.batch_normalize = 1;
     l.scales = calloc(n, sizeof(float));
-    for (j = 0; j < n; ++j) {
+    for (int j = 0; j < n; ++j) {
         l.scales[j] = 1;
     }
     l.rolling_mean = calloc(n, sizeof(float));
@@ -366,11 +367,11 @@ void mkimg(char *cfgfile, char *weightfile, int h, int w, int num, char *prefix)
         image im = make_image(h, w, 3);
         fill_image(im, .5);
         for (int i = 0; i < 100; ++i) {
-            image r = copy_image(ims[rand()%n]);
-            rotate_image_cw(r, rand()%4);
+            image r = copy_image(ims[rand() % n]);
+            rotate_image_cw(r, rand() % 4);
             random_distort_image(r, 1, 1.5, 1.5);
-            int dx = rand()%(w-r.w);
-            int dy = rand()%(h-r.h);
+            int dx = rand() % (w - r.w);
+            int dy = rand() % (h - r.h);
             ghost_image(r, im, dx, dy);
             free_image(&r);
         }

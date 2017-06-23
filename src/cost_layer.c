@@ -78,7 +78,9 @@ void forward_cost_layer(cost_layer l, network net)
     if (!net.truth) return;
     if (l.cost_type == MASKED) {
         for (int i = 0; i < l.batch * l.inputs; ++i) {
-            if (net.truth[i] == SECRET_NUM) net.input[i] = SECRET_NUM;
+            if (net.truth[i] == SECRET_NUM) {
+                net.input[i] = SECRET_NUM;
+            }
         }
     }
     if (l.cost_type == SMOOTH) {

@@ -93,15 +93,15 @@ void resize_reorg_layer(layer *l, int w, int h)
 void forward_reorg_layer(const layer l, network net)
 {
     if (l.flatten) {
-        memcpy(l.output, net.input, l.outputs*l.batch*sizeof(float));
+        memcpy(l.output, net.input, l.outputs * l.batch * sizeof(float));
         if (l.reverse) {
-            flatten(l.output, l.w*l.h, l.c, l.batch, 0);
+            flatten(l.output, l.w * l.h, l.c, l.batch, 0);
         }else {
-            flatten(l.output, l.w*l.h, l.c, l.batch, 1);
+            flatten(l.output, l.w * l.h, l.c, l.batch, 1);
         }
     }else if (l.extra) {
         for (int i = 0; i < l.batch; ++i) {
-            copy_cpu(l.inputs, net.input + i*l.inputs, 1, l.output + i*l.outputs, 1);
+            copy_cpu(l.inputs, net.input + i * l.inputs, 1, l.output + i * l.outputs, 1);
         }
     }else if (l.reverse) {
         reorg_cpu(net.input, l.w, l.h, l.c, l.batch, l.stride, 1, l.output);

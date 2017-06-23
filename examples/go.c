@@ -14,7 +14,9 @@ typedef struct {
 
 char *fgetgo(FILE *fp)
 {
-    if (feof(fp)) return 0;
+    if (feof(fp)) {
+        return 0;
+    }
     size_t size = 94;
     char *line = malloc(size*sizeof(char));
     if (size != fread(line, sizeof(char), size, fp)) {
@@ -60,23 +62,27 @@ void string_to_board(char *s, float *board)
             else if (you) board[count] = -1;
             else board[count] = 0;
             ++count;
-            if (count >= 19*19) break;
+            if (count >= 19*19) {
+                break;
+            }
         }
     }
 }
 
 void board_to_string(char *s, float *board)
 {
-    memset(s, 0, (19*19/4+1)*sizeof(char));
+    memset(s, 0, (19 * 19 / 4 + 1) * sizeof(char));
     int count = 0;
     for (int i = 0; i < 91; ++i) {
         for (int j = 0; j < 4; ++j) {
             int me = (board[count] == 1);
             int you = (board[count] == -1);
-            if (me) s[i] = s[i] | (1<<(2*j));
-            if (you) s[i] = s[i] | (1<<(2*j + 1));
+            if (me) s[i] = s[i] | (1 << (2 * j));
+            if (you) s[i] = s[i] | (1 << (2 * j + 1));
             ++count;
-            if (count >= 19*19) break;
+            if (count >= 19 * 19) {
+                break;
+            }
         }
     }
 }
@@ -84,24 +90,26 @@ void board_to_string(char *s, float *board)
 data random_go_moves(moves m, int n)
 {
     data d = {0};
-    d.X = make_matrix(n, 19*19);
-    d.y = make_matrix(n, 19*19+1);
+    d.X = make_matrix(n, 19 * 19);
+    d.y = make_matrix(n, 19 * 19 + 1);
     for (int i = 0; i < n; ++i) {
         float *board = d.X.vals[i];
         float *label = d.y.vals[i];
-        char *b = m.data[rand()%m.n];
+        char *b = m.data[rand() % m.n];
         int row = b[0];
         int col = b[1];
         if (row >= 19 || col >= 19) {
-            label[19*19] = 1;
+            label[19 * 19] = 1;
         }else {
-            label[col + 19*row] = 1;
-            string_to_board(b+2, board);
-            if (board[col + 19*row]) printf("hey\n");
+            label[col + 19 * row] = 1;
+            string_to_board(b + 2, board);
+            if (board[col + 19 * row]) {
+                printf("hey\n");
+            }
         }
 
-        int flip = rand()%2;
-        int rotate = rand()%4;
+        int flip = rand() % 2;
+        int rotate = rand() % 4;
         image in = float_to_image(19, 19, 1, board);
         image out = float_to_image(19, 19, 1, label);
         if (flip) {
@@ -152,16 +160,16 @@ void train_go(char *cfgfile,
 
     int N = m.n;
     printf("Moves: %d\n", N);
-    int epoch = (*net.seen)/N;
+    int epoch = (*net.seen) / N;
     while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
         clock_t time = clock();
 
         data train = random_go_moves(m,
-                                     net.batch * net.subdivisions
 #ifdef GPU
-                                     * ngpus
+                                     net.batch * net.subdivisions * ngpus);
+#else
+                                     net.batch * net.subdivisions);
 #endif
-                                     );
         printf("Loaded: %lf seconds\n", sec(clock()-time));
         time=clock();
 
@@ -177,11 +185,13 @@ void train_go(char *cfgfile,
 #endif
         free_data(train);
 
-        if (avg_loss == -1) avg_loss = loss;
+        if (avg_loss == -1) {
+            avg_loss = loss;
+        }
         avg_loss = avg_loss*.95 + loss*.05;
         printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), (float)(*net.seen)/N, loss, avg_loss, get_current_rate(net), sec(clock()-time), *net.seen);
-        if (*net.seen/N > epoch) {
-            epoch = *net.seen/N;
+        if (*net.seen / N > epoch) {
+            epoch = *net.seen / N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, epoch);
             save_weights(net, buff);
@@ -207,10 +217,16 @@ void train_go(char *cfgfile,
 
 void propagate_liberty(float *board, int *lib, int *visited, int row, int col, int side)
 {
-    if (row < 0 || row > 18 || col < 0 || col > 18) return;
+    if (row < 0 || row > 18 || col < 0 || col > 18) {
+        return;
+    }
     int index = row*19 + col;
-    if (board[index] != side) return;
-    if (visited[index]) return;
+    if (board[index] != side) {
+        return;
+    }
+    if (visited[index]) {
+        return;
+    }
     visited[index] = 1;
     lib[index] += 1;
     propagate_liberty(board, lib, visited, row+1, col, side);
@@ -268,7 +284,9 @@ void print_board(FILE *stream, float *board, int swap, int *indexes)
                         else if (n == 4) fprintf(stream, " 5");
                     }
                 }
-                if (found) continue;
+                if (found) {
+                    continue;
+                }
             }
             //if (board[index]*-swap > 0) fprintf(stream, "\u25C9 ");
             //else if (board[index]*-swap < 0) fprintf(stream, "\u25EF ");
@@ -295,36 +313,44 @@ void predict_move(network net, float *board, float *move, int multi)
         image bim = float_to_image(19, 19, 1, board);
         for (int i = 1; i < 8; ++i) {
             rotate_image_cw(bim, i);
-            if (i >= 4) flip_image(bim);
+            if (i >= 4) {
+                flip_image(bim);
+            }
 
             float *output = network_predict(net, board);
             image oim = float_to_image(19, 19, 1, output);
 
-            if (i >= 4) flip_image(oim);
+            if (i >= 4) {
+                flip_image(oim);
+            }
             rotate_image_cw(oim, -i);
 
             axpy_cpu(19*19+1, 1, output, 1, move, 1);
 
-            if (i >= 4) flip_image(bim);
+            if (i >= 4) {
+                flip_image(bim);
+            }
             rotate_image_cw(bim, -i);
         }
         scal_cpu(19*19+1, 1./8., move, 1);
     }
     for (int i = 0; i < 19*19; ++i) {
-        if (board[i]) move[i] = 0;
+        if (board[i]) {
+            move[i] = 0;
+        }
     }
 }
 
 void remove_connected(float *b, int *lib, int p, int r, int c)
 {
     if (r < 0 || r >= 19 || c < 0 || c >= 19) return;
-    if (b[r*19 + c] != p) return;
-    if (lib[r*19 + c] != 1) return;
+    if (b[r * 19 + c] != p) return;
+    if (lib[r * 19 + c] != 1) return;
     b[r*19 + c] = 0;
-    remove_connected(b, lib, p, r+1, c);
-    remove_connected(b, lib, p, r-1, c);
-    remove_connected(b, lib, p, r, c+1);
-    remove_connected(b, lib, p, r, c-1);
+    remove_connected(b, lib, p, r + 1, c);
+    remove_connected(b, lib, p, r - 1, c);
+    remove_connected(b, lib, p, r, c + 1);
+    remove_connected(b, lib, p, r, c - 1);
 }
 
 
@@ -340,13 +366,15 @@ void move_go(float *b, int p, int r, int c)
 }
 
 int makes_safe_go(float *b, int *lib, int p, int r, int c) {
-    if (r < 0 || r >= 19 || c < 0 || c >= 19) return 0;
-    if (b[r*19 + c] == -p) {
-        if (lib[r*19 + c] > 1) return 0;
+    if (r < 0 || r >= 19 || c < 0 || c >= 19) {
+        return 0;
+    }
+    if (b[r * 19 + c] == -p) {
+        if (lib[r * 19 + c] > 1) return 0;
         else return 1;
     }
-    if (b[r*19 + c] == 0) return 1;
-    if (lib[r*19 + c] > 1) return 1;
+    if (b[r * 19 + c] == 0) return 1;
+    if (lib[r * 19 + c] > 1) return 1;
     return 0;
 }
 
@@ -364,14 +392,18 @@ int suicide_go(float *b, int p, int r, int c)
 
 int legal_go(float *b, char *ko, int p, int r, int c)
 {
-    if (b[r*19 + c]) return 0;
+    if (b[r * 19 + c]) {
+        return 0;
+    }
     char curr[91];
     char next[91];
     board_to_string(curr, b);
     move_go(b, p, r, c);
     board_to_string(next, b);
     string_to_board(curr, b);
-    if (memcmp(next, ko, 91) == 0) return 0;
+    if (memcmp(next, ko, 91) == 0) {
+        return 0;
+    }
     return 1;
 }
 
@@ -397,32 +429,36 @@ int generate_move(network net, int player, float *board, int multi, float thresh
 
     for (int i = 0; i < 19; ++i) {
         for (int j = 0; j < 19; ++j) {
-            if (!legal_go(board, ko, player, i, j)) move[i*19 + j] = 0;
+            if (!legal_go(board, ko, player, i, j)) {
+                move[i*19 + j] = 0;
+            }
         }
     }
 
     int indexes[nind];
-    top_k(move, 19*19+1, nind, indexes);
+    top_k(move, 19 * 19 + 1, nind, indexes);
     if (thresh > move[indexes[0]]) thresh = move[indexes[nind-1]];
 
-    for (int i = 0; i < 19*19+1; ++i) {
-        if (move[i] < thresh) move[i] = 0;
+    for (int i = 0; i < 19 * 19 + 1; ++i) {
+        if (move[i] < thresh) {
+            move[i] = 0;
+        }
     }
 
-
-    int max = max_index(move, 19*19+1);
+    int max = max_index(move, 19 * 19 + 1);
     int row = max / 19;
     int col = max % 19;
-    int index = sample_array(move, 19*19+1);
+    int index = sample_array(move, 19 * 19 + 1);
 
     if (print) {
-        top_k(move, 19*19+1, nind, indexes);
+        top_k(move, 19 * 19 + 1, nind, indexes);
         for (int i = 0; i < nind; ++i) {
             if (!move[indexes[i]]) indexes[i] = -1;
         }
         print_board(stderr, board, player, indexes);
         for (int i = 0; i < nind; ++i) {
-            fprintf(stderr, "%d: %f\n", i+1, move[indexes[i]]);
+            fprintf(stderr, "%d: %f\n",
+                    i+1, move[indexes[i]]);
         }
     }
     if (row == 19) return -1;
@@ -431,10 +467,10 @@ int generate_move(network net, int player, float *board, int multi, float thresh
         return -1; 
     }
 
-    if (suicide_go(board, player, index/19, index%19)) {
+    if (suicide_go(board, player, index / 19, index % 19)) {
         index = max;
     }
-    if (index == 19*19) return -1;
+    if (index == 19 * 19) return -1;
     return index;
 }
 
@@ -448,10 +484,11 @@ void valid_go(char *cfgfile, char *weightfile, int multi, char *filename)
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
 
-    float *board = calloc(19*19, sizeof(float));
-    float *move = calloc(19*19+1, sizeof(float));
+    float *board = calloc(19 * 19, sizeof(float));
+    float *move = calloc(19 * 19 + 1, sizeof(float));
    // moves m = load_go_moves("/home/pjreddie/backup/go.test");
     moves m = load_go_moves(filename);
 
@@ -461,12 +498,12 @@ void valid_go(char *cfgfile, char *weightfile, int multi, char *filename)
         char *b = m.data[i];
         int row = b[0];
         int col = b[1];
-        int truth = col + 19*row;
-        string_to_board(b+2, board);
+        int truth = col + 19 * row;
+        string_to_board(b + 2, board);
         predict_move(net, board, move, multi);
-        int index = max_index(move, 19*19);
+        int index = max_index(move, 19 * 19);
         if (index == truth) ++correct;
-        printf("%d Accuracy %f\n", i, (float) correct/(i+1));
+        printf("%d Accuracy %f\n", i, (float) correct / (i + 1));
     }
 }
 
@@ -692,16 +729,20 @@ void test_go(char *cfg, char *weights, int multi)
 
         int indexes[nind];
         int row, col;
-        top_k(move, 19*19+1, nind, indexes);
+        top_k(move, 19 * 19 + 1, nind, indexes);
         print_board(stderr, board, color, indexes);
         for (int i = 0; i < nind; ++i) {
             int index = indexes[i];
             row = index / 19;
             col = index % 19;
             if (row == 19) {
-                printf("%d: Pass, %.2f%%\n", i+1, move[index]*100);
+                printf("%d: Pass, %.2f%%\n",
+                       i + 1, move[index] * 100);
             }else {
-                printf("%d: %c %d, %.2f%%\n", i+1, col + 'A' + 1*(col > 7 && noi), (inverted)?19 - row : row+1, move[index]*100);
+                printf("%d: %c %d, %.2f%%\n",
+                       i + 1, col + 'A' + 1 * (col > 7 && noi),
+                       (inverted) ? 19 - row : row+1,
+                       move[index]*100);
             }
         }
         //if (color == 1) printf("\u25EF Enter move: ");
@@ -727,7 +768,7 @@ void test_go(char *cfg, char *weights, int multi)
         }else if (cnum) {
             if (c <= 'T' && c >= 'A') {
                 int num = sscanf(line, "%c %d", &c, &row);
-                row = (inverted)?19 - row : row-1;
+                row = (inverted) ? 19 - row : row - 1;
                 col = c - 'A';
                 if (col > 7 && noi) col -= 1;
                 if (num == 2) move_go(board, 1, row, col);
@@ -736,17 +777,17 @@ void test_go(char *cfg, char *weights, int multi)
             }else if (c == 'b' || c == 'w') {
                 char g;
                 int num = sscanf(line, "%c %c %d", &g, &c, &row);
-                row = (inverted)?19 - row : row-1;
+                row = (inverted)? 19 - row : row - 1;
                 col = c - 'A';
                 if (col > 7 && noi) col -= 1;
-                if (num == 3) board[row*19 + col] = (g == 'b') ? color : -color;
+                if (num == 3) board[row * 19 + col] = (g == 'b') ? color : -color;
             }else if (c == 'c') {
                 char g;
                 int num = sscanf(line, "%c %c %d", &g, &c, &row);
-                row = (inverted)?19 - row : row-1;
+                row = (inverted) ? 19 - row : row - 1;
                 col = c - 'A';
                 if (col > 7 && noi) col -= 1;
-                if (num == 3) board[row*19 + col] = 0;
+                if (num == 3) board[row * 19 + col] = 0;
             }
         }
         free(line);
@@ -799,7 +840,7 @@ void self_go(char *filename, char *weightfile, char *f2, char *w2, int multi)
     int count = 0;
     set_batch_network(&net, 1);
     set_batch_network(&net2, 1);
-    float *board = calloc(19*19, sizeof(float));
+    float *board = calloc(19 * 19, sizeof(float));
     char *one = calloc(91, sizeof(char));
     char *two = calloc(91, sizeof(char));
     int done = 0;
@@ -813,19 +854,18 @@ void self_go(char *filename, char *weightfile, char *f2, char *w2, int multi)
             if ((score > 0) == (total%2 == 0)) ++p1;
             else ++p2;
             ++total;
-            fprintf(stderr, "Total: %d, Player 1: %f, Player 2: %f\n", total, (float)p1/total, (float)p2/total);
+            fprintf(stderr, "Total: %d, Player 1: %f, Player 2: %f\n", total, (float)p1 / total, (float)p2 / total);
             sleep(1);
             /*
             int i = (score > 0)? 0 : 1;
-            int j;
             for (; i < count; i += 2) {
-                for (j = 0; j < 93; ++j) {
+                for (int j = 0; j < 93; ++j) {
                     printf("%c", boards[i][j]);
                 }
                 printf("\n");
             }
             */
-            memset(board, 0, 19*19*sizeof(float));
+            memset(board, 0, 19 * 19 * sizeof(float));
             player = 1;
             done = 0;
             count = 0;

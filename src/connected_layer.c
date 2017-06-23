@@ -191,7 +191,9 @@ void backward_connected_layer(connected_layer l, network net)
     b = l.weights;
     c = net.delta;
 
-    if (c) gemm(0, 0, m, n, k, 1, a, k, b, n, 1, c, n);
+    if (c) {
+        gemm(0, 0, m, n, k, 1, a, k, b, n, 1, c, n);
+    }
 }
 
 
@@ -245,9 +247,9 @@ void pull_connected_layer(connected_layer l)
 
 void push_connected_layer(connected_layer l)
 {
-    cuda_push_array(l.weights_gpu, l.weights, l.inputs*l.outputs);
+    cuda_push_array(l.weights_gpu, l.weights, l.inputs * l.outputs);
     cuda_push_array(l.biases_gpu, l.biases, l.outputs);
-    cuda_push_array(l.weight_updates_gpu, l.weight_updates, l.inputs*l.outputs);
+    cuda_push_array(l.weight_updates_gpu, l.weight_updates, l.inputs * l.outputs);
     cuda_push_array(l.bias_updates_gpu, l.bias_updates, l.outputs);
     if (l.batch_normalize) {
         cuda_push_array(l.scales_gpu, l.scales, l.outputs);
@@ -319,7 +321,9 @@ void backward_connected_layer_gpu(connected_layer l, network net)
     b = l.weights_gpu;
     c = net.delta_gpu;
 
-    if (c) gemm_ongpu(0, 0, m, n, k, 1, a, k, b, n, 1, c, n);
+    if (c) {
+        gemm_ongpu(0, 0, m, n, k, 1, a, k, b, n, 1, c, n);
+    }
 }
 
 #endif // #ifdef GPU

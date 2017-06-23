@@ -15,12 +15,12 @@ __global__ void scale_bias_kernel(float *output, float *biases, int n, int size)
     int filter = blockIdx.y;
     int batch = blockIdx.z;
 
-    if (offset < size) output[(batch*n+filter)*size + offset] *= biases[filter];
+    if (offset < size) output[(batch * n + filter) * size + offset] *= biases[filter];
 }
 
 void scale_bias_gpu(float *output, float *biases, int batch, int n, int size)
 {
-    dim3 dimGrid((size-1)/BLOCK + 1, n, batch);
+    dim3 dimGrid((size - 1) / BLOCK + 1, n, batch);
     dim3 dimBlock(BLOCK, 1, 1);
 
     scale_bias_kernel<<<dimGrid, dimBlock>>>(output, biases, n, size);
@@ -35,8 +35,8 @@ __global__ void backward_scale_kernel(float *x_norm, float *delta, int batch, in
     float sum = 0;
     for (int b = 0; b < batch; ++b) {
         for (int i = 0; i < size; i += BLOCK) {
-            int index = p + i + size*(filter + n*b);
-            sum += (p+i < size) ? delta[index]*x_norm[index] : 0;
+            int index = p + i + size * (filter + n * b);
+            sum += (p + i < size) ? delta[index] * x_norm[index] : 0;
         }
     }
     part[p] = sum;
@@ -58,12 +58,12 @@ __global__ void add_bias_kernel(float *output, float *biases, int n, int size)
     int filter = blockIdx.y;
     int batch = blockIdx.z;
 
-    if (offset < size) output[(batch*n+filter)*size + offset] += biases[filter];
+    if (offset < size) output[(batch * n + filter) * size + offset] += biases[filter];
 }
 
 void add_bias_gpu(float *output, float *biases, int batch, int n, int size)
 {
-    dim3 dimGrid((size-1)/BLOCK + 1, n, batch);
+    dim3 dimGrid((size - 1) / BLOCK + 1, n, batch);
     dim3 dimBlock(BLOCK, 1, 1);
 
     add_bias_kernel<<<dimGrid, dimBlock>>>(output, biases, n, size);
@@ -78,8 +78,8 @@ __global__ void backward_bias_kernel(float *bias_updates, float *delta, int batc
     float sum = 0;
     for (int b = 0; b < batch; ++b) {
         for (int i = 0; i < size; i += BLOCK) {
-            int index = p + i + size*(filter + n*b);
-            sum += (p+i < size) ? delta[index] : 0;
+            int index = p + i + size * (filter + n * b);
+            sum += (p + i < size) ? delta[index] : 0;
         }
     }
     part[p] = sum;
@@ -92,7 +92,7 @@ __global__ void backward_bias_kernel(float *bias_updates, float *delta, int batc
 /*
 __global__ void dot_kernel(float *output, float scale, int batch, int n, int size, float *delta)
 {
-    int index = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int index = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     int f1 = index / n;
     int f2 = index % n;
     if (f2 <= f1) return;
@@ -140,11 +140,11 @@ void backward_bias_gpu(float *bias_updates, float *delta, int batch, int n, int 
 
 __global__ void adam_kernel(int N, float *x, float *m, float *v, float B1, float B2, float rate, float eps, int t)
 {
-    int index = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int index = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (index >= N) return;
     
-    x[index] = x[index] + (rate * sqrt(1.-pow(B2, t)) / (1.-pow(B1, t)) * m[index] / (sqrt(v[index]) + eps));
-    //if (index == 0) printf("%f %f %f %f\n", m[index], v[index], (rate * sqrt(1.-pow(B2, t)) / (1.-pow(B1, t)) * m[index] / (sqrt(v[index]) + eps)));
+    x[index] = x[index] + (rate * sqrt(1. - pow(B2, t)) / (1. - pow(B1, t)) * m[index] / (sqrt(v[index]) + eps));
+    //if (index == 0) printf("%f %f %f %f\n", m[index], v[index], (rate * sqrt(1. - pow(B2, t)) / (1. - pow(B1, t)) * m[index] / (sqrt(v[index]) + eps)));
 }
 
 extern "C" void adam_gpu(int n, float *x, float *m, float *v, float B1, float B2, float rate, float eps, int t)
@@ -155,25 +155,25 @@ extern "C" void adam_gpu(int n, float *x, float *m, float *v, float B1, float B2
 
 __global__ void normalize_kernel(int N, float *x, float *mean, float *variance, int batch, int filters, int spatial)
 {
-    int index = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int index = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (index >= N) return;
-    int f = (index/spatial)%filters;
+    int f = (index/spatial) % filters;
     
-    x[index] = (x[index] - mean[f])/(sqrt(variance[f] + .00001f));
+    x[index] = (x[index] - mean[f]) / (sqrt(variance[f] + .00001f));
 }
 
 __global__ void normalize_delta_kernel(int N, float *x, float *mean, float *variance, float *mean_delta, float *variance_delta, int batch, int filters, int spatial, float *delta)
 {
-    int index = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int index = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (index >= N) return;
-    int f = (index/spatial)%filters;
+    int f = (index / spatial) % filters;
     
-    delta[index] = delta[index] * 1./(sqrt(variance[f] + .00001f)) + variance_delta[f] * 2. * (x[index] - mean[f]) / (spatial * batch) + mean_delta[f]/(spatial*batch);
+    delta[index] = delta[index] * 1. / (sqrt(variance[f] + .00001f)) + variance_delta[f] * 2. * (x[index] - mean[f]) / (spatial * batch) + mean_delta[f] / (spatial * batch);
 }
 
 extern "C" void normalize_delta_gpu(float *x, float *mean, float *variance, float *mean_delta, float *variance_delta, int batch, int filters, int spatial, float *delta)
 {
-    size_t N = batch*filters*spatial;
+    size_t N = batch * filters * spatial;
     normalize_delta_kernel<<<cuda_gridsize(N), BLOCK>>>(N, x, mean, variance, mean_delta, variance_delta, batch, filters, spatial, delta);
     check_error(cudaPeekAtLastError());
 }
@@ -182,15 +182,15 @@ __global__ void  variance_delta_kernel(float *x, float *delta, float *mean, floa
 {
     int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
     if (i >= filters) return;
-    int j,k;
+    int j, k;
     variance_delta[i] = 0;
     for (j = 0; j < batch; ++j) {
         for (k = 0; k < spatial; ++k) {
-            int index = j*filters*spatial + i*spatial + k;
-            variance_delta[i] += delta[index]*(x[index] - mean[i]);
+            int index = j * filters * spatial + i * spatial + k;
+            variance_delta[i] += delta[index] * (x[index] - mean[i]);
         }
     }
-    variance_delta[i] *= -.5 * pow(variance[i] + .00001f, (float)(-3./2.));
+    variance_delta[i] *= -.5 * pow(variance[i] + .00001f, (float)(-3. / 2.));
 }
 
 __global__ void accumulate_kernel(float *x, int n, int groups, float *sum)
@@ -200,7 +200,7 @@ __global__ void accumulate_kernel(float *x, int n, int groups, float *sum)
     if (i >= groups) return;
     sum[i] = 0;
     for (k = 0; k < n; ++k) {
-        sum[i] += x[k*groups + i];
+        sum[i] += x[k * groups + i];
     }
 }
 
@@ -216,7 +216,7 @@ __global__ void fast_mean_delta_kernel(float *delta, float *variance, int batch,
 
     for (int j = 0; j < batch; ++j) {
         for (int i = 0; i < spatial; i += threads) {
-            int index = j*spatial*filters + filter*spatial + i + id;
+            int index = j * spatial * filters + filter * spatial + i + id;
             local[id] += (i+id < spatial) ? delta[index] : 0;
         }
     }
@@ -244,9 +244,9 @@ __global__ void  fast_variance_delta_kernel(float *x, float *delta, float *mean,
 
     for (int j = 0; j < batch; ++j) {
         for (int i = 0; i < spatial; i += threads) {
-            int index = j*spatial*filters + filter*spatial + i + id;
+            int index = j * spatial * filters + filter * spatial + i + id;
 
-            local[id] += (i+id < spatial) ? delta[index]*(x[index] - mean[filter]) : 0;
+            local[id] += (i + id < spatial) ? delta[index] * (x[index] - mean[filter]) : 0;
         }
     }
 
@@ -257,7 +257,7 @@ __global__ void  fast_variance_delta_kernel(float *x, float *delta, float *mean,
         for (int i = 0; i < threads; ++i) {
             variance_delta[filter] += local[i];
         }
-        variance_delta[filter] *= -.5 * pow(variance[filter] + .00001f, (float)(-3./2.));
+        variance_delta[filter] *= -.5 * pow(variance[filter] + .00001f, (float)(-3. / 2.));
     }
 }
 
@@ -266,11 +266,11 @@ __global__ void mean_delta_kernel(float *delta, float *variance, int batch, int 
 {
     int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
     if (i >= filters) return;
-    int j,k;
+    int j, k;
     mean_delta[i] = 0;
     for (j = 0; j < batch; ++j) {
         for (k = 0; k < spatial; ++k) {
-            int index = j*filters*spatial + i*spatial + k;
+            int index = j * filters * spatial + i * spatial + k;
             mean_delta[i] += delta[index];
         }
     }
@@ -297,14 +297,14 @@ extern "C" void fast_variance_delta_gpu(float *x, float *delta, float *mean, flo
 
 __global__ void  mean_kernel(float *x, int batch, int filters, int spatial, float *mean)
 {
-    float scale = 1./(batch * spatial);
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    float scale = 1. / (batch * spatial);
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i >= filters) return;
-    int j,k;
+    int j, k;
     mean[i] = 0;
     for (j = 0; j < batch; ++j) {
         for (k = 0; k < spatial; ++k) {
-            int index = j*filters*spatial + i*spatial + k;
+            int index = j * filters * spatial + i * spatial + k;
             mean[i] += x[index];
         }
     }
@@ -313,14 +313,14 @@ __global__ void  mean_kernel(float *x, int batch, int filters, int spatial, floa
 
 __global__ void variance_kernel(float *x, float *mean, int batch, int filters, int spatial, float *variance)
 {
-    float scale = 1./(batch * spatial - 1);
+    float scale = 1. / (batch * spatial - 1);
     int j,k;
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i >= filters) return;
     variance[i] = 0;
     for (j = 0; j < batch; ++j) {
         for (k = 0; k < spatial; ++k) {
-            int index = j*filters*spatial + i*spatial + k;
+            int index = j * filters * spatial + i * spatial + k;
             variance[i] += pow((x[index] - mean[i]), 2);
         }
     }
@@ -329,25 +329,25 @@ __global__ void variance_kernel(float *x, float *mean, int batch, int filters, i
 
 __global__ void reorg_kernel(int N, float *x, int w, int h, int c, int batch, int stride, int forward, float *out)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i >= N) return;
     int in_index = i;
-    int in_w = i%w;
-    i = i/w;
-    int in_h = i%h;
-    i = i/h;
-    int in_c = i%c;
-    i = i/c;
-    int b = i%batch;
+    int in_w = i % w;
+    i = i / w;
+    int in_h = i % h;
+    i = i / h;
+    int in_c = i % c;
+    i = i / c;
+    int b = i % batch;
 
-    int out_c = c/(stride*stride);
+    int out_c = c / (stride * stride);
 
     int c2 = in_c % out_c;
     int offset = in_c / out_c;
-    int w2 = in_w*stride + offset % stride;
-    int h2 = in_h*stride + offset / stride;
+    int w2 = in_w * stride + offset % stride;
+    int h2 = in_h * stride + offset / stride;
     //printf("%d\n", offset);
-    int out_index = w2 + w*stride*(h2 + h*stride*(c2 + out_c*b));
+    int out_index = w2 + w * stride * (h2 + h * stride * (c2 + out_c * b));
 
    // printf("%d %d %d\n", w2, h2, c2);
     //printf("%d %d\n", in_index, out_index);
@@ -361,76 +361,76 @@ __global__ void reorg_kernel(int N, float *x, int w, int h, int c, int batch, in
 
 __global__ void axpy_kernel(int N, float ALPHA, float *X, int OFFX, int INCX,  float *Y, int OFFY, int INCY)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (i < N) Y[OFFY+i*INCY] += ALPHA*X[OFFX+i*INCX];
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (i < N) Y[OFFY + i * INCY] += ALPHA * X[OFFX + i * INCX];
 }
 
 __global__ void pow_kernel(int N, float ALPHA, float *X, int INCX, float *Y, int INCY)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (i < N) Y[i*INCY] = pow(X[i*INCX], ALPHA);
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (i < N) Y[i * INCY] = pow(X[i * INCX], ALPHA);
 }
 
 __global__ void const_kernel(int N, float ALPHA, float *X, int INCX)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (i < N) X[i*INCX] = ALPHA;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (i < N) X[i * INCX] = ALPHA;
 }
 
 __global__ void constrain_kernel(int N, float ALPHA, float *X, int INCX)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (i < N) X[i*INCX] = fminf(ALPHA, fmaxf(-ALPHA, X[i*INCX]));
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (i < N) X[i * INCX] = fminf(ALPHA, fmaxf(-ALPHA, X[i * INCX]));
 }
 
 __global__ void supp_kernel(int N, float ALPHA, float *X, int INCX)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i < N) {
-        if ((X[i*INCX] * X[i*INCX]) < (ALPHA * ALPHA)) X[i*INCX] = 0;
+        if ((X[i * INCX] * X[i * INCX]) < (ALPHA * ALPHA)) X[i * INCX] = 0;
     }
 }
 
 __global__ void add_kernel(int N, float ALPHA, float *X, int INCX)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (i < N) X[i*INCX] += ALPHA;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (i < N) X[i * INCX] += ALPHA;
 }
 
 __global__ void scal_kernel(int N, float ALPHA, float *X, int INCX)
 {
     int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (i < N) X[i*INCX] *= ALPHA;
+    if (i < N) X[i * INCX] *= ALPHA;
 }
 
 __global__ void fill_kernel(int N, float ALPHA, float *X, int INCX)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (i < N) X[i*INCX] = ALPHA;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (i < N) X[i * INCX] = ALPHA;
 }
 
 __global__ void mask_kernel(int n,  float *x, float mask_num, float *mask)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i < n && mask[i] == mask_num) x[i] = mask_num;
 }
 
 __global__ void copy_kernel(int N,  float *X, int OFFX, int INCX, float *Y, int OFFY, int INCY)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (i < N) Y[i*INCY + OFFY] = X[i*INCX + OFFX];
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (i < N) Y[i * INCY + OFFY] = X[i * INCX + OFFX];
 }
 
 __global__ void mul_kernel(int N, float *X, int INCX, float *Y, int INCY)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (i < N) Y[i*INCY] *= X[i*INCX];
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (i < N) Y[i * INCY] *= X[i * INCX];
 }
 
 
 extern "C" void normalize_gpu(float *x, float *mean, float *variance, int batch, int filters, int spatial)
 {
-    size_t N = batch*filters*spatial;
+    size_t N = batch * filters * spatial;
     normalize_kernel<<<cuda_gridsize(N), BLOCK>>>(N, x, mean, variance, batch, filters, spatial);
     check_error(cudaPeekAtLastError());
 }
@@ -447,7 +447,7 @@ __global__ void  fast_mean_kernel(float *x, int batch, int filters, int spatial,
 
     for (int j = 0; j < batch; ++j) {
         for (int i = 0; i < spatial; i += threads) {
-            int index = j*spatial*filters + filter*spatial + i + id;
+            int index = j * spatial * filters + filter * spatial + i + id;
             local[id] += (i+id < spatial) ? x[index] : 0;
         }
     }
@@ -475,7 +475,7 @@ __global__ void  fast_variance_kernel(float *x, float *mean, int batch, int filt
 
     for (int j = 0; j < batch; ++j) {
         for (int i = 0; i < spatial; i += threads) {
-            int index = j*spatial*filters + filter*spatial + i + id;
+            int index = j * spatial * filters + filter * spatial + i + id;
 
             local[id] += (i+id < spatial) ? pow((x[index] - mean[filter]), 2) : 0;
         }
@@ -553,16 +553,16 @@ extern "C" void copy_ongpu_offset(int N, float * X, int OFFX, int INCX, float * 
 
 __global__ void flatten_kernel(int N, float *x, int spatial, int layers, int batch, int forward, float *out)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i >= N) return;
-    int in_s = i%spatial;
-    i = i/spatial;
-    int in_c = i%layers;
-    i = i/layers;
+    int in_s = i % spatial;
+    i = i / spatial;
+    int in_c = i % layers;
+    i = i / layers;
     int b = i;
 
-    int i1 = b*layers*spatial + in_c*spatial + in_s;
-    int i2 = b*layers*spatial + in_s*layers +  in_c;
+    int i1 = b * layers * spatial + in_c * spatial + in_s;
+    int i2 = b * layers * spatial + in_s * layers +  in_c;
 
     if (forward) out[i2] = x[i1];
     else out[i1] = x[i2];
@@ -570,14 +570,14 @@ __global__ void flatten_kernel(int N, float *x, int spatial, int layers, int bat
 
 extern "C" void flatten_ongpu(float *x, int spatial, int layers, int batch, int forward, float *out)
 {
-    int size = spatial*batch*layers;
+    int size = spatial * batch * layers;
     flatten_kernel<<<cuda_gridsize(size), BLOCK>>>(size, x, spatial, layers, batch, forward, out);
     check_error(cudaPeekAtLastError());
 }
 
 extern "C" void reorg_ongpu(float *x, int w, int h, int c, int batch, int stride, int forward, float *out)
 {
-    int size = w*h*c*batch;
+    int size = w * h * c * batch;
     reorg_kernel<<<cuda_gridsize(size), BLOCK>>>(size, x, w, h, c, batch, stride, forward, out);
     check_error(cudaPeekAtLastError());
 }
@@ -627,7 +627,7 @@ extern "C" void fill_ongpu(int N, float ALPHA, float * X, int INCX)
 
 __global__ void shortcut_kernel(int size, int minw, int minh, int minc, int stride, int sample, int batch, int w1, int h1, int c1, float *add, int w2, int h2, int c2, float *out)
 {
-    int id = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int id = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (id >= size) return;
     int i = id % minw;
     id /= minw;
@@ -637,8 +637,8 @@ __global__ void shortcut_kernel(int size, int minw, int minh, int minc, int stri
     id /= minc;
     int b = id % batch;
 
-    int out_index = i*sample + w2*(j*sample + h2*(k + c2*b));
-    int add_index = i*stride + w1*(j*stride + h1*(k + c1*b));
+    int out_index = i * sample + w2 * (j * sample + h2 * (k + c2 * b));
+    int add_index = i * stride + w1 * (j * stride + h1 * (k + c1 * b));
     out[out_index] += add[add_index];
 }
 
@@ -648,10 +648,10 @@ extern "C" void shortcut_gpu(int batch, int w1, int h1, int c1, float *add, int 
     int minh = (h1 < h2) ? h1 : h2;
     int minc = (c1 < c2) ? c1 : c2;
 
-    int stride = w1/w2;
-    int sample = w2/w1;
-    assert(stride == h1/h2);
-    assert(sample == h2/h1);
+    int stride = w1 / w2;
+    int sample = w2 / w1;
+    assert(stride == h1 / h2);
+    assert(sample == h2 / h1);
     if (stride < 1) stride = 1;
     if (sample < 1) sample = 1;
 
@@ -662,7 +662,7 @@ extern "C" void shortcut_gpu(int batch, int w1, int h1, int c1, float *add, int 
 
 __global__ void smooth_l1_kernel(int n, float *pred, float *truth, float *delta, float *error)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i < n) {
         float diff = truth[i] - pred[i];
         float abs_val = abs(diff);
@@ -671,7 +671,7 @@ __global__ void smooth_l1_kernel(int n, float *pred, float *truth, float *delta,
             delta[i] = diff;
         }
         else {
-            error[i] = 2*abs_val - 1;
+            error[i] = 2 * abs_val - 1;
             delta[i] = (diff > 0) ? 1 : -1;
         }
     }
@@ -685,10 +685,10 @@ extern "C" void smooth_l1_gpu(int n, float *pred, float *truth, float *delta, fl
 
 __global__ void l2_kernel(int n, float *pred, float *truth, float *delta, float *error)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i < n) {
         float diff = truth[i] - pred[i];
-        error[i] = diff * diff; //I know this is technically wrong, deal with it.
+        error[i] = diff * diff; // I know this is technically wrong, deal with it.
         delta[i] = diff;
     }
 }
@@ -701,7 +701,7 @@ extern "C" void l2_gpu(int n, float *pred, float *truth, float *delta, float *er
 
 __global__ void l1_kernel(int n, float *pred, float *truth, float *delta, float *error)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i < n) {
         float diff = truth[i] - pred[i];
         error[i] = abs(diff);
@@ -715,14 +715,11 @@ extern "C" void l1_gpu(int n, float *pred, float *truth, float *delta, float *er
     check_error(cudaPeekAtLastError());
 }
 
-
-
-
 __global__ void weighted_sum_kernel(int n, float *a, float *b, float *s, float *c)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i < n) {
-        c[i] = s[i]*a[i] + (1-s[i])*(b ? b[i] : 0);
+        c[i] = s[i] * a[i] + (1 - s[i]) * (b ? b[i] : 0);
     }
 }
 
@@ -734,10 +731,10 @@ extern "C" void weighted_sum_gpu(float *a, float *b, float *s, int num, float *c
 
 __global__ void weighted_delta_kernel(int n, float *a, float *b, float *s, float *da, float *db, float *ds, float *dc)
 {
-    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i < n) {
         if (da) da[i] += dc[i] * s[i];
-        db[i] += dc[i] * (1-s[i]);
+        db[i] += dc[i] * (1 - s[i]);
         ds[i] += dc[i] * a[i] + dc[i] * -b[i];
     }
 }
@@ -768,30 +765,30 @@ __device__ void softmax_device(float *input, int n, float temp, int stride, floa
     float sum = 0;
     float largest = -INFINITY;
     for (int i = 0; i < n; ++i) {
-        int val = input[i*stride];
-        largest = (val>largest) ? val : largest;
+        int val = input[i * stride];
+        largest = (val > largest) ? val : largest;
     }
     for (int i = 0; i < n; ++i) {
-        float e = exp(input[i*stride]/temp - largest/temp);
+        float e = exp(input[i * stride] / temp - largest / temp);
         sum += e;
-        output[i*stride] = e;
+        output[i * stride] = e;
     }
     for (int i = 0; i < n; ++i) {
-        output[i*stride] /= sum;
+        output[i * stride] /= sum;
     }
 }
 
 
 __global__ void softmax_tree_kernel(float *input, int spatial, int batch, int stride, float temp, float *output, int groups, int *group_size, int *group_offset)
 {
-    int id = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (id >= spatial*batch*groups) return;
+    int id = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (id >= spatial * batch * groups) return;
     int s = id % spatial;
     id = id / spatial;
     int g = id % groups;
     int b = id / groups;
-    int goff = group_offset[g]*spatial;
-    int boff = b*stride;
+    int goff = group_offset[g] * spatial;
+    int boff = b * stride;
     softmax_device(input + goff + boff + s, group_size[g], temp, spatial, output + goff + boff + s);
 }
 
@@ -805,7 +802,7 @@ extern "C" void softmax_tree(float *input, int spatial, int batch, int stride, f
         tree_groups_size = cuda_make_int_array(hier.group_size, hier.groups);
         tree_groups_offset = cuda_make_int_array(hier.group_offset, hier.groups);
     }
-    int num = spatial*batch*hier.groups;
+    int num = spatial * batch * hier.groups;
     softmax_tree_kernel<<<cuda_gridsize(num), BLOCK>>>(input, spatial, batch, stride, temp, output, hier.groups, tree_groups_size, tree_groups_offset);
     check_error(cudaPeekAtLastError());
     //cuda_free((float *)tree_groups_size);
@@ -814,15 +811,15 @@ extern "C" void softmax_tree(float *input, int spatial, int batch, int stride, f
 
 __global__ void softmax_kernel(float *input, int n, int batch, int batch_offset, int groups, int group_offset, int stride, float temp, float *output)
 {
-    int id = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (id >= batch*groups) return;
+    int id = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
+    if (id >= batch * groups) return;
     int b = id / groups;
     int g = id % groups;
-    softmax_device(input + b*batch_offset + g*group_offset, n, temp, stride, output + b*batch_offset + g*group_offset);
+    softmax_device(input + b * batch_offset + g * group_offset, n, temp, stride, output + b * batch_offset + g * group_offset);
 }
 
 extern "C" void softmax_gpu(float *input, int n, int batch, int batch_offset, int groups, int group_offset, int stride, float temp, float *output)
 {
-    softmax_kernel<<<cuda_gridsize(batch*groups), BLOCK>>>(input, n, batch, batch_offset, groups, group_offset, stride, temp, output);
+    softmax_kernel<<<cuda_gridsize(batch * groups), BLOCK>>>(input, n, batch, batch_offset, groups, group_offset, stride, temp, output);
     check_error(cudaPeekAtLastError());
 }

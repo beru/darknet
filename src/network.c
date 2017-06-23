@@ -71,7 +71,7 @@ network load_network(char *cfg, char *weights, int clear)
 
 int get_current_batch(network net)
 {
-    int batch_num = (*net.seen)/(net.batch*net.subdivisions);
+    int batch_num = (*net.seen) / (net.batch * net.subdivisions);
     return batch_num;
 }
 
@@ -95,7 +95,7 @@ float get_current_rate(network net)
     case CONSTANT:
         return net.learning_rate;
     case STEP:
-        return net.learning_rate * pow(net.scale, batch_num/net.step);
+        return net.learning_rate * pow(net.scale, batch_num / net.step);
     case STEPS:
         rate = net.learning_rate;
         for (int i = 0; i < net.num_steps; ++i) {
@@ -201,12 +201,12 @@ printf("[%d] %s %lld\n", i, get_layer_string(l.type), t1 - t0);
 
 void update_network(network net)
 {
-    int update_batch = net.batch*net.subdivisions;
+    int update_batch = net.batch * net.subdivisions;
     float rate = get_current_rate(net);
     for (int i = 0; i < net.n; ++i) {
         layer l = net.layers[i];
         if (l.update) {
-            l.update(l, update_batch, rate*l.learning_rate_scale, net.momentum, net.decay);
+            l.update(l, update_batch, rate * l.learning_rate_scale, net.momentum, net.decay);
         }
     }
 }
@@ -232,13 +232,13 @@ int get_predicted_class_network(network net)
 void backward_network(network net)
 {
     network orig = net;
-    for (int i = net.n-1; i >= 0; --i) {
+    for (int i = net.n - 1; i >= 0; --i) {
         layer l = net.layers[i];
         if (l.stopbackward) break;
         if (i == 0) {
             net = orig;
         }else {
-            layer prev = net.layers[i-1];
+            layer prev = net.layers[i - 1];
             net.input = prev.output;
             net.delta = prev.delta;
         }
@@ -257,7 +257,7 @@ float train_network_datum(network net)
     forward_network(net);
     backward_network(net);
     float error = *net.cost;
-    if (((*net.seen)/net.batch)%net.subdivisions == 0) update_network(net);
+    if (((*net.seen) / net.batch) % net.subdivisions == 0) update_network(net);
     return error;
 }
 
@@ -271,7 +271,7 @@ float train_network_sgd(network net, data d, int n)
         float err = train_network_datum(net);
         sum += err;
     }
-    return (float)sum/(n*batch);
+    return (float)sum / (n * batch);
 }
 
 float train_network(network net, data d)
@@ -282,11 +282,11 @@ float train_network(network net, data d)
 
     float sum = 0;
     for (int i = 0; i < n; ++i) {
-        get_next_batch(d, batch, i*batch, net.input, net.truth);
+        get_next_batch(d, batch, i * batch, net.input, net.truth);
         float err = train_network_datum(net);
         sum += err;
     }
-    return (float)sum/(n*batch);
+    return (float)sum / (n * batch);
 }
 
 void set_batch_network(network *net, int b)
@@ -349,7 +349,7 @@ int resize_network(network *net, int w, int h)
     net->inputs = net->layers[0].inputs;
     net->outputs = out.outputs;
     net->truths = out.outputs;
-    if (net->layers[net->n-1].truths) net->truths = net->layers[net->n-1].truths;
+    if (net->layers[net->n - 1].truths) net->truths = net->layers[net->n - 1].truths;
     net->output = out.output;
     free(net->input);
     free(net->truth);
@@ -359,9 +359,9 @@ int resize_network(network *net, int w, int h)
     if (gpu_index >= 0) {
         cuda_free(net->input_gpu);
         cuda_free(net->truth_gpu);
-        net->input_gpu = cuda_make_array(net->input, net->inputs*net->batch);
-        net->truth_gpu = cuda_make_array(net->truth, net->truths*net->batch);
-        net->workspace = cuda_make_array(0, (workspace_size-1)/sizeof(float)+1);
+        net->input_gpu = cuda_make_array(net->input, net->inputs * net->batch);
+        net->truth_gpu = cuda_make_array(net->truth, net->truths * net->batch);
+        net->workspace = cuda_make_array(0, (workspace_size - 1) / sizeof(float) + 1);
     }else {
         free(net->workspace);
         net->workspace = calloc(1, workspace_size);
@@ -445,18 +445,18 @@ matrix network_predict_data_multi(network net, data test, int n)
 {
     int k = net.outputs;
     matrix pred = make_matrix(test.X.rows, k);
-    float *X = calloc(net.batch*test.X.rows, sizeof(float));
+    float *X = calloc(net.batch * test.X.rows, sizeof(float));
     for (int i = 0; i < test.X.rows; i += net.batch) {
         for (int b = 0; b < net.batch; ++b) {
             if (i+b == test.X.rows) break;
-            memcpy(X+b*test.X.cols, test.X.vals[i+b], test.X.cols*sizeof(float));
+            memcpy(X + b * test.X.cols, test.X.vals[i + b], test.X.cols * sizeof(float));
         }
         for (int m = 0; m < n; ++m) {
             float *out = network_predict(net, X);
             for (int b = 0; b < net.batch; ++b) {
                 if (i+b == test.X.rows) break;
                 for (int j = 0; j < k; ++j) {
-                    pred.vals[i+b][j] += out[j+b*k]/n;
+                    pred.vals[i + b][j] += out[j + b * k] / n;
                 }
             }
         }
@@ -469,17 +469,17 @@ matrix network_predict_data(network net, data test)
 {
     int k = net.outputs;
     matrix pred = make_matrix(test.X.rows, k);
-    float *X = calloc(net.batch*test.X.cols, sizeof(float));
+    float *X = calloc(net.batch * test.X.cols, sizeof(float));
     for (int i = 0; i < test.X.rows; i += net.batch) {
         for (int b = 0; b < net.batch; ++b) {
-            if (i+b == test.X.rows) break;
-            memcpy(X+b*test.X.cols, test.X.vals[i+b], test.X.cols*sizeof(float));
+            if (i + b == test.X.rows) break;
+            memcpy(X + b * test.X.cols, test.X.vals[i + b], test.X.cols * sizeof(float));
         }
         float *out = network_predict(net, X);
         for (int b = 0; b < net.batch; ++b) {
             if (i+b == test.X.rows) break;
             for (int j = 0; j < k; ++j) {
-                pred.vals[i+b][j] = out[j+b*k];
+                pred.vals[i + b][j] = out[j + b * k];
             }
         }
     }
@@ -495,10 +495,11 @@ void print_network(network net)
         int n = l.outputs;
         float mean = mean_array(output, n);
         float vari = variance_array(output, n);
-        fprintf(stderr, "Layer %d - Mean: %f, Variance: %f\n", i, mean, vari);
+        fprintf(stderr, "Layer %d - Mean: %f, Variance: %f\n",
+                i, mean, vari);
         if (n > 100) n = 100;
         for (int j = 0; j < n; ++j) fprintf(stderr, "%f, ", output[j]);
-        if (n == 100)fprintf(stderr, ".....\n");
+        if (n == 100) fprintf(stderr, ".....\n");
         fprintf(stderr, "\n");
     }
 }

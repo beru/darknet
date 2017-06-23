@@ -2,7 +2,7 @@
 #include <math.h>
 
 void col2im_add_pixel(float *im, int height, int width, int channels,
-                        int row, int col, int channel, int pad, float val)
+                      int row, int col, int channel, int pad, float val)
 {
     row -= pad;
     col -= pad;

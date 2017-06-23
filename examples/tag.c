@@ -47,7 +47,7 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
     fprintf(stderr, "%d classes\n", net.outputs);
 
 #ifdef THREAD
-    load_thread = load_data_in_thread(args);
+    pthread_t load_thread = load_data_in_thread(args);
 #endif
     int epoch = (*net.seen) / N;
     while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
@@ -142,7 +142,8 @@ void test_tag(char *cfgfile, char *weightfile, char *filename)
 void run_tag(int argc, char **argv)
 {
     if (argc < 4) {
-        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n", argv[0], argv[1]);
+        fprintf(stderr, "usage: %s %s [train/test/valid] [cfg] [weights (optional)]\n",
+                argv[0], argv[1]);
         return;
     }
 

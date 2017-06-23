@@ -79,7 +79,9 @@ float box_intersection(box a, box b)
 {
     float w = overlap(a.x, a.w, b.x, b.w);
     float h = overlap(a.y, a.h, b.y, b.h);
-    if (w < 0 || h < 0) return 0;
+    if (w < 0 || h < 0) {
+        return 0;
+    }
     float area = w * h;
     return area;
 }
@@ -135,10 +137,10 @@ dbox dunion(box a, box b)
 void test_dunion()
 {
     box a = {0, 0, 1, 1};
-    box dxa= {0+.0001, 0, 1, 1};
-    box dya= {0, 0+.0001, 1, 1};
-    box dwa= {0, 0, 1+.0001, 1};
-    box dha= {0, 0, 1, 1+.0001};
+    box dxa= {0 + .0001, 0, 1, 1};
+    box dya= {0, 0 + .0001, 1, 1};
+    box dwa= {0, 0, 1 + .0001, 1};
+    box dha= {0, 0, 1, 1 + .0001};
 
     box b = {.5, .5, .2, .2};
     dbox di = dunion(a,b);
@@ -264,7 +266,9 @@ void do_nms_obj(box *boxes, float **probs, int total, int classes, float thresh)
 
     qsort(s, total, sizeof(sortable_bbox), nms_comparator);
     for (int i = 0; i < total; ++i) {
-        if (probs[s[i].index][classes] == 0) continue;
+        if (probs[s[i].index][classes] == 0) {
+            continue;
+        }
         box a = boxes[s[i].index];
         for (int j = i + 1; j < total; ++j) {
             box b = boxes[s[j].index];
@@ -295,7 +299,9 @@ void do_nms_sort(box *boxes, float **probs, int total, int classes, float thresh
         }
         qsort(s, total, sizeof(sortable_bbox), nms_comparator);
         for (int i = 0; i < total; ++i) {
-            if (probs[s[i].index][k] == 0) continue;
+            if (probs[s[i].index][k] == 0) {
+                continue;
+            }
             box a = boxes[s[i].index];
             for (int j = i + 1; j < total; ++j) {
                 box b = boxes[s[j].index];
