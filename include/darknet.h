@@ -33,7 +33,7 @@ extern int gpu_index;
     #endif
 #endif
 
-typedef struct{
+typedef struct {
     int *leaf;
     int n;
     int *parent;
@@ -91,13 +91,13 @@ struct layer{
     LAYER_TYPE type;
     ACTIVATION activation;
     COST_TYPE cost_type;
-    void (*forward)   (struct layer, struct network);
-    void (*backward)  (struct layer, struct network);
-    void (*update)    (struct layer, int, float, float, float);
+    void (*forward)   (struct layer*, struct network*);
+    void (*backward)  (struct layer*, struct network*);
+    void (*update)    (struct layer*, int, float, float, float);
 #ifdef GPU
-    void (*forward_gpu)   (struct layer, struct network);
-    void (*backward_gpu)  (struct layer, struct network);
-    void (*update_gpu)    (struct layer, int, float, float, float);
+    void (*forward_gpu)   (struct layer*, struct network*);
+    void (*backward_gpu)  (struct layer*, struct network*);
+    void (*update_gpu)    (struct layer*, int, float, float, float);
 #endif
     int batch_normalize;
     int shortcut;
@@ -110,7 +110,7 @@ struct layer{
     int nbiases;
     int extra;
     int truths;
-    int h,w,c;
+    int h, w, c;
     int out_h, out_w, out_c;
     int n;
     int max_boxes;
@@ -337,7 +337,7 @@ typedef enum {
     CONSTANT, STEP, EXP, POLY, STEPS, SIG, RANDOM
 } learning_rate_policy;
 
-typedef struct network{
+typedef struct network {
     int n;
     int batch;
     int *seen;
@@ -419,17 +419,17 @@ typedef struct {
     float *data;
 } image;
 
-typedef struct{
+typedef struct {
     float x, y, w, h;
 } box;
 
-typedef struct matrix{
+typedef struct matrix {
     int rows, cols;
     float **vals;
 } matrix;
 
 
-typedef struct{
+typedef struct {
     int w, h;
     matrix X;
     matrix y;
@@ -442,7 +442,7 @@ typedef enum {
     CLASSIFICATION_DATA, DETECTION_DATA, CAPTCHA_DATA, REGION_DATA, IMAGE_DATA, COMPARE_DATA, WRITING_DATA, SWAG_DATA, TAG_DATA, OLD_CLASSIFICATION_DATA, STUDY_DATA, DET_DATA, SUPER_DATA, LETTERBOX_DATA, REGRESSION_DATA, SEGMENTATION_DATA
 } data_type;
 
-typedef struct load_args{
+typedef struct load_args {
 #ifdef THREAD
     int threads;
 #endif
@@ -476,25 +476,25 @@ typedef struct load_args{
     tree *hierarchy;
 } load_args;
 
-typedef struct{
+typedef struct {
     int id;
     float x,y,w,h;
     float left, right, top, bottom;
 } box_label;
 
 
-network load_network(char *cfg, char *weights, int clear);
-load_args get_base_args(network net);
+void load_network(network *net, char *cfg, char *weights, int clear);
+load_args get_base_args(network *net);
 
 void free_data(data d);
 
-typedef struct node{
+typedef struct node {
     void *val;
     struct node *next;
     struct node *prev;
 } node;
 
-typedef struct list{
+typedef struct list {
     int size;
     node *front;
     node *back;

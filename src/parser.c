@@ -31,7 +31,7 @@
 #include "softmax_layer.h"
 #include "utils.h"
 
-typedef struct{
+typedef struct {
     char *type;
     list *options;
 }section;
@@ -104,7 +104,7 @@ void parse_data(char *data, float *a, int n)
     }
 }
 
-typedef struct size_params{
+typedef struct size_params {
     int batch;
     int inputs;
     int h;
@@ -115,7 +115,7 @@ typedef struct size_params{
     network net;
 } size_params;
 
-local_layer parse_local(list *options, size_params params)
+void parse_local(local_layer *l, list *options, size_params params)
 {
     int n = option_find_int(options, "filters", 1);
     int size = option_find_int(options, "size", 1);
@@ -128,15 +128,15 @@ local_layer parse_local(list *options, size_params params)
     h = params.h;
     w = params.w;
     c = params.c;
-    batch=params.batch;
-    if (!(h && w && c)) error("Layer before local layer must output image.");
+    batch = params.batch;
+    if (!(h && w && c)) {
+        error("Layer before local layer must output image.");
+    }
 
-    local_layer layer = make_local_layer(batch, h, w, c, n, size, stride, pad, activation);
-
-    return layer;
+    make_local_layer(l, batch, h, w, c, n, size, stride, pad, activation);
 }
 
-layer parse_deconvolutional(list *options, size_params params)
+void parse_deconvolutional(layer *l, list *options, size_params params)
 {
     int n = option_find_int(options, "filters", 1);
     int size = option_find_int(options, "size", 1);
@@ -149,29 +149,30 @@ layer parse_deconvolutional(list *options, size_params params)
     h = params.h;
     w = params.w;
     c = params.c;
-    batch=params.batch;
-    if (!(h && w && c)) error("Layer before deconvolutional layer must output image.");
+    batch = params.batch;
+    if (!(h && w && c)) {
+        error("Layer before deconvolutional layer must output image.");
+    }
     int batch_normalize = option_find_int_quiet(options, "batch_normalize", 0);
     int pad = option_find_int_quiet(options, "pad", 0);
     int padding = option_find_int_quiet(options, "padding", 0);
-    if (pad) padding = size/2;
+    if (pad) padding = size / 2;
 
-    layer l = make_deconvolutional_layer(batch, h, w, c, n,
-                                         size, stride, padding,
-                                         activation, batch_normalize, params.net.adam);
-
-    return l;
+    make_deconvolutional_layer(l,
+                               batch, h, w, c, n,
+                               size, stride, padding,
+                               activation, batch_normalize, params.net.adam);
 }
 
 
-convolutional_layer parse_convolutional(list *options, size_params params)
+void parse_convolutional(convolutional_layer *l, list *options, size_params params)
 {
     int n = option_find_int(options, "filters", 1);
     int size = option_find_int(options, "size", 1);
     int stride = option_find_int(options, "stride", 1);
     int pad = option_find_int_quiet(options, "pad", 0);
     int padding = option_find_int_quiet(options, "padding", 0);
-    if (pad) padding = size/2;
+    if (pad) padding = size / 2;
 
     char *activation_s = option_find_str(options, "activation", "logistic");
     ACTIVATION activation = get_activation(activation_s);
@@ -180,28 +181,29 @@ convolutional_layer parse_convolutional(list *options, size_params params)
     h = params.h;
     w = params.w;
     c = params.c;
-    batch=params.batch;
-    if (!(h && w && c)) error("Layer before convolutional layer must output image.");
+    batch = params.batch;
+    if (!(h && w && c)) {
+        error("Layer before convolutional layer must output image.");
+    }
     int batch_normalize = option_find_int_quiet(options, "batch_normalize", 0);
     int binary = option_find_int_quiet(options, "binary", 0);
     int xnor = option_find_int_quiet(options, "xnor", 0);
 
-    convolutional_layer layer = make_convolutional_layer(batch, h, w, c, n,
-                                                         size, stride, padding,
-                                                         activation, batch_normalize,
-                                                         binary, xnor, params.net.adam);
-    layer.flipped = option_find_int_quiet(options, "flipped", 0);
-    layer.dot = option_find_float_quiet(options, "dot", 0);
+    make_convolutional_layer(l,
+                             batch, h, w, c, n,
+                             size, stride, padding,
+                             activation, batch_normalize,
+                             binary, xnor, params.net.adam);
+    l->flipped = option_find_int_quiet(options, "flipped", 0);
+    l->dot = option_find_float_quiet(options, "dot", 0);
     if (params.net.adam) {
-        layer.B1 = params.net.B1;
-        layer.B2 = params.net.B2;
-        layer.eps = params.net.eps;
+        l->B1 = params.net.B1;
+        l->B2 = params.net.B2;
+        l->eps = params.net.eps;
     }
-
-    return layer;
 }
 
-layer parse_crnn(list *options, size_params params)
+void parse_crnn(layer *l, list *options, size_params params)
 {
     int output_filters = option_find_int(options, "output_filters", 1);
     int hidden_filters = option_find_int(options, "hidden_filters", 1);
@@ -209,16 +211,15 @@ layer parse_crnn(list *options, size_params params)
     ACTIVATION activation = get_activation(activation_s);
     int batch_normalize = option_find_int_quiet(options, "batch_normalize", 0);
 
-    layer l = make_crnn_layer(params.batch, params.w, params.h, params.c,
-                              hidden_filters, output_filters, params.time_steps,
-                              activation, batch_normalize);
+    make_crnn_layer(l,
+                    params.batch, params.w, params.h, params.c,
+                    hidden_filters, output_filters, params.time_steps,
+                    activation, batch_normalize);
 
-    l.shortcut = option_find_int_quiet(options, "shortcut", 0);
-
-    return l;
+    l->shortcut = option_find_int_quiet(options, "shortcut", 0);
 }
 
-layer parse_rnn(list *options, size_params params)
+void parse_rnn(layer *l, list *options, size_params params)
 {
     int output = option_find_int(options, "output", 1);
     int hidden = option_find_int(options, "hidden", 1);
@@ -227,85 +228,86 @@ layer parse_rnn(list *options, size_params params)
     int batch_normalize = option_find_int_quiet(options, "batch_normalize", 0);
     int logistic = option_find_int_quiet(options, "logistic", 0);
 
-    layer l = make_rnn_layer(params.batch, params.inputs,
-                             hidden, output, params.time_steps,
-                             activation, batch_normalize, logistic);
+    make_rnn_layer(l,
+                   params.batch, params.inputs,
+                   hidden, output, params.time_steps,
+                   activation, batch_normalize, logistic);
 
-    l.shortcut = option_find_int_quiet(options, "shortcut", 0);
-
-    return l;
+    l->shortcut = option_find_int_quiet(options, "shortcut", 0);
 }
 
-layer parse_gru(list *options, size_params params)
+void parse_gru(layer *l, list *options, size_params params)
 {
     int output = option_find_int(options, "output", 1);
     int batch_normalize = option_find_int_quiet(options, "batch_normalize", 0);
 
-    layer l = make_gru_layer(params.batch, params.inputs, output, params.time_steps, batch_normalize);
-
-    return l;
+    make_gru_layer(l, params.batch, params.inputs, output, params.time_steps, batch_normalize);
 }
 
-connected_layer parse_connected(list *options, size_params params)
+void parse_connected(connected_layer *l, list *options, size_params params)
 {
     int output = option_find_int(options, "output", 1);
     char *activation_s = option_find_str(options, "activation", "logistic");
     ACTIVATION activation = get_activation(activation_s);
     int batch_normalize = option_find_int_quiet(options, "batch_normalize", 0);
 
-    connected_layer layer = make_connected_layer(params.batch, params.inputs,
-                                                 output, activation, batch_normalize);
-
-    return layer;
+    make_connected_layer(l,
+                         params.batch, params.inputs,
+                         output, activation, batch_normalize);
 }
 
-softmax_layer parse_softmax(list *options, size_params params)
+void parse_softmax(softmax_layer *l, list *options, size_params params)
 {
     int groups = option_find_int_quiet(options, "groups", 1);
-    softmax_layer layer = make_softmax_layer(params.batch, params.inputs, groups);
-    layer.temperature = option_find_float_quiet(options, "temperature", 1);
+    make_softmax_layer(l, params.batch, params.inputs, groups);
+    l->temperature = option_find_float_quiet(options, "temperature", 1);
     char *tree_file = option_find_str(options, "tree", 0);
-    if (tree_file) layer.softmax_tree = read_tree(tree_file);
-    layer.w = params.w;
-    layer.h = params.h;
-    layer.c = params.c;
-    layer.spatial = option_find_float_quiet(options, "spatial", 0);
-    return layer;
+    if (tree_file) {
+        l->softmax_tree = read_tree(tree_file);
+    }
+    l->w = params.w;
+    l->h = params.h;
+    l->c = params.c;
+    l->spatial = option_find_float_quiet(options, "spatial", 0);
 }
 
-layer parse_region(list *options, size_params params)
+void parse_region(layer *l, list *options, size_params params)
 {
     int coords = option_find_int(options, "coords", 4);
     int classes = option_find_int(options, "classes", 20);
     int num = option_find_int(options, "num", 1);
 
-    layer l = make_region_layer(params.batch, params.w, params.h, num, classes, coords);
-    assert(l.outputs == params.inputs);
+    make_region_layer(l, params.batch, params.w, params.h, num, classes, coords);
+    assert(l->outputs == params.inputs);
 
-    l.log = option_find_int_quiet(options, "log", 0);
-    l.sqrt = option_find_int_quiet(options, "sqrt", 0);
+    l->log = option_find_int_quiet(options, "log", 0);
+    l->sqrt = option_find_int_quiet(options, "sqrt", 0);
 
-    l.softmax = option_find_int(options, "softmax", 0);
-    l.background = option_find_int_quiet(options, "background", 0);
-    l.max_boxes = option_find_int_quiet(options, "max",30);
-    l.jitter = option_find_float(options, "jitter", .2);
-    l.rescore = option_find_int_quiet(options, "rescore", 0);
+    l->softmax = option_find_int(options, "softmax", 0);
+    l->background = option_find_int_quiet(options, "background", 0);
+    l->max_boxes = option_find_int_quiet(options, "max",30);
+    l->jitter = option_find_float(options, "jitter", .2);
+    l->rescore = option_find_int_quiet(options, "rescore", 0);
 
-    l.thresh = option_find_float(options, "thresh", .5);
-    l.classfix = option_find_int_quiet(options, "classfix", 0);
-    l.absolute = option_find_int_quiet(options, "absolute", 0);
-    l.random = option_find_int_quiet(options, "random", 0);
+    l->thresh = option_find_float(options, "thresh", .5);
+    l->classfix = option_find_int_quiet(options, "classfix", 0);
+    l->absolute = option_find_int_quiet(options, "absolute", 0);
+    l->random = option_find_int_quiet(options, "random", 0);
 
-    l.coord_scale = option_find_float(options, "coord_scale", 1);
-    l.object_scale = option_find_float(options, "object_scale", 1);
-    l.noobject_scale = option_find_float(options, "noobject_scale", 1);
-    l.class_scale = option_find_float(options, "class_scale", 1);
-    l.bias_match = option_find_int_quiet(options, "bias_match", 0);
+    l->coord_scale = option_find_float(options, "coord_scale", 1);
+    l->object_scale = option_find_float(options, "object_scale", 1);
+    l->noobject_scale = option_find_float(options, "noobject_scale", 1);
+    l->class_scale = option_find_float(options, "class_scale", 1);
+    l->bias_match = option_find_int_quiet(options, "bias_match", 0);
 
     char *tree_file = option_find_str(options, "tree", 0);
-    if (tree_file) l.softmax_tree = read_tree(tree_file);
+    if (tree_file) {
+        l->softmax_tree = read_tree(tree_file);
+    }
     char *map_file = option_find_str(options, "map", 0);
-    if (map_file) l.map = read_map(map_file);
+    if (map_file) {
+        l->map = read_map(map_file);
+    }
 
     char *a = option_find_str(options, "anchors", 0);
     if (a) {
@@ -316,49 +318,47 @@ layer parse_region(list *options, size_params params)
         }
         for (int i = 0; i < n; ++i) {
             float bias = atof(a);
-            l.biases[i] = bias;
+            l->biases[i] = bias;
             a = strchr(a, ',') + 1;
         }
     }
-    return l;
 }
-detection_layer parse_detection(list *options, size_params params)
+void parse_detection(detection_layer *l, list *options, size_params params)
 {
     int coords = option_find_int(options, "coords", 1);
     int classes = option_find_int(options, "classes", 1);
     int rescore = option_find_int(options, "rescore", 0);
     int num = option_find_int(options, "num", 1);
     int side = option_find_int(options, "side", 7);
-    detection_layer layer = make_detection_layer(params.batch, params.inputs,
-                                                 num, side, classes, coords, rescore);
+    make_detection_layer(l,
+                         params.batch, params.inputs,
+                         num, side, classes, coords, rescore);
 
-    layer.softmax = option_find_int(options, "softmax", 0);
-    layer.sqrt = option_find_int(options, "sqrt", 0);
+    l->softmax = option_find_int(options, "softmax", 0);
+    l->sqrt = option_find_int(options, "sqrt", 0);
 
-    layer.max_boxes = option_find_int_quiet(options, "max",30);
-    layer.coord_scale = option_find_float(options, "coord_scale", 1);
-    layer.forced = option_find_int(options, "forced", 0);
-    layer.object_scale = option_find_float(options, "object_scale", 1);
-    layer.noobject_scale = option_find_float(options, "noobject_scale", 1);
-    layer.class_scale = option_find_float(options, "class_scale", 1);
-    layer.jitter = option_find_float(options, "jitter", .2);
-    layer.random = option_find_int_quiet(options, "random", 0);
-    layer.reorg = option_find_int_quiet(options, "reorg", 0);
-    return layer;
+    l->max_boxes = option_find_int_quiet(options, "max",30);
+    l->coord_scale = option_find_float(options, "coord_scale", 1);
+    l->forced = option_find_int(options, "forced", 0);
+    l->object_scale = option_find_float(options, "object_scale", 1);
+    l->noobject_scale = option_find_float(options, "noobject_scale", 1);
+    l->class_scale = option_find_float(options, "class_scale", 1);
+    l->jitter = option_find_float(options, "jitter", .2);
+    l->random = option_find_int_quiet(options, "random", 0);
+    l->reorg = option_find_int_quiet(options, "reorg", 0);
 }
 
-cost_layer parse_cost(list *options, size_params params)
+void parse_cost(cost_layer *l, list *options, size_params params)
 {
     char *type_s = option_find_str(options, "type", "sse");
     COST_TYPE type = get_cost_type(type_s);
     float scale = option_find_float_quiet(options, "scale", 1);
-    cost_layer layer = make_cost_layer(params.batch, params.inputs, type, scale);
-    layer.ratio =  option_find_float_quiet(options, "ratio", 0);
-    layer.thresh =  option_find_float_quiet(options, "thresh", 0);
-    return layer;
+    make_cost_layer(l, params.batch, params.inputs, type, scale);
+    l->ratio =  option_find_float_quiet(options, "ratio", 0);
+    l->thresh =  option_find_float_quiet(options, "thresh", 0);
 }
 
-crop_layer parse_crop(list *options, size_params params)
+void parse_crop(crop_layer *l, list *options, size_params params)
 {
     int crop_height = option_find_int(options, "crop_height", 1);
     int crop_width = option_find_int(options, "crop_width", 1);
@@ -371,19 +371,21 @@ crop_layer parse_crop(list *options, size_params params)
     h = params.h;
     w = params.w;
     c = params.c;
-    batch=params.batch;
-    if (!(h && w && c)) error("Layer before crop layer must output image.");
+    batch = params.batch;
+    if (!(h && w && c)) {
+        error("Layer before crop layer must output image.");
+    }
 
     int noadjust = option_find_int_quiet(options, "noadjust", 0);
 
-    crop_layer l = make_crop_layer(batch, h, w, c, crop_height, crop_width,
-                                   flip, angle, saturation, exposure);
-    l.shift = option_find_float(options, "shift", 0);
-    l.noadjust = noadjust;
-    return l;
+    make_crop_layer(l,
+                    batch, h, w, c, crop_height, crop_width,
+                    flip, angle, saturation, exposure);
+    l->shift = option_find_float(options, "shift", 0);
+    l->noadjust = noadjust;
 }
 
-layer parse_reorg(list *options, size_params params)
+void parse_reorg(layer *l, list *options, size_params params)
 {
     int stride = option_find_int(options, "stride", 1);
     int reverse = option_find_int_quiet(options, "reverse", 0);
@@ -394,143 +396,146 @@ layer parse_reorg(list *options, size_params params)
     h = params.h;
     w = params.w;
     c = params.c;
-    batch=params.batch;
-    if (!(h && w && c)) error("Layer before reorg layer must output image.");
+    batch = params.batch;
+    if (!(h && w && c)) {
+        error("Layer before reorg layer must output image.");
+    }
 
-    layer layer = make_reorg_layer(batch, w, h, c, stride, reverse, flatten, extra);
-    return layer;
+    make_reorg_layer(l, batch, w, h, c, stride, reverse, flatten, extra);
 }
 
-maxpool_layer parse_maxpool(list *options, size_params params)
+void parse_maxpool(maxpool_layer *l, list *options, size_params params)
 {
     int stride = option_find_int(options, "stride", 1);
-    int size = option_find_int(options, "size",stride);
-    int padding = option_find_int_quiet(options, "padding", (size-1)/2);
+    int size = option_find_int(options, "size", stride);
+    int padding = option_find_int_quiet(options, "padding", (size - 1) / 2);
 
     int batch, h, w, c;
     h = params.h;
     w = params.w;
     c = params.c;
-    batch=params.batch;
-    if (!(h && w && c)) error("Layer before maxpool layer must output image.");
+    batch = params.batch;
+    if (!(h && w && c)) {
+        error("Layer before maxpool layer must output image.");
+    }
 
-    maxpool_layer layer = make_maxpool_layer(batch, h, w, c, size, stride, padding);
-    return layer;
+    make_maxpool_layer(l, batch, h, w, c, size, stride, padding);
 }
 
-avgpool_layer parse_avgpool(list *options, size_params params)
+void parse_avgpool(avgpool_layer *l, list *options, size_params params)
 {
     int batch, w, h, c;
     w = params.w;
     h = params.h;
     c = params.c;
-    batch=params.batch;
-    if (!(h && w && c)) error("Layer before avgpool layer must output image.");
+    batch = params.batch;
+    if (!(h && w && c)) {
+        error("Layer before avgpool layer must output image.");
+    }
 
-    avgpool_layer layer = make_avgpool_layer(batch, w, h, c);
-    return layer;
+    make_avgpool_layer(l, batch, w, h, c);
 }
 
-dropout_layer parse_dropout(list *options, size_params params)
+void parse_dropout(dropout_layer *l, list *options, size_params params)
 {
     float probability = option_find_float(options, "probability", .5);
-    dropout_layer layer = make_dropout_layer(params.batch, params.inputs, probability);
-    layer.out_w = params.w;
-    layer.out_h = params.h;
-    layer.out_c = params.c;
-    return layer;
+    make_dropout_layer(l, params.batch, params.inputs, probability);
+    l->out_w = params.w;
+    l->out_h = params.h;
+    l->out_c = params.c;
 }
 
-layer parse_normalization(list *options, size_params params)
+void parse_normalization(layer *l, list *options, size_params params)
 {
     float alpha = option_find_float(options, "alpha", .0001);
     float beta =  option_find_float(options, "beta" , .75);
     float kappa = option_find_float(options, "kappa", 1);
     int size = option_find_int(options, "size", 5);
-    layer l = make_normalization_layer(params.batch, params.w, params.h, params.c,
-                                       size, alpha, beta, kappa);
-    return l;
+    make_normalization_layer(l,
+                             params.batch, params.w, params.h, params.c,
+                             size, alpha, beta, kappa);
 }
 
-layer parse_batchnorm(list *options, size_params params)
+void parse_batchnorm(layer *l, list *options, size_params params)
 {
-    layer l = make_batchnorm_layer(params.batch, params.w, params.h, params.c);
-    return l;
+    make_batchnorm_layer(l, params.batch, params.w, params.h, params.c);
 }
 
-layer parse_shortcut(list *options, size_params params, network net)
+void parse_shortcut(layer *l, list *options, size_params params, network *net)
 {
-    char *l = option_find(options, "from");   
-    int index = atoi(l);
-    if (index < 0) index = params.index + index;
+    char *from_option = option_find(options, "from");   
+    int index = atoi(from_option);
+    if (index < 0) {
+        index = params.index + index;
+    }
 
     int batch = params.batch;
-    layer from = net.layers[index];
+    layer *from = &net->layers[index];
 
-    layer s = make_shortcut_layer(batch, index, params.w, params.h, params.c,
-                                  from.out_w, from.out_h, from.out_c);
+    make_shortcut_layer(l,
+                        batch, index, params.w, params.h, params.c,
+                        from->out_w, from->out_h, from->out_c);
 
     char *activation_s = option_find_str(options, "activation", "linear");
     ACTIVATION activation = get_activation(activation_s);
-    s.activation = activation;
-    return s;
+    l->activation = activation;
 }
 
-layer parse_activation(list *options, size_params params)
+void parse_activation(layer *l, list *options, size_params params)
 {
     char *activation_s = option_find_str(options, "activation", "linear");
     ACTIVATION activation = get_activation(activation_s);
 
-    layer l = make_activation_layer(params.batch, params.inputs, activation);
+    make_activation_layer(l, params.batch, params.inputs, activation);
 
-    l.out_h = params.h;
-    l.out_w = params.w;
-    l.out_c = params.c;
-    l.h = params.h;
-    l.w = params.w;
-    l.c = params.c;
-
-    return l;
+    l->out_h = params.h;
+    l->out_w = params.w;
+    l->out_c = params.c;
+    l->h = params.h;
+    l->w = params.w;
+    l->c = params.c;
 }
 
-route_layer parse_route(list *options, size_params params, network net)
+void parse_route(route_layer *l, list *options, size_params params, network *net)
 {
-    char *l = option_find(options, "layers");   
-    int len = strlen(l);
-    if (!l) error("Route Layer must specify input layers");
+    char *opt_layers = option_find(options, "layers");   
+    int len = strlen(opt_layers);
+    if (!opt_layers) {
+        error("Route Layer must specify input layers");
+    }
     int n = 1;
     for (int i = 0; i < len; ++i) {
-        if (l[i] == ',') ++n;
+        if (opt_layers[i] == ',') ++n;
     }
 
     int *layers = calloc(n, sizeof(int));
     int *sizes = calloc(n, sizeof(int));
     for (int i = 0; i < n; ++i) {
-        int index = atoi(l);
-        l = strchr(l, ',')+1;
-        if (index < 0) index = params.index + index;
+        int index = atoi(opt_layers);
+        opt_layers = strchr(opt_layers, ',') + 1;
+        if (index < 0) {
+            index = params.index + index;
+        }
         layers[i] = index;
-        sizes[i] = net.layers[index].outputs;
+        sizes[i] = net->layers[index].outputs;
     }
     int batch = params.batch;
 
-    route_layer layer = make_route_layer(batch, n, layers, sizes);
+    make_route_layer(l, batch, n, layers, sizes);
 
-    convolutional_layer first = net.layers[layers[0]];
-    layer.out_w = first.out_w;
-    layer.out_h = first.out_h;
-    layer.out_c = first.out_c;
+    convolutional_layer *first = &net->layers[layers[0]];
+    l->out_w = first->out_w;
+    l->out_h = first->out_h;
+    l->out_c = first->out_c;
     for (int i = 1; i < n; ++i) {
         int index = layers[i];
-        convolutional_layer next = net.layers[index];
-        if (next.out_w == first.out_w && next.out_h == first.out_h) {
-            layer.out_c += next.out_c;
+        convolutional_layer *next = &net->layers[index];
+        if (next->out_w == first->out_w && next->out_h == first->out_h) {
+            l->out_c += next->out_c;
         }else {
-            layer.out_h = layer.out_w = layer.out_c = 0;
+            l->out_h = l->out_w = l->out_c = 0;
         }
     }
-
-    return layer;
 }
 
 learning_rate_policy get_policy(char *s)
@@ -580,7 +585,9 @@ void parse_net_options(list *options, network *net)
     net->exposure = option_find_float_quiet(options, "exposure", 1);
     net->hue = option_find_float_quiet(options, "hue", 0);
 
-    if (!net->inputs && !(net->h && net->w && net->c)) error("No input parameters supplied");
+    if (!net->inputs && !(net->h && net->w && net->c)) {
+        error("No input parameters supplied");
+    }
 
     char *policy_s = option_find_str(options, "policy", "constant");
     net->policy = get_policy(policy_s);
@@ -592,7 +599,9 @@ void parse_net_options(list *options, network *net)
     }else if (net->policy == STEPS) {
         char *l = option_find(options, "steps");   
         char *p = option_find(options, "scales");   
-        if (!l || !p) error("STEPS policy must have steps and scales in cfg file");
+        if (!l || !p) {
+            error("STEPS policy must have steps and scales in cfg file");
+        }
 
         int len = strlen(l);
         int n = 1;
@@ -628,29 +637,33 @@ int is_network(section *s)
             || strcmp(s->type, "[network]") == 0);
 }
 
-network parse_network_cfg(char *filename)
+void parse_network_cfg(network *net, char *filename)
 {
     list *sections = read_cfg(filename);
     node *n = sections->front;
-    if (!n) error("Config file has no sections");
-    network net = make_network(sections->size - 1);
+    if (!n) {
+        error("Config file has no sections");
+    }
+    make_network(net, sections->size - 1);
 #ifdef GPU
-    net.gpu_index = gpu_index;
+    net->gpu_index = gpu_index;
 #endif
     size_params params;
 
     section *s = (section *)n->val;
     list *options = s->options;
-    if (!is_network(s)) error("First section must be [net] or [network]");
-    parse_net_options(options, &net);
+    if (!is_network(s)) {
+        error("First section must be [net] or [network]");
+    }
+    parse_net_options(options, net);
 
-    params.h = net.h;
-    params.w = net.w;
-    params.c = net.c;
-    params.inputs = net.inputs;
-    params.batch = net.batch;
-    params.time_steps = net.time_steps;
-    params.net = net;
+    params.h = net->h;
+    params.w = net->w;
+    params.c = net->c;
+    params.inputs = net->inputs;
+    params.batch = net->batch;
+    params.time_steps = net->time_steps;
+    params.net = *net;
 
     size_t workspace_size = 0;
     n = n->next;
@@ -662,117 +675,121 @@ network parse_network_cfg(char *filename)
         fprintf(stderr, "%5d ", count);
         s = (section *)n->val;
         options = s->options;
-        layer l = {0};
+        layer *l = &net->layers[count];
         LAYER_TYPE lt = string_to_layer_type(s->type);
         if (lt == CONVOLUTIONAL) {
-            l = parse_convolutional(options, params);
+            parse_convolutional(l, options, params);
         }else if (lt == DECONVOLUTIONAL) {
-            l = parse_deconvolutional(options, params);
+            parse_deconvolutional(l, options, params);
         }else if (lt == LOCAL) {
-            l = parse_local(options, params);
+            parse_local(l, options, params);
         }else if (lt == ACTIVE) {
-            l = parse_activation(options, params);
+            parse_activation(l, options, params);
         }else if (lt == RNN) {
-            l = parse_rnn(options, params);
+            parse_rnn(l, options, params);
         }else if (lt == GRU) {
-            l = parse_gru(options, params);
+            parse_gru(l, options, params);
         }else if (lt == CRNN) {
-            l = parse_crnn(options, params);
+            parse_crnn(l, options, params);
         }else if (lt == CONNECTED) {
-            l = parse_connected(options, params);
+            parse_connected(l, options, params);
         }else if (lt == CROP) {
-            l = parse_crop(options, params);
+            parse_crop(l, options, params);
         }else if (lt == COST) {
-            l = parse_cost(options, params);
+            parse_cost(l, options, params);
         }else if (lt == REGION) {
-            l = parse_region(options, params);
+            parse_region(l, options, params);
         }else if (lt == DETECTION) {
-            l = parse_detection(options, params);
+            parse_detection(l, options, params);
         }else if (lt == SOFTMAX) {
-            l = parse_softmax(options, params);
-            net.hierarchy = l.softmax_tree;
+            parse_softmax(l, options, params);
+            net->hierarchy = l->softmax_tree;
         }else if (lt == NORMALIZATION) {
-            l = parse_normalization(options, params);
+            parse_normalization(l, options, params);
         }else if (lt == BATCHNORM) {
-            l = parse_batchnorm(options, params);
+            parse_batchnorm(l, options, params);
         }else if (lt == MAXPOOL) {
-            l = parse_maxpool(options, params);
+            parse_maxpool(l, options, params);
         }else if (lt == REORG) {
-            l = parse_reorg(options, params);
+            parse_reorg(l, options, params);
         }else if (lt == AVGPOOL) {
-            l = parse_avgpool(options, params);
+            parse_avgpool(l, options, params);
         }else if (lt == ROUTE) {
-            l = parse_route(options, params, net);
+            parse_route(l, options, params, net);
         }else if (lt == SHORTCUT) {
-            l = parse_shortcut(options, params, net);
+            parse_shortcut(l, options, params, net);
         }else if (lt == DROPOUT) {
-            l = parse_dropout(options, params);
-            l.output = net.layers[count - 1].output;
-            l.delta = net.layers[count - 1].delta;
+            parse_dropout(l, options, params);
+            l->output = net->layers[count - 1].output;
+            l->delta = net->layers[count - 1].delta;
 #ifdef GPU
-            l.output_gpu = net.layers[count - 1].output_gpu;
-            l.delta_gpu = net.layers[count - 1].delta_gpu;
+            l->output_gpu = net->layers[count - 1].output_gpu;
+            l->delta_gpu = net->layers[count - 1].delta_gpu;
 #endif
         }else {
             fprintf(stderr, "Type not recognized: %s\n", s->type);
         }
-        l.truth = option_find_int_quiet(options, "truth", 0);
-        l.onlyforward = option_find_int_quiet(options, "onlyforward", 0);
-        l.stopbackward = option_find_int_quiet(options, "stopbackward", 0);
-        l.dontload = option_find_int_quiet(options, "dontload", 0);
-        l.dontloadscales = option_find_int_quiet(options, "dontloadscales", 0);
-        l.learning_rate_scale = option_find_float_quiet(options, "learning_rate", 1);
-        l.smooth = option_find_float_quiet(options, "smooth", 0);
+        l->truth = option_find_int_quiet(options, "truth", 0);
+        l->onlyforward = option_find_int_quiet(options, "onlyforward", 0);
+        l->stopbackward = option_find_int_quiet(options, "stopbackward", 0);
+        l->dontload = option_find_int_quiet(options, "dontload", 0);
+        l->dontloadscales = option_find_int_quiet(options, "dontloadscales", 0);
+        l->learning_rate_scale = option_find_float_quiet(options, "learning_rate", 1);
+        l->smooth = option_find_float_quiet(options, "smooth", 0);
         option_unused(options);
-        net.layers[count] = l;
-        if (l.workspace_size > workspace_size) workspace_size = l.workspace_size;
+        if (l->workspace_size > workspace_size) {
+            workspace_size = l->workspace_size;
+        }
         free_section(s);
         n = n->next;
         ++count;
         if (n) {
-            params.h = l.out_h;
-            params.w = l.out_w;
-            params.c = l.out_c;
-            params.inputs = l.outputs;
+            params.h = l->out_h;
+            params.w = l->out_w;
+            params.c = l->out_c;
+            params.inputs = l->outputs;
         }
     }   
     free_list(sections);
-    layer out = get_network_output_layer(net);
-    net.outputs = out.outputs;
-    net.truths = out.outputs;
-    if (net.layers[net.n - 1].truths) net.truths = net.layers[net.n - 1].truths;
-    net.output = out.output;
-    net.input = calloc(net.inputs * net.batch, sizeof(float));
-    net.truth = calloc(net.truths * net.batch, sizeof(float));
+    layer *out = get_network_output_layer(net);
+    net->outputs = out->outputs;
+    net->truths = out->outputs;
+    if (net->layers[net->n - 1].truths) {
+        net->truths = net->layers[net->n - 1].truths;
+    }
+    net->output = out->output;
+    net->input = calloc(net->inputs * net->batch, sizeof(float));
+    net->truth = calloc(net->truths * net->batch, sizeof(float));
 #ifdef GPU
-    net.output_gpu = out.output_gpu;
-    net.input_gpu = cuda_make_array(net.input, net.inputs * net.batch);
-    net.truth_gpu = cuda_make_array(net.truth, net.truths * net.batch);
+    net->output_gpu = out->output_gpu;
+    net->input_gpu = cuda_make_array(net->input, net->inputs * net->batch);
+    net->truth_gpu = cuda_make_array(net->truth, net->truths * net->batch);
 #endif
     if (workspace_size) {
         //printf("%ld\n", workspace_size);
 #ifdef GPU
         if (gpu_index >= 0) {
-            net.workspace = cuda_make_array(0, (workspace_size - 1) / sizeof(float) + 1);
+            net->workspace = cuda_make_array(0, (workspace_size - 1) / sizeof(float) + 1);
         }else {
-            net.workspace = calloc(1, workspace_size);
+            net->workspace = calloc(1, workspace_size);
         }
 #else
-        net.workspace = calloc(1, workspace_size);
+        net->workspace = calloc(1, workspace_size);
 #endif
     }
-    return net;
 }
 
 list *read_cfg(char *filename)
 {
     FILE *file = fopen(filename, "r");
-    if (file == 0) file_error(filename);
+    if (file == 0) {
+        file_error(filename);
+    }
     char *line;
     int nu = 0;
     list *options = make_list();
     section *current = 0;
-    while ((line=fgetl(file)) != 0) {
+    while ((line = fgetl(file)) != 0) {
         ++ nu;
         strip(line);
         switch (line[0]) {
@@ -804,11 +821,11 @@ void save_convolutional_weights_binary(layer l, FILE *fp)
 {
 #ifdef GPU
     if (gpu_index >= 0) {
-        pull_convolutional_layer(l);
+        pull_convolutional_layer(&l);
     }
 #endif
     binarize_weights(l.weights, l.n, l.c * l.size * l.size, l.binary_weights);
-    int size = l.c*l.size*l.size;
+    int size = l.c * l.size * l.size;
     fwrite(l.biases, sizeof(float), l.n, fp);
     if (l.batch_normalize) {
         fwrite(l.scales, sizeof(float), l.n, fp);
@@ -817,23 +834,29 @@ void save_convolutional_weights_binary(layer l, FILE *fp)
     }
     for (int i = 0; i < l.n; ++i) {
         float mean = l.binary_weights[i * size];
-        if (mean < 0) mean = -mean;
+        if (mean < 0) {
+            mean = -mean;
+        }
         fwrite(&mean, sizeof(float), 1, fp);
         for (int j = 0; j < size/8; ++j) {
             int index = i * size + j * 8;
             unsigned char c = 0;
             for (int k = 0; k < 8; ++k) {
-                if (j*8 + k >= size) break;
-                if (l.binary_weights[index + k] > 0) c = (c | 1<<k);
+                if (j * 8 + k >= size) {
+                    break;
+                }
+                if (l.binary_weights[index + k] > 0) {
+                    c = (c | 1<<k);
+                }
             }
             fwrite(&c, sizeof(char), 1, fp);
         }
     }
 }
 
-void save_convolutional_weights(layer l, FILE *fp)
+void save_convolutional_weights(layer *l, FILE *fp)
 {
-    if (l.binary) {
+    if (l->binary) {
         //save_convolutional_weights_binary(l, fp);
         //return;
     }
@@ -842,58 +865,60 @@ void save_convolutional_weights(layer l, FILE *fp)
         pull_convolutional_layer(l);
     }
 #endif
-    int num = l.n * l.c * l.size * l.size;
-    fwrite(l.biases, sizeof(float), l.n, fp);
-    if (l.batch_normalize) {
-        fwrite(l.scales, sizeof(float), l.n, fp);
-        fwrite(l.rolling_mean, sizeof(float), l.n, fp);
-        fwrite(l.rolling_variance, sizeof(float), l.n, fp);
+    int num = l->n * l->c * l->size * l->size;
+    fwrite(l->biases, sizeof(float), l->n, fp);
+    if (l->batch_normalize) {
+        fwrite(l->scales, sizeof(float), l->n, fp);
+        fwrite(l->rolling_mean, sizeof(float), l->n, fp);
+        fwrite(l->rolling_variance, sizeof(float), l->n, fp);
     }
-    fwrite(l.weights, sizeof(float), num, fp);
-    if (l.adam) {
+    fwrite(l->weights, sizeof(float), num, fp);
+    if (l->adam) {
         //fwrite(l.m, sizeof(float), num, fp);
         //fwrite(l.v, sizeof(float), num, fp);
     }
 }
 
-void save_batchnorm_weights(layer l, FILE *fp)
+void save_batchnorm_weights(layer *l, FILE *fp)
 {
 #ifdef GPU
     if (gpu_index >= 0) {
         pull_batchnorm_layer(l);
     }
 #endif
-    fwrite(l.scales, sizeof(float), l.c, fp);
-    fwrite(l.rolling_mean, sizeof(float), l.c, fp);
-    fwrite(l.rolling_variance, sizeof(float), l.c, fp);
+    fwrite(l->scales, sizeof(float), l->c, fp);
+    fwrite(l->rolling_mean, sizeof(float), l->c, fp);
+    fwrite(l->rolling_variance, sizeof(float), l->c, fp);
 }
 
-void save_connected_weights(layer l, FILE *fp)
+void save_connected_weights(layer *l, FILE *fp)
 {
 #ifdef GPU
     if (gpu_index >= 0) {
         pull_connected_layer(l);
     }
 #endif
-    fwrite(l.biases, sizeof(float), l.outputs, fp);
-    fwrite(l.weights, sizeof(float), l.outputs * l.inputs, fp);
-    if (l.batch_normalize) {
-        fwrite(l.scales, sizeof(float), l.outputs, fp);
-        fwrite(l.rolling_mean, sizeof(float), l.outputs, fp);
-        fwrite(l.rolling_variance, sizeof(float), l.outputs, fp);
+    fwrite(l->biases, sizeof(float), l->outputs, fp);
+    fwrite(l->weights, sizeof(float), l->outputs * l->inputs, fp);
+    if (l->batch_normalize) {
+        fwrite(l->scales, sizeof(float), l->outputs, fp);
+        fwrite(l->rolling_mean, sizeof(float), l->outputs, fp);
+        fwrite(l->rolling_variance, sizeof(float), l->outputs, fp);
     }
 }
 
-void save_weights_upto(network net, char *filename, int cutoff)
+void save_weights_upto(network *net, char *filename, int cutoff)
 {
 #ifdef GPU
-    if (net.gpu_index >= 0) {
-        cuda_set_device(net.gpu_index);
+    if (net->gpu_index >= 0) {
+        cuda_set_device(net->gpu_index);
     }
 #endif
     fprintf(stderr, "Saving weights to %s\n", filename);
     FILE *fp = fopen(filename, "wb");
-    if (!fp) file_error(filename);
+    if (!fp) {
+        file_error(filename);
+    }
 
     int major = 0;
     int minor = 1;
@@ -901,48 +926,48 @@ void save_weights_upto(network net, char *filename, int cutoff)
     fwrite(&major, sizeof(int), 1, fp);
     fwrite(&minor, sizeof(int), 1, fp);
     fwrite(&revision, sizeof(int), 1, fp);
-    fwrite(net.seen, sizeof(int), 1, fp);
+    fwrite(net->seen, sizeof(int), 1, fp);
 
-    for (int i = 0; i < net.n && i < cutoff; ++i) {
-        layer l = net.layers[i];
-        if (l.type == CONVOLUTIONAL || l.type == DECONVOLUTIONAL) {
+    for (int i = 0; i < net->n && i < cutoff; ++i) {
+        layer *l = &net->layers[i];
+        if (l->type == CONVOLUTIONAL || l->type == DECONVOLUTIONAL) {
             save_convolutional_weights(l, fp);
-        } if (l.type == CONNECTED) {
+        } if (l->type == CONNECTED) {
             save_connected_weights(l, fp);
-        } if (l.type == BATCHNORM) {
+        } if (l->type == BATCHNORM) {
             save_batchnorm_weights(l, fp);
-        } if (l.type == RNN) {
-            save_connected_weights(*(l.input_layer), fp);
-            save_connected_weights(*(l.self_layer), fp);
-            save_connected_weights(*(l.output_layer), fp);
-        } if (l.type == GRU) {
-            save_connected_weights(*(l.input_z_layer), fp);
-            save_connected_weights(*(l.input_r_layer), fp);
-            save_connected_weights(*(l.input_h_layer), fp);
-            save_connected_weights(*(l.state_z_layer), fp);
-            save_connected_weights(*(l.state_r_layer), fp);
-            save_connected_weights(*(l.state_h_layer), fp);
-        } if (l.type == CRNN) {
-            save_convolutional_weights(*(l.input_layer), fp);
-            save_convolutional_weights(*(l.self_layer), fp);
-            save_convolutional_weights(*(l.output_layer), fp);
-        } if (l.type == LOCAL) {
+        } if (l->type == RNN) {
+            save_connected_weights(l->input_layer, fp);
+            save_connected_weights(l->self_layer, fp);
+            save_connected_weights(l->output_layer, fp);
+        } if (l->type == GRU) {
+            save_connected_weights(l->input_z_layer, fp);
+            save_connected_weights(l->input_r_layer, fp);
+            save_connected_weights(l->input_h_layer, fp);
+            save_connected_weights(l->state_z_layer, fp);
+            save_connected_weights(l->state_r_layer, fp);
+            save_connected_weights(l->state_h_layer, fp);
+        } if (l->type == CRNN) {
+            save_convolutional_weights(l->input_layer, fp);
+            save_convolutional_weights(l->self_layer, fp);
+            save_convolutional_weights(l->output_layer, fp);
+        } if (l->type == LOCAL) {
 #ifdef GPU
             if (gpu_index >= 0) {
                 pull_local_layer(l);
             }
 #endif
-            int locations = l.out_w*l.out_h;
-            int size = l.size * l.size * l.c * l.n * locations;
-            fwrite(l.biases, sizeof(float), l.outputs, fp);
-            fwrite(l.weights, sizeof(float), size, fp);
+            int locations = l->out_w * l->out_h;
+            int size = l->size * l->size * l->c * l->n * locations;
+            fwrite(l->biases, sizeof(float), l->outputs, fp);
+            fwrite(l->weights, sizeof(float), size, fp);
         }
     }
     fclose(fp);
 }
-void save_weights(network net, char *filename)
+void save_weights(network *net, char *filename)
 {
-    save_weights_upto(net, filename, net.n);
+    save_weights_upto(net, filename, net->n);
 }
 
 void transpose_matrix(float *a, int rows, int cols)
@@ -958,19 +983,19 @@ void transpose_matrix(float *a, int rows, int cols)
     free(transpose);
 }
 
-void load_connected_weights(layer l, FILE *fp, int transpose)
+void load_connected_weights(layer *l, FILE *fp, int transpose)
 {
-    fread(l.biases, sizeof(float), l.outputs, fp);
-    fread(l.weights, sizeof(float), l.outputs * l.inputs, fp);
+    fread(l->biases, sizeof(float), l->outputs, fp);
+    fread(l->weights, sizeof(float), l->outputs * l->inputs, fp);
     if (transpose) {
-        transpose_matrix(l.weights, l.inputs, l.outputs);
+        transpose_matrix(l->weights, l->inputs, l->outputs);
     }
     //printf("Biases: %f mean %f variance\n", mean_array(l.biases, l.outputs), variance_array(l.biases, l.outputs));
     //printf("Weights: %f mean %f variance\n", mean_array(l.weights, l.outputs*l.inputs), variance_array(l.weights, l.outputs*l.inputs));
-    if (l.batch_normalize && (!l.dontloadscales)) {
-        fread(l.scales, sizeof(float), l.outputs, fp);
-        fread(l.rolling_mean, sizeof(float), l.outputs, fp);
-        fread(l.rolling_variance, sizeof(float), l.outputs, fp);
+    if (l->batch_normalize && (!l->dontloadscales)) {
+        fread(l->scales, sizeof(float), l->outputs, fp);
+        fread(l->rolling_mean, sizeof(float), l->outputs, fp);
+        fread(l->rolling_variance, sizeof(float), l->outputs, fp);
         //printf("Scales: %f mean %f variance\n", mean_array(l.scales, l.outputs), variance_array(l.scales, l.outputs));
         //printf("rolling_mean: %f mean %f variance\n", mean_array(l.rolling_mean, l.outputs), variance_array(l.rolling_mean, l.outputs));
         //printf("rolling_variance: %f mean %f variance\n", mean_array(l.rolling_variance, l.outputs), variance_array(l.rolling_variance, l.outputs));
@@ -982,11 +1007,11 @@ void load_connected_weights(layer l, FILE *fp, int transpose)
 #endif
 }
 
-void load_batchnorm_weights(layer l, FILE *fp)
+void load_batchnorm_weights(layer *l, FILE *fp)
 {
-    fread(l.scales, sizeof(float), l.c, fp);
-    fread(l.rolling_mean, sizeof(float), l.c, fp);
-    fread(l.rolling_variance, sizeof(float), l.c, fp);
+    fread(l->scales, sizeof(float), l->c, fp);
+    fread(l->rolling_mean, sizeof(float), l->c, fp);
+    fread(l->rolling_variance, sizeof(float), l->c, fp);
 #ifdef GPU
     if (gpu_index >= 0) {
         push_batchnorm_layer(l);
@@ -1011,53 +1036,55 @@ void load_convolutional_weights_binary(layer l, FILE *fp)
             unsigned char c = 0;
             fread(&c, sizeof(char), 1, fp);
             for (int k = 0; k < 8; ++k) {
-                if (j * 8 + k >= size) break;
+                if (j * 8 + k >= size) {
+                    break;
+                }
                 l.weights[index + k] = (c & 1 << k) ? mean : -mean;
             }
         }
     }
 #ifdef GPU
     if (gpu_index >= 0) {
-        push_convolutional_layer(l);
+        push_convolutional_layer(&l);
     }
 #endif
 }
 
-void load_convolutional_weights(layer l, FILE *fp)
+void load_convolutional_weights(layer *l, FILE *fp)
 {
-    if (l.binary) {
+    if (l->binary) {
         //load_convolutional_weights_binary(l, fp);
         //return;
     }
-    int num = l.n * l.c * l.size * l.size;
-    fread(l.biases, sizeof(float), l.n, fp);
-    if (l.batch_normalize && (!l.dontloadscales)) {
-        fread(l.scales, sizeof(float), l.n, fp);
-        fread(l.rolling_mean, sizeof(float), l.n, fp);
-        fread(l.rolling_variance, sizeof(float), l.n, fp);
+    int num = l->n * l->c * l->size * l->size;
+    fread(l->biases, sizeof(float), l->n, fp);
+    if (l->batch_normalize && (!l->dontloadscales)) {
+        fread(l->scales, sizeof(float), l->n, fp);
+        fread(l->rolling_mean, sizeof(float), l->n, fp);
+        fread(l->rolling_variance, sizeof(float), l->n, fp);
         if (0) {
-            for (int i = 0; i < l.n; ++i) {
-                printf("%g, ", l.rolling_mean[i]);
+            for (int i = 0; i < l->n; ++i) {
+                printf("%g, ", l->rolling_mean[i]);
             }
             printf("\n");
-            for (int i = 0; i < l.n; ++i) {
-                printf("%g, ", l.rolling_variance[i]);
+            for (int i = 0; i < l->n; ++i) {
+                printf("%g, ", l->rolling_variance[i]);
             }
             printf("\n");
         }
         if (0) {
-            fill_cpu(l.n, 0, l.rolling_mean, 1);
-            fill_cpu(l.n, 0, l.rolling_variance, 1);
+            fill_cpu(l->n, 0, l->rolling_mean, 1);
+            fill_cpu(l->n, 0, l->rolling_variance, 1);
         }
     }
-    fread(l.weights, sizeof(float), num, fp);
-    if (l.adam) {
+    fread(l->weights, sizeof(float), num, fp);
+    if (l->adam) {
         //fread(l.m, sizeof(float), num, fp);
         //fread(l.v, sizeof(float), num, fp);
     }
     //if (l.c == 3) scal_cpu(num, 1./256, l.weights, 1);
-    if (l.flipped) {
-        transpose_matrix(l.weights, l.c * l.size * l.size, l.n);
+    if (l->flipped) {
+        transpose_matrix(l->weights, l->c * l->size * l->size, l->n);
     }
     //if (l.binary) binarize_weights(l.weights, l.n, l.c*l.size*l.size, l.weights);
 #ifdef GPU
@@ -1077,7 +1104,9 @@ void load_weights_upto(network *net, char *filename, int start, int cutoff)
     fprintf(stderr, "Loading weights from %s...", filename);
     fflush(stdout);
     FILE *fp = fopen(filename, "rb");
-    if (!fp) file_error(filename);
+    if (!fp) {
+        file_error(filename);
+    }
 
     int major;
     int minor;
@@ -1089,40 +1118,42 @@ void load_weights_upto(network *net, char *filename, int start, int cutoff)
     int transpose = (major > 1000) || (minor > 1000);
 
     for (int i = start; i < net->n && i < cutoff; ++i) {
-        layer l = net->layers[i];
-        if (l.dontload) continue;
-        if (l.type == CONVOLUTIONAL || l.type == DECONVOLUTIONAL) {
+        layer *l = &net->layers[i];
+        if (l->dontload) {
+            continue;
+        }
+        if (l->type == CONVOLUTIONAL || l->type == DECONVOLUTIONAL) {
             load_convolutional_weights(l, fp);
         }
-        if (l.type == CONNECTED) {
+        if (l->type == CONNECTED) {
             load_connected_weights(l, fp, transpose);
         }
-        if (l.type == BATCHNORM) {
+        if (l->type == BATCHNORM) {
             load_batchnorm_weights(l, fp);
         }
-        if (l.type == CRNN) {
-            load_convolutional_weights(*(l.input_layer), fp);
-            load_convolutional_weights(*(l.self_layer), fp);
-            load_convolutional_weights(*(l.output_layer), fp);
+        if (l->type == CRNN) {
+            load_convolutional_weights(l->input_layer, fp);
+            load_convolutional_weights(l->self_layer, fp);
+            load_convolutional_weights(l->output_layer, fp);
         }
-        if (l.type == RNN) {
-            load_connected_weights(*(l.input_layer), fp, transpose);
-            load_connected_weights(*(l.self_layer), fp, transpose);
-            load_connected_weights(*(l.output_layer), fp, transpose);
+        if (l->type == RNN) {
+            load_connected_weights(l->input_layer, fp, transpose);
+            load_connected_weights(l->self_layer, fp, transpose);
+            load_connected_weights(l->output_layer, fp, transpose);
         }
-        if (l.type == GRU) {
-            load_connected_weights(*(l.input_z_layer), fp, transpose);
-            load_connected_weights(*(l.input_r_layer), fp, transpose);
-            load_connected_weights(*(l.input_h_layer), fp, transpose);
-            load_connected_weights(*(l.state_z_layer), fp, transpose);
-            load_connected_weights(*(l.state_r_layer), fp, transpose);
-            load_connected_weights(*(l.state_h_layer), fp, transpose);
+        if (l->type == GRU) {
+            load_connected_weights(l->input_z_layer, fp, transpose);
+            load_connected_weights(l->input_r_layer, fp, transpose);
+            load_connected_weights(l->input_h_layer, fp, transpose);
+            load_connected_weights(l->state_z_layer, fp, transpose);
+            load_connected_weights(l->state_r_layer, fp, transpose);
+            load_connected_weights(l->state_h_layer, fp, transpose);
         }
-        if (l.type == LOCAL) {
-            int locations = l.out_w * l.out_h;
-            int size = l.size * l.size * l.c * l.n * locations;
-            fread(l.biases, sizeof(float), l.outputs, fp);
-            fread(l.weights, sizeof(float), size, fp);
+        if (l->type == LOCAL) {
+            int locations = l->out_w * l->out_h;
+            int size = l->size * l->size * l->c * l->n * locations;
+            fread(l->biases, sizeof(float), l->outputs, fp);
+            fread(l->weights, sizeof(float), size, fp);
 #ifdef GPU
             if (gpu_index >= 0) {
                 push_local_layer(l);

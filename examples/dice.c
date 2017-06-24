@@ -9,7 +9,8 @@ void train_dice(char *cfgfile, char *weightfile)
     char *base = basecfg(cfgfile);
     char *backup_directory = "/home/pjreddie/backup/";
     printf("%s\n", base);
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -28,8 +29,8 @@ void train_dice(char *cfgfile, char *weightfile)
         data train = load_data_old(paths, imgs, plist->size, labels, 6, net.w, net.h);
         printf("Loaded: %lf seconds\n", sec(clock() - time));
 
-        time=clock();
-        float loss = train_network(net, train);
+        time = clock();
+        float loss = train_network(&net, train);
         if (avg_loss == -1) {
             avg_loss = loss;
         }
@@ -43,14 +44,15 @@ void train_dice(char *cfgfile, char *weightfile)
         if (i % 100 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
-            save_weights(net, buff);
+            save_weights(&net, buff);
         }
     }
 }
 
 void validate_dice(char *filename, char *weightfile)
 {
-    network net = parse_network_cfg(filename);
+    network net = {0};
+    parse_network_cfg(&net, filename);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -64,14 +66,15 @@ void validate_dice(char *filename, char *weightfile)
     free_list(plist);
 
     data val = load_data_old(paths, m, 0, labels, 6, net.w, net.h);
-    float *acc = network_accuracies(net, val, 2);
+    float *acc = network_accuracies(&net, val, 2);
     printf("Validation Accuracy: %f, %d images\n", acc[0], m);
     free_data(val);
 }
 
 void test_dice(char *cfgfile, char *weightfile, char *filename)
 {
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -96,8 +99,8 @@ void test_dice(char *cfgfile, char *weightfile, char *filename)
         }
         image im = load_image_color(input, net.w, net.h);
         float *X = im.data;
-        float *predictions = network_predict(net, X);
-        top_predictions(net, 6, indexes);
+        float *predictions = network_predict(&net, X);
+        top_predictions(&net, 6, indexes);
         for (i = 0; i < 6; ++i) {
             int index = indexes[i];
             printf("%s: %f\n", names[index], predictions[index]);

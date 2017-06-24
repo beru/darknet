@@ -8,7 +8,8 @@ void train_super(char *cfgfile, char *weightfile, int clear)
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
     float avg_loss = -1;
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -38,7 +39,7 @@ void train_super(char *cfgfile, char *weightfile, int clear)
 #endif
     clock_t time;
     //while (i*imgs < N*120) {
-    while (get_current_batch(net) < net.max_batches) {
+    while (get_current_batch(&net) < net.max_batches) {
         i += 1;
         time = clock();
 #ifdef THREAD
@@ -53,32 +54,33 @@ void train_super(char *cfgfile, char *weightfile, int clear)
         printf("Loaded: %lf seconds\n", sec(clock()-time));
 
         time=clock();
-        float loss = train_network(net, train);
+        float loss = train_network(&net, train);
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
 
         printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n",
-               i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+               i, loss, avg_loss, get_current_rate(&net), sec(clock() - time), i * imgs);
         if (i%1000 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
-            save_weights(net, buff);
+            save_weights(&net, buff);
         }
         if (i%100 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s.backup", backup_directory, base);
-            save_weights(net, buff);
+            save_weights(&net, buff);
         }
         free_data(train);
     }
     char buff[256];
     sprintf(buff, "%s/%s_final.weights", backup_directory, base);
-    save_weights(net, buff);
+    save_weights(&net, buff);
 }
 
 void test_super(char *cfgfile, char *weightfile, char *filename)
 {
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -104,8 +106,8 @@ void test_super(char *cfgfile, char *weightfile, char *filename)
 
         float *X = im.data;
         time=clock();
-        network_predict(net, X);
-        image out = get_network_image(net);
+        network_predict(&net, X);
+        image out = get_network_image(&net);
         printf("%s: Predicted in %f seconds.\n", input, sec(clock() - time));
         save_image(out, "out");
 

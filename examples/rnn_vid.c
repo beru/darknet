@@ -47,7 +47,7 @@ float_pair get_rnn_vid_data(network net, char **files, int n, int batch, int ste
             free_image(&im);
             free_image(&re);
         }
-        float *output = network_predict(net, input);
+        float *output = network_predict(&net, input);
 
         free(input);
 
@@ -75,7 +75,8 @@ void train_vid_rnn(char *cfgfile, char *weightfile)
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
     float avg_loss = -1;
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -90,17 +91,18 @@ void train_vid_rnn(char *cfgfile, char *weightfile)
     int steps = net.time_steps;
     int batch = net.batch / net.time_steps;
 
-    network extractor = parse_network_cfg("cfg/extractor.cfg");
+    network extractor = {0};
+    parse_network_cfg(&extractor, "cfg/extractor.cfg");
     load_weights(&extractor, "/home/pjreddie/trained/yolo-coco.conv");
 
-    while (get_current_batch(net) < net.max_batches) {
+    while (get_current_batch(&net) < net.max_batches) {
         i += 1;
         time = clock();
         float_pair p = get_rnn_vid_data(extractor, paths, N, batch, steps);
 
-        memcpy(net.input, p.x, net.inputs*net.batch);
-        memcpy(net.truth, p.y, net.truths*net.batch);
-        float loss = train_network_datum(net) / (net.batch);
+        memcpy(net.input, p.x, net.inputs * net.batch);
+        memcpy(net.truth, p.y, net.truths * net.batch);
+        float loss = train_network_datum(&net) / (net.batch);
 
 
         free(p.x);
@@ -111,17 +113,17 @@ void train_vid_rnn(char *cfgfile, char *weightfile)
         if (i%100==0) {
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
-            save_weights(net, buff);
+            save_weights(&net, buff);
         }
         if (i%10==0) {
             char buff[256];
             sprintf(buff, "%s/%s.backup", backup_directory, base);
-            save_weights(net, buff);
+            save_weights(&net, buff);
         }
     }
     char buff[256];
     sprintf(buff, "%s/%s_final.weights", backup_directory, base);
-    save_weights(net, buff);
+    save_weights(&net, buff);
 }
 
 
@@ -145,10 +147,12 @@ image save_reconstruction(network net, image *init, float *feat, char *name, int
 
 void generate_vid_rnn(char *cfgfile, char *weightfile)
 {
-    network extractor = parse_network_cfg("cfg/extractor.recon.cfg");
+    network extractor = {0};
+    parse_network_cfg(&extractor, "cfg/extractor.recon.cfg");
     load_weights(&extractor, "/home/pjreddie/trained/yolo-coco.conv");
 
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -162,7 +166,7 @@ void generate_vid_rnn(char *cfgfile, char *weightfile)
     for (int i = 0; i < 25; ++i) {
         image im = get_image_from_stream(cap);
         image re = resize_image(im, extractor.w, extractor.h);
-        feat = network_predict(extractor, re.data);
+        feat = network_predict(&extractor, re.data);
         if (i > 0) {
             printf("%f %f\n", mean_array(feat, 14*14*512), variance_array(feat, 14*14*512));
             printf("%f %f\n", mean_array(next, 14*14*512), variance_array(next, 14*14*512));
@@ -170,7 +174,7 @@ void generate_vid_rnn(char *cfgfile, char *weightfile)
             axpy_cpu(14*14*512, -1, feat, 1, next, 1);
             printf("%f\n", mse_array(next, 14*14*512));
         }
-        next = network_predict(net, feat);
+        next = network_predict(&net, feat);
 
         free_image(&im);
 
@@ -180,7 +184,7 @@ void generate_vid_rnn(char *cfgfile, char *weightfile)
         free_image(&re);
     }
     for (i = 0; i < 30; ++i) {
-        next = network_predict(net, next);
+        next = network_predict(&net, next);
         image new = save_reconstruction(extractor, &last, next, "new", i);
         free_image(&last);
         last = new;

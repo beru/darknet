@@ -238,7 +238,7 @@ dbox diou(box a, box b)
     return dd;
 }
 
-typedef struct{
+typedef struct {
     int index;
     int class;
     float **probs;

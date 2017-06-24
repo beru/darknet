@@ -5,7 +5,8 @@
 void demo_art(char *cfgfile, char *weightfile, int cam_index)
 {
 #ifdef OPENCV
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -28,7 +29,7 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
         image in_s = resize_image(in, net.w, net.h);
         show_image(in, window);
 
-        float *p = network_predict(net, in_s.data);
+        float *p = network_predict(&net, in_s.data);
 
         printf("\033[2J");
         printf("\033[1;1H");

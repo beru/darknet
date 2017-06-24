@@ -42,28 +42,28 @@ void optimize_picture(network *net, image orig, int max_layer, float scale, floa
     image delta = make_image(im.w, im.h, im.c);
 
 #ifdef GPU
-    net->delta_gpu = cuda_make_array(delta.data, im.w*im.h*im.c);
+    net->delta_gpu = cuda_make_array(delta.data, im.w * im.h * im.c);
     cuda_push_array(net->input_gpu, im.data, net->inputs);
 
-    forward_network_gpu(*net);
+    forward_network_gpu(net);
     copy_ongpu(last.outputs, last.output_gpu, 1, last.delta_gpu, 1);
 
     cuda_pull_array(last.delta_gpu, last.delta, last.outputs);
     calculate_loss(last.delta, last.delta, last.outputs, thresh);
     cuda_push_array(last.delta_gpu, last.delta, last.outputs);
 
-    backward_network_gpu(*net);
+    backward_network_gpu(net);
 
-    cuda_pull_array(net->delta_gpu, delta.data, im.w*im.h*im.c);
+    cuda_pull_array(net->delta_gpu, delta.data, im.w * im.h * im.c);
     cuda_free(net->delta_gpu);
     net->delta_gpu = 0;
 #else
     net->input = im.data;
     net->delta = delta.data;
-    forward_network(*net);
+    forward_network(net);
     copy_cpu(last.outputs, last.output, 1, last.delta, 1);
     calculate_loss(last.output, last.delta, last.outputs, thresh);
-    backward_network(*net);
+    backward_network(net);
 #endif
 
     if (flip) flip_image(delta);
@@ -121,45 +121,45 @@ void smooth(image recon, image update, float lambda, int num)
     }
 }
 
-void reconstruct_picture(network net, float *features, image recon, image update, float rate, float momentum, float lambda, int smooth_size, int iters)
+void reconstruct_picture(network *net, float *features, image recon, image update, float rate, float momentum, float lambda, int smooth_size, int iters)
 {
     int iter = 0;
-    layer l = get_network_output_layer(net);
+    layer *l = get_network_output_layer(net);
     for (iter = 0; iter < iters; ++iter) {
         image delta = make_image(recon.w, recon.h, recon.c);
 
 #ifdef GPU
-        cuda_push_array(net.input_gpu, recon.data, recon.w*recon.h*recon.c);
+        cuda_push_array(net->input_gpu, recon.data, recon.w * recon.h * recon.c);
         //cuda_push_array(net.truth_gpu, features, net.truths);
-        net.delta_gpu = cuda_make_array(delta.data, delta.w*delta.h*delta.c);
+        net->delta_gpu = cuda_make_array(delta.data, delta.w * delta.h * delta.c);
 
         forward_network_gpu(net);
-        cuda_push_array(l.delta_gpu, features, l.outputs);
-        axpy_ongpu(l.outputs, -1, l.output_gpu, 1, l.delta_gpu, 1);
+        cuda_push_array(l->delta_gpu, features, l->outputs);
+        axpy_ongpu(l->outputs, -1, l->output_gpu, 1, l->delta_gpu, 1);
         backward_network_gpu(net);
 
-        cuda_pull_array(net.delta_gpu, delta.data, delta.w*delta.h*delta.c);
+        cuda_pull_array(net->delta_gpu, delta.data, delta.w*delta.h*delta.c);
 
-        cuda_free(net.delta_gpu);
+        cuda_free(net->delta_gpu);
 #else
-        net.input = recon.data;
-        net.delta = delta.data;
-        net.truth = features;
+        net->input = recon.data;
+        net->delta = delta.data;
+        net->truth = features;
 
         forward_network(net);
         backward_network(net);
 #endif
 
         //normalize_array(delta.data, delta.w*delta.h*delta.c);
-        axpy_cpu(recon.w*recon.h*recon.c, 1, delta.data, 1, update.data, 1);
+        axpy_cpu(recon.w * recon.h * recon.c, 1, delta.data, 1, update.data, 1);
         //smooth(recon, update, lambda, smooth_size);
 
-        axpy_cpu(recon.w*recon.h*recon.c, rate, update.data, 1, recon.data, 1);
-        scal_cpu(recon.w*recon.h*recon.c, momentum, update.data, 1);
+        axpy_cpu(recon.w * recon.h * recon.c, rate, update.data, 1, recon.data, 1);
+        scal_cpu(recon.w * recon.h * recon.c, momentum, update.data, 1);
 
-        float mag = mag_array(delta.data, recon.w*recon.h*recon.c);
+        float mag = mag_array(delta.data, recon.w * recon.h * recon.c);
         printf("mag: %f\n", mag);
-        //scal_cpu(recon.w*recon.h*recon.c, 600/mag, recon.data, 1);
+        //scal_cpu(recon.w*recon.h*recon.c, 600 / mag, recon.data, 1);
 
         constrain_image(recon);
         free_image(&delta);
@@ -189,7 +189,8 @@ void run_lsd(int argc, char **argv)
     int reconstruct = find_arg(argc, argv, "-reconstruct");
     int smooth_size = find_int_arg(argc, argv, "-smooth", 1);
 
-    network net = parse_network_cfg(cfg);
+    network net = {0};
+    parse_network_cfg(&net, cfg);
     load_weights(&net, weights);
     char *cfgbase = basecfg(cfg);
     char *imbase = basecfg(input);
@@ -203,7 +204,7 @@ void run_lsd(int argc, char **argv)
         im = letterbox_image(im, net.w, net.h);
 
         int zz = 0;
-        network_predict(net, im.data);
+        network_predict(&net, im.data);
         image out_im = get_network_image(net);
         image crop = crop_image(out_im, zz, zz, out_im.w-2*zz, out_im.h-2*zz);
         //flip_image(crop);
@@ -301,7 +302,8 @@ void run_nightmare(int argc, char **argv)
     int reconstruct = find_arg(argc, argv, "-reconstruct");
     int smooth_size = find_int_arg(argc, argv, "-smooth", 1);
 
-    network net = parse_network_cfg(cfg);
+    network net = {0};
+    parse_network_cfg(&net, cfg);
     load_weights(&net, weights);
     char *cfgbase = basecfg(cfg);
     char *imbase = basecfg(input);
@@ -327,19 +329,20 @@ void run_nightmare(int argc, char **argv)
         im = letterbox_image(im, net.w, net.h);
         //resize_network(&net, im.w, im.h);
 
-        network_predict(net, im.data);
-        if (net.layers[net.n-1].type == REGION) {
+        network_predict(&net, im.data);
+        if (net.layers[net.n - 1].type == REGION) {
             printf("region!\n");
-            zero_objectness(net.layers[net.n-1]);
+            zero_objectness(&net.layers[net.n - 1]);
         }
-        image out_im = copy_image(get_network_image(net));
+        image out_im = copy_image(get_network_image(&net));
         /*
            image crop = crop_image(out_im, zz, zz, out_im.w-2*zz, out_im.h-2*zz);
         //flip_image(crop);
         image f_im = resize_image(crop, out_im.w, out_im.h);
         free_image(&crop);
          */
-        printf("%d features\n", out_im.w*out_im.h*out_im.c);
+        printf("%d features\n",
+               out_im.w * out_im.h * out_im.c);
 
         features = out_im.data;
 
@@ -362,7 +365,7 @@ void run_nightmare(int argc, char **argv)
             fprintf(stderr, "%d, ", n);
             fflush(stderr);
             if (reconstruct) {
-                reconstruct_picture(net, features, im, update, rate, momentum, lambda, smooth_size, 1);
+                reconstruct_picture(&net, features, im, update, rate, momentum, lambda, smooth_size, 1);
                 //if ((n+1)%30 == 0) rate *= .5;
                 show_image(im, "reconstruction");
 #ifdef OPENCV

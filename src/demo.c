@@ -55,14 +55,14 @@ void *detect_in_thread(void *ptr)
     running = 1;
     float nms = .4;
 
-    layer l = net.layers[net.n-1];
-    float *X = buff_letter[(buff_index+2)%3].data;
-    float *prediction = network_predict(net, X);
+    layer *l = &net.layers[net.n - 1];
+    float *X = buff_letter[(buff_index + 2) % 3].data;
+    float *prediction = network_predict(&net, X);
 
-    memcpy(predictions[demo_index], prediction, l.outputs*sizeof(float));
-    mean_arrays(predictions, demo_frame, l.outputs, avg);
-    l.output = last_avg2;
-    if (demo_delay == 0) l.output = avg;
+    memcpy(predictions[demo_index], prediction, l->outputs * sizeof(float));
+    mean_arrays(predictions, demo_frame, l->outputs, avg);
+    l->output = last_avg2;
+    if (demo_delay == 0) l->output = avg;
     if (l.type == DETECTION) {
         get_detection_boxes(l, 1, 1, demo_thresh, probs, boxes, 0);
     }else if (l.type == REGION) {
@@ -70,7 +70,7 @@ void *detect_in_thread(void *ptr)
     }else {
         error("Last layer must produce detections\n");
     }
-    if (nms > 0) do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
+    if (nms > 0) do_nms_obj(boxes, probs, l->w * l->h * l->n, l->classes, nms);
 
     printf("\033[2J");
     printf("\033[1;1H");
@@ -79,7 +79,7 @@ void *detect_in_thread(void *ptr)
     image display = buff[(buff_index+2) % 3];
     draw_detections(display, demo_detections, demo_thresh, boxes, probs, demo_names, demo_alphabet, demo_classes);
 
-    demo_index = (demo_index + 1)%demo_frame;
+    demo_index = (demo_index + 1) % demo_frame;
     running = 0;
     return 0;
 }
@@ -94,9 +94,9 @@ void *fetch_in_thread(void *ptr)
 
 void *display_in_thread(void *ptr)
 {
-    show_image_cv(buff[(buff_index + 1)%3], "Demo", ipl);
+    show_image_cv(buff[(buff_index + 1) % 3], "Demo", ipl);
     int c = cvWaitKey(1);
-    if (c != -1) c = c%256;
+    if (c != -1) c %= 256;
     if (c == 10) {
         if (demo_delay == 0) demo_delay = 60;
         else if (demo_delay == 5) demo_delay = 0;

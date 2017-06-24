@@ -6,36 +6,34 @@
 #include <stdio.h>
 #include <assert.h>
 
-layer make_shortcut_layer(int batch, int index, int w, int h, int c, int w2, int h2, int c2)
+void make_shortcut_layer(layer *l, int batch, int index, int w, int h, int c, int w2, int h2, int c2)
 {
     fprintf(stderr, "Shortcut Layer: %d\n", index);
-    layer l = {0};
-    l.type = SHORTCUT;
-    l.batch = batch;
-    l.w = w2;
-    l.h = h2;
-    l.c = c2;
-    l.out_w = w;
-    l.out_h = h;
-    l.out_c = c;
-    l.outputs = w * h * c;
-    l.inputs = l.outputs;
+    l->type = SHORTCUT;
+    l->batch = batch;
+    l->w = w2;
+    l->h = h2;
+    l->c = c2;
+    l->out_w = w;
+    l->out_h = h;
+    l->out_c = c;
+    l->outputs = w * h * c;
+    l->inputs = l->outputs;
 
-    l.index = index;
+    l->index = index;
 
-    l.delta =  calloc(l.outputs * batch, sizeof(float));
-    l.output = calloc(l.outputs * batch, sizeof(float));;
+    l->delta =  calloc(l->outputs * batch, sizeof(float));
+    l->output = calloc(l->outputs * batch, sizeof(float));;
 
-    l.forward = forward_shortcut_layer;
-    l.backward = backward_shortcut_layer;
+    l->forward = forward_shortcut_layer;
+    l->backward = backward_shortcut_layer;
 #ifdef GPU
-    l.forward_gpu = forward_shortcut_layer_gpu;
-    l.backward_gpu = backward_shortcut_layer_gpu;
+    l->forward_gpu = forward_shortcut_layer_gpu;
+    l->backward_gpu = backward_shortcut_layer_gpu;
 
-    l.delta_gpu =  cuda_make_array(l.delta, l.outputs * batch);
-    l.output_gpu = cuda_make_array(l.output, l.outputs * batch);
+    l->delta_gpu =  cuda_make_array(l->delta, l->outputs * batch);
+    l->output_gpu = cuda_make_array(l->output, l->outputs * batch);
 #endif
-    return l;
 }
 
 void forward_shortcut_layer(const layer l, network net)

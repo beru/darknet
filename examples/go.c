@@ -143,12 +143,13 @@ void train_go(char *cfgfile,
     for (int i = 0; i < ngpus; ++i) {
         srand(seed);
         cuda_set_device(gpus[i]);
-        nets[i] = load_network(cfgfile, weightfile, clear);
+        load_network(&nets[i], cfgfile, weightfile, clear);
         nets[i].learning_rate *= ngpus;
     }
     network net = nets[0];
 #else
-    network net = load_network(cfgfile, weightfile, clear);
+    network net = {0};
+    load_network(&net, cfgfile, weightfile, clear);
 #endif
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
 
@@ -161,7 +162,7 @@ void train_go(char *cfgfile,
     int N = m.n;
     printf("Moves: %d\n", N);
     int epoch = (*net.seen) / N;
-    while (get_current_batch(net) < net.max_batches || net.max_batches == 0) {
+    while (get_current_batch(&net) < net.max_batches || net.max_batches == 0) {
         clock_t time = clock();
 
         data train = random_go_moves(m,
@@ -176,12 +177,12 @@ void train_go(char *cfgfile,
         float loss = 0;
 #ifdef GPU
         if (ngpus == 1) {
-            loss = train_network(net, train);
+            loss = train_network(&net, train);
         }else {
             loss = train_networks(nets, ngpus, train, 4);
         }
 #else
-        loss = train_network(net, train);
+        loss = train_network(&net, train);
 #endif
         free_data(train);
 
@@ -189,29 +190,32 @@ void train_go(char *cfgfile,
             avg_loss = loss;
         }
         avg_loss = avg_loss*.95 + loss*.05;
-        printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), (float)(*net.seen)/N, loss, avg_loss, get_current_rate(net), sec(clock()-time), *net.seen);
+        printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n",
+               get_current_batch(&net), (float)(*net.seen) / N, loss, avg_loss,
+               get_current_rate(&net), sec(clock() - time), *net.seen);
         if (*net.seen / N > epoch) {
             epoch = *net.seen / N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, epoch);
-            save_weights(net, buff);
+            save_weights(&net, buff);
 
         }
-        if (get_current_batch(net)%1000 == 0) {
+        if (get_current_batch(&net)%1000 == 0) {
             char buff[256];
             sprintf(buff, "%s/%s.backup", backup_directory, base);
-            save_weights(net, buff);
+            save_weights(&net, buff);
         }
-        if (get_current_batch(net)%10000 == 0) {
+        if (get_current_batch(&net)%10000 == 0) {
             char buff[256];
-            sprintf(buff, "%s/%s_%d.backup", backup_directory, base, get_current_batch(net));
-            save_weights(net, buff);
+            sprintf(buff, "%s/%s_%d.backup",
+                    backup_directory, base, get_current_batch(&net));
+            save_weights(&net, buff);
         }
     }
     sprintf(buff, "%s/%s.weights", backup_directory, base);
-    save_weights(net, buff);
+    save_weights(&net, buff);
 
-    free_network(net);
+    free_network(&net);
     free(base);
 }
 
@@ -307,7 +311,7 @@ void flip_board(float *board)
 
 void predict_move(network net, float *board, float *move, int multi)
 {
-    float *output = network_predict(net, board);
+    float *output = network_predict(&net, board);
     copy_cpu(19*19+1, output, 1, move, 1);
     if (multi) {
         image bim = float_to_image(19, 19, 1, board);
@@ -317,7 +321,7 @@ void predict_move(network net, float *board, float *move, int multi)
                 flip_image(bim);
             }
 
-            float *output = network_predict(net, board);
+            float *output = network_predict(&net, board);
             image oim = float_to_image(19, 19, 1, output);
 
             if (i >= 4) {
@@ -479,7 +483,8 @@ void valid_go(char *cfgfile, char *weightfile, int multi, char *filename)
     srand(time(0));
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -525,7 +530,8 @@ int print_game(float *board, FILE *fp)
 
 void engine_go(char *filename, char *weightfile, int multi)
 {
-    network net = parse_network_cfg(filename);
+    network net = {0};
+    parse_network_cfg(&net, filename);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -715,7 +721,8 @@ void engine_go(char *filename, char *weightfile, int multi)
 
 void test_go(char *cfg, char *weights, int multi)
 {
-    network net = parse_network_cfg(cfg);
+    network net = {0};
+    parse_network_cfg(&net, cfg);
     if (weights) {
         load_weights(&net, weights);
     }
@@ -823,14 +830,15 @@ float score_game(float *board)
 
 void self_go(char *filename, char *weightfile, char *f2, char *w2, int multi)
 {
-    network net = parse_network_cfg(filename);
+    network net = {0};
+    parse_network_cfg(&net, filename);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
 
     network net2 = net;
     if (f2) {
-        net2 = parse_network_cfg(f2);
+        parse_network_cfg(&net2, f2);
         if (w2) {
             load_weights(&net2, w2);
         }

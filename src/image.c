@@ -647,7 +647,7 @@ image make_random_image(int w, int h, int c)
 
 image float_to_image(int w, int h, int c, float *data)
 {
-    image out = make_empty_image(w,h,c);
+    image out = make_empty_image(w, h, c);
     out.data = data;
     return out;
 }

@@ -2,7 +2,7 @@
 
 #include "list.h"
 
-typedef struct{
+typedef struct {
     char *key;
     char *val;
     int used;

@@ -14,7 +14,8 @@ void train_compare(char *cfgfile, char *weightfile)
     char *base = basecfg(cfgfile);
     char *backup_directory = "/home/pjreddie/backup/";
     printf("%s\n", base);
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -57,7 +58,7 @@ void train_compare(char *cfgfile, char *weightfile)
 #endif
         printf("Loaded: %lf seconds\n", sec(clock()-time));
         time = clock();
-        float loss = train_network(net, train);
+        float loss = train_network(&net, train);
         if (avg_loss == -1) {
             avg_loss = loss;
         }
@@ -69,7 +70,7 @@ void train_compare(char *cfgfile, char *weightfile)
             char buff[256];
             sprintf(buff, "%s/%s_%d_minor_%d.weights",
                     backup_directory, base, epoch, i);
-            save_weights(net, buff);
+            save_weights(&net, buff);
         }
         if (*net.seen / N > epoch) {
             epoch = *net.seen / N;
@@ -77,7 +78,7 @@ void train_compare(char *cfgfile, char *weightfile)
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights",
                     backup_directory, base, epoch);
-            save_weights(net, buff);
+            save_weights(&net, buff);
             if (epoch % 22 == 0) {
                 net.learning_rate *= .1;
             }
@@ -87,7 +88,7 @@ void train_compare(char *cfgfile, char *weightfile)
     pthread_join(load_thread, 0);
 #endif
     free_data(buffer);
-    free_network(net);
+    free_network(&net);
     free_ptrs((void**)paths, plist->size);
     free_list(plist);
     free(base);
@@ -96,7 +97,8 @@ void train_compare(char *cfgfile, char *weightfile)
 void validate_compare(char *filename, char *weightfile)
 {
     int i = 0;
-    network net = parse_network_cfg(filename);
+    network net = {0};
+    parse_network_cfg(&net, filename);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -150,7 +152,7 @@ void validate_compare(char *filename, char *weightfile)
         printf("Loaded: %d images in %lf seconds\n", val.X.rows, sec(clock()-time));
 
         time = clock();
-        matrix pred = network_predict_data(net, val);
+        matrix pred = network_predict_data(&net, val);
         for (int j = 0; j < val.y.rows; ++j) {
             for (int k = 0; k < 20; ++k) {
                 if (val.y.vals[j][k * 2] != val.y.vals[j][k * 2 + 1]) {
@@ -202,7 +204,7 @@ int bbox_comparator(const void *a, const void *b)
     float *X  = calloc(net.w * net.h * net.c, sizeof(float));
     memcpy(X,                         im1.data, im1.w * im1.h * im1.c * sizeof(float));
     memcpy(X + im1.w * im1.h * im1.c, im2.data, im2.w * im2.h * im2.c * sizeof(float));
-    float *predictions = network_predict(net, X);
+    float *predictions = network_predict(&net, X);
     
     free_image(&im1);
     free_image(&im2);
@@ -231,7 +233,7 @@ void bbox_fight(network net, sortable_bbox *a, sortable_bbox *b, int classes, in
     float *X  = calloc(net.w * net.h * net.c, sizeof(float));
     memcpy(X,                         im1.data, im1.w * im1.h * im1.c * sizeof(float));
     memcpy(X + im1.w * im1.h * im1.c, im2.data, im2.w * im2.h * im2.c * sizeof(float));
-    float *predictions = network_predict(net, X);
+    float *predictions = network_predict(&net, X);
     ++total_compares;
 
     for (int i = 0; i < classes; ++i) {
@@ -248,7 +250,8 @@ void bbox_fight(network net, sortable_bbox *a, sortable_bbox *b, int classes, in
 
 void SortMaster3000(char *filename, char *weightfile)
 {
-    network net = parse_network_cfg(filename);
+    network net = {0};
+    parse_network_cfg(&net, filename);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -280,7 +283,8 @@ void SortMaster3000(char *filename, char *weightfile)
 void BattleRoyaleWithCheese(char *filename, char *weightfile)
 {
     int classes = 20;
-    network net = parse_network_cfg(filename);
+    network net = {0};
+    parse_network_cfg(&net, filename);
     if (weightfile) {
         load_weights(&net, weightfile);
     }

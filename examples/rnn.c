@@ -139,7 +139,8 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
     float avg_loss = -1;
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -158,7 +159,7 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
     }
 
     clock_t time;
-    while (get_current_batch(net) < net.max_batches) {
+    while (get_current_batch(&net) < net.max_batches) {
         i += 1;
         time=clock();
         float_pair p;
@@ -168,16 +169,17 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
             p = get_rnn_data(text, offsets, inputs, size, streams, steps);
         }
 
-        memcpy(net.input, p.x, net.inputs*net.batch);
-        memcpy(net.truth, p.y, net.truths*net.batch);
-        float loss = train_network_datum(net) / (batch);
+        memcpy(net.input, p.x, net.inputs * net.batch);
+        memcpy(net.truth, p.y, net.truths * net.batch);
+        float loss = train_network_datum(&net) / (batch);
         free(p.x);
         free(p.y);
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
 
-        int chars = get_current_batch(net)*batch;
-        fprintf(stderr, "%d: %f, %f avg, %f rate, %lf seconds, %f epochs\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), (float) chars/size);
+        int chars = get_current_batch(&net) * batch;
+        fprintf(stderr, "%d: %f, %f avg, %f rate, %lf seconds, %f epochs\n",
+                i, loss, avg_loss, get_current_rate(&net), sec(clock() - time), (float)chars / size);
 
         for (int j = 0; j < streams; ++j) {
             //printf("%d\n", j);
@@ -191,17 +193,17 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
         if (i%1000==0) {
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
-            save_weights(net, buff);
+            save_weights(&net, buff);
         }
         if (i%10==0) {
             char buff[256];
             sprintf(buff, "%s/%s.backup", backup_directory, base);
-            save_weights(net, buff);
+            save_weights(&net, buff);
         }
     }
     char buff[256];
     sprintf(buff, "%s/%s_final.weights", backup_directory, base);
-    save_weights(net, buff);
+    save_weights(&net, buff);
 }
 
 void print_symbol(int n, char **tokens) {
@@ -224,7 +226,8 @@ void test_char_rnn(char *cfgfile, char *weightfile, int num, char *seed, float t
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -238,7 +241,7 @@ void test_char_rnn(char *cfgfile, char *weightfile, int num, char *seed, float t
     /*
        fill_cpu(inputs, 0, input, 1);
        for (i = 0; i < 10; ++i) {
-       network_predict(net, input);
+       network_predict(&net, input);
        }
        fill_cpu(inputs, 0, input, 1);
      */
@@ -246,7 +249,7 @@ void test_char_rnn(char *cfgfile, char *weightfile, int num, char *seed, float t
     for (int i = 0; i < len-1; ++i) {
         c = seed[i];
         input[c] = 1;
-        network_predict(net, input);
+        network_predict(&net, input);
         input[c] = 0;
         print_symbol(c, tokens);
     }
@@ -254,7 +257,7 @@ void test_char_rnn(char *cfgfile, char *weightfile, int num, char *seed, float t
     print_symbol(c, tokens);
     for (int i = 0; i < num; ++i) {
         input[c] = 1;
-        float *out = network_predict(net, input);
+        float *out = network_predict(&net, input);
         input[c] = 0;
         for (int j = 32; j < 127; ++j) {
             //printf("%d %c %f\n",j, j, out[j]);
@@ -280,7 +283,8 @@ void test_tactic_rnn(char *cfgfile, char *weightfile, int num, float temp, int r
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -293,7 +297,7 @@ void test_tactic_rnn(char *cfgfile, char *weightfile, int num, float temp, int r
 
     while ((c = getc(stdin)) != EOF) {
         input[c] = 1;
-        out = network_predict(net, input);
+        out = network_predict(&net, input);
         input[c] = 0;
     }
     for (int i = 0; i < num; ++i) {
@@ -306,7 +310,7 @@ void test_tactic_rnn(char *cfgfile, char *weightfile, int num, float temp, int r
         print_symbol(c, tokens);
 
         input[c] = 1;
-        out = network_predict(net, input);
+        out = network_predict(&net, input);
         input[c] = 0;
     }
     printf("\n");
@@ -317,7 +321,8 @@ void valid_tactic_rnn(char *cfgfile, char *weightfile, char *seed)
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -331,7 +336,7 @@ void valid_tactic_rnn(char *cfgfile, char *weightfile, char *seed)
     for (int i = 0; i < len; ++i) {
         c = seed[i];
         input[(int)c] = 1;
-        network_predict(net, input);
+        network_predict(&net, input);
         input[(int)c] = 0;
     }
     float sum = 0;
@@ -344,7 +349,7 @@ void valid_tactic_rnn(char *cfgfile, char *weightfile, char *seed)
         if (next < 0 || next >= 255) error("Out of range character");
 
         input[c] = 1;
-        float *out = network_predict(net, input);
+        float *out = network_predict(&net, input);
         input[c] = 0;
 
         if (c == '.' && next == '\n') in = 0;
@@ -368,7 +373,8 @@ void valid_char_rnn(char *cfgfile, char *weightfile, char *seed)
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -382,7 +388,7 @@ void valid_char_rnn(char *cfgfile, char *weightfile, char *seed)
     for (int i = 0; i < len; ++i) {
         c = seed[i];
         input[(int)c] = 1;
-        network_predict(net, input);
+        network_predict(&net, input);
         input[(int)c] = 0;
     }
     float sum = 0;
@@ -395,7 +401,7 @@ void valid_char_rnn(char *cfgfile, char *weightfile, char *seed)
         ++count;
         if (next == ' ' || next == '\n' || next == '\t') ++words;
         input[c] = 1;
-        float *out = network_predict(net, input);
+        float *out = network_predict(&net, input);
         input[c] = 0;
         sum += log(out[next])/log2;
         c = next;
@@ -408,7 +414,8 @@ void vec_char_rnn(char *cfgfile, char *weightfile, char *seed)
     char *base = basecfg(cfgfile);
     fprintf(stderr, "%s\n", base);
 
-    network net = parse_network_cfg(cfgfile);
+    network net = {0};
+    parse_network_cfg(&net, cfgfile);
     if (weightfile) {
         load_weights(&net, weightfile);
     }
@@ -423,7 +430,7 @@ void vec_char_rnn(char *cfgfile, char *weightfile, char *seed)
         for (int i = 0; i < seed_len; ++i) {
             c = seed[i];
             input[(int)c] = 1;
-            network_predict(net, input);
+            network_predict(&net, input);
             input[(int)c] = 0;
         }
         strip(line);
@@ -431,12 +438,12 @@ void vec_char_rnn(char *cfgfile, char *weightfile, char *seed)
         for (int i = 0; i < str_len; ++i) {
             c = line[i];
             input[(int)c] = 1;
-            network_predict(net, input);
+            network_predict(&net, input);
             input[(int)c] = 0;
         }
         c = ' ';
         input[(int)c] = 1;
-        network_predict(net, input);
+        network_predict(&net, input);
         input[(int)c] = 0;
 
         layer l = net.layers[0];
