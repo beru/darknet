@@ -196,7 +196,7 @@ void test_box()
 
     box b = {.5, 0, .2, .2};
 
-    float iou = box_iou(a,b);
+    float iou = box_iou(a, b);
     iou = (1 - iou) * (1 - iou);
     printf("%f\n", iou);
     dbox d = diou(a, b);

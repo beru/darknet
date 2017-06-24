@@ -42,7 +42,7 @@ void demo_art(char *cfgfile, char *weightfile, int cam_index)
             }
         }
         score = score;
-        printf("I APPRECIATE THIS ARTWORK: %10.7f%%\n", score*100);
+        printf("I APPRECIATE THIS ARTWORK: %10.7f%%\n", score * 100);
         printf("[");
 	    int upper = 30;
         for (int i = 0; i < upper; ++i) {

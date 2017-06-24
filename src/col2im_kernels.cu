@@ -10,7 +10,8 @@ extern "C" {
 // src: https://github.com/BVLC/caffe/blob/master/src/caffe/util/im2col.cu
 // You may also want to read: https://github.com/BVLC/caffe/blob/master/LICENSE
 
-__global__ void col2im_gpu_kernel(const int n, const float* data_col,
+__global__
+void col2im_gpu_kernel(const int n, const float* data_col,
         const int height, const int width, const int ksize,
         const int pad,
         const int stride,

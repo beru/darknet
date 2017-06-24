@@ -122,7 +122,7 @@ void operations(char *cfgfile)
         }
     }
     printf("Floating Point Operations: %ld\n", ops);
-    printf("Floating Point Operations: %.2f Bn\n", (float)ops/1000000000.);
+    printf("Floating Point Operations: %.2f Bn\n", (float)ops / 1000000000.);
 }
 
 void oneoff(char *cfgfile, char *weightfile, char *outfile)

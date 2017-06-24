@@ -15,7 +15,8 @@ void train_yolo(char *cfgfile, char *weightfile)
     if (weightfile) {
         load_weights(&net, weightfile);
     }
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
     int imgs = net.batch * net.subdivisions;
     int i = *net.seen / imgs;
     data train, buffer;
@@ -368,7 +369,8 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
         float *X = sized.data;
         time=clock();
         network_predict(&net, X);
-        printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
+        printf("%s: Predicted in %f seconds.\n",
+               input, sec(clock() - time));
         get_detection_boxes(l, 1, 1, thresh, probs, boxes, 0);
         if (nms) {
             do_nms_sort(boxes, probs, l->side * l->side * l->n, l->classes, nms);

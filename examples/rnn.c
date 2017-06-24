@@ -364,7 +364,8 @@ void valid_tactic_rnn(char *cfgfile, char *weightfile, char *seed)
         ++count;
         sum += log(out[next])/log2;
         c = next;
-        printf("%d %d Perplexity: %4.4f    Word Perplexity: %4.4f\n", count, words, pow(2, -sum/count), pow(2, -sum/words));
+        printf("%d %d Perplexity: %4.4f    Word Perplexity: %4.4f\n",
+               count, words, pow(2, -sum / count), pow(2, -sum / words));
     }
 }
 
@@ -405,7 +406,8 @@ void valid_char_rnn(char *cfgfile, char *weightfile, char *seed)
         input[c] = 0;
         sum += log(out[next])/log2;
         c = next;
-        printf("%d Perplexity: %4.4f    Word Perplexity: %4.4f\n", count, pow(2, -sum/count), pow(2, -sum/words));
+        printf("%d Perplexity: %4.4f    Word Perplexity: %4.4f\n",
+               count, pow(2, -sum / count), pow(2, -sum / words));
     }
 }
 

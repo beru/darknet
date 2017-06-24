@@ -15,7 +15,8 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
         load_weights(&net, weightfile);
     }
     if (clear) *net.seen = 0;
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
     int imgs = 1024;
     list *plist = get_paths("/home/pjreddie/tag/train.list");
     char **paths = (char **)list_to_array(plist);
@@ -61,7 +62,7 @@ void train_tag(char *cfgfile, char *weightfile, int clear)
         load_data(args);
         train = buffer;
 #endif
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
+        printf("Loaded: %lf seconds\n", sec(clock() - time));
         time = clock();
         float loss = train_network(&net, train);
         if (avg_loss == -1) avg_loss = loss;

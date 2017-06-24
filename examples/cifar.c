@@ -176,7 +176,8 @@ void test_cifar(char *filename, char *weightfile)
     float *acc = network_accuracies(&net, test, 2);
     avg_acc += acc[0];
     avg_top5 += acc[1];
-    printf("top1: %f, %lf seconds, %d images\n", avg_acc, sec(clock() - time), test.X.rows);
+    printf("top1: %f, %lf seconds, %d images\n",
+           avg_acc, sec(clock() - time), test.X.rows);
     free_data(test);
 }
 

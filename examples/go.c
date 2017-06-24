@@ -151,7 +151,8 @@ void train_go(char *cfgfile,
     network net = {0};
     load_network(&net, cfgfile, weightfile, clear);
 #endif
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
 
     char *backup_directory = "/home/pjreddie/backup/";
 
@@ -171,7 +172,7 @@ void train_go(char *cfgfile,
 #else
                                      net.batch * net.subdivisions);
 #endif
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
+        printf("Loaded: %lf seconds\n", sec(clock() - time));
         time=clock();
 
         float loss = 0;

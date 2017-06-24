@@ -51,9 +51,9 @@ void train_super(char *cfgfile, char *weightfile, int clear)
         train = buffer;
 #endif
 
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
+        printf("Loaded: %lf seconds\n", sec(clock() - time));
 
-        time=clock();
+        time = clock();
         float loss = train_network(&net, train);
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;

@@ -471,7 +471,8 @@ void train_dcgan(char *cfg, char *weight, char *acfg, char *aweight, int clear, 
         }
     }
 
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", gnet.learning_rate, gnet.momentum, gnet.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           gnet.learning_rate, gnet.momentum, gnet.decay);
     int imgs = gnet.batch*gnet.subdivisions;
     int i = *gnet.seen/imgs;
     data train, buffer;
@@ -522,7 +523,7 @@ void train_dcgan(char *cfg, char *weight, char *acfg, char *aweight, int clear, 
 
         load_thread = load_data_in_thread(args);
 
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
+        printf("Loaded: %lf seconds\n", sec(clock() - time));
 
         data gen = copy_data(train);
         for (int j = 0; j < imgs; ++j) {
@@ -650,7 +651,8 @@ void train_colorizer(char *cfg, char *weight, char *acfg, char *aweight, int cle
         }
     }
 
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
     int imgs = net.batch * net.subdivisions;
     int i = *net.seen / imgs;
     data train, buffer;
@@ -700,7 +702,7 @@ void train_colorizer(char *cfg, char *weight, char *acfg, char *aweight, int cle
         train = buffer;
         load_thread = load_data_in_thread(args);
 
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
+        printf("Loaded: %lf seconds\n", sec(clock() - time));
 
         data gray = copy_data(train);
         for (int j = 0; j < imgs; ++j) {

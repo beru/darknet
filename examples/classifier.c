@@ -50,7 +50,8 @@ void train_classifier(char *datacfg,
 #endif
                 ;
 
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
     list *options = read_data_cfg(datacfg);
 
     char *backup_directory = option_find_str(options, "backup", "/backup/");
@@ -108,8 +109,8 @@ void train_classifier(char *datacfg,
         load_data(args);
         train = buffer;
 #endif
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
-        time=clock();
+        printf("Loaded: %lf seconds\n", sec(clock() - time));
+        time = clock();
 
         float loss = 0;
 #ifdef GPU
@@ -126,8 +127,8 @@ void train_classifier(char *datacfg,
         }
         avg_loss = avg_loss*.9 + loss*.1;
         printf("%d, %.3f: %f, %f avg, %f rate, %lf seconds, %d images\n",
-                get_current_batch(&net), (float)(*net.seen) / N, loss, avg_loss,
-                get_current_rate(&net), sec(clock() - time), *net.seen);
+               get_current_batch(&net), (float)(*net.seen) / N, loss, avg_loss,
+               get_current_rate(&net), sec(clock() - time), *net.seen);
         free_data(train);
         if (*net.seen / N > epoch) {
             epoch = *net.seen/N;
@@ -169,7 +170,8 @@ void train_classifier(char *datacfg,
 
    int imgs = net.batch * net.subdivisions;
 
-   printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+   printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+          net.learning_rate, net.momentum, net.decay);
    list *options = read_data_cfg(datacfg);
 
    char *backup_directory = option_find_str(options, "backup", "/backup/");
@@ -425,7 +427,8 @@ void validate_classifier_10(char *datacfg, char *filename, char *weightfile)
             }
         }
 
-        printf("%d: top 1: %f, top %d: %f\n", i, avg_acc/(i+1), topk, avg_topk/(i+1));
+        printf("%d: top 1: %f, top %d: %f\n",
+               i, avg_acc / (i + 1), topk, avg_topk / (i + 1));
     }
 }
 
@@ -562,7 +565,8 @@ void validate_classifier_single(char *datacfg, char *filename, char *weightfile)
             }
         }
 
-        printf("%d: top 1: %f, top %d: %f\n", i, avg_acc/(i+1), topk, avg_topk/(i+1));
+        printf("%d: top 1: %f, top %d: %f\n",
+               i, avg_acc / (i + 1), topk, avg_topk / (i + 1));
     }
 }
 
@@ -634,7 +638,8 @@ void validate_classifier_multi(char *datacfg, char *filename, char *weightfile)
             }
         }
 
-        printf("%d: top 1: %f, top %d: %f\n", i, avg_acc/(i+1), topk, avg_topk/(i+1));
+        printf("%d: top 1: %f, top %d: %f\n",
+               i, avg_acc / (i + 1), topk, avg_topk / (i + 1));
     }
 }
 
@@ -717,7 +722,7 @@ void try_classifier(char *datacfg, char *cfgfile, char *weightfile, char *filena
          */
 
         top_predictions(&net, top, indexes);
-        printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
+        printf("%s: Predicted in %f seconds.\n", input, sec(clock() - time));
         for (i = 0; i < top; ++i) {
             int index = indexes[i];
             printf("%s: %f\n", names[index], predictions[index]);
@@ -1038,11 +1043,12 @@ void threat_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_i
 
         printf("\033[2J");
         printf("\033[1;1H");
-        printf("\nFPS:%.0f\n",fps);
+        printf("\nFPS:%.0f\n", fps);
 
         for (int i = 0; i < top; ++i) {
             int index = indexes[i];
-            printf("%.1f%%: %s\n", predictions[index] * 100, names[index]);
+            printf("%.1f%%: %s\n",
+                   predictions[index] * 100, names[index]);
         }
 
         if (1) {
@@ -1197,7 +1203,8 @@ void demo_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_ind
 
         for (int i = 0; i < top; ++i) {
             int index = indexes[i];
-            printf("%.1f%%: %s\n", predictions[index]*100, names[index]);
+            printf("%.1f%%: %s\n",
+                   predictions[index] * 100, names[index]);
         }
 
         free_image(&in_s);

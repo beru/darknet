@@ -12,7 +12,8 @@ void train_writing(char *cfgfile, char *weightfile)
     if (weightfile) {
         load_weights(&net, weightfile);
     }
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
     int imgs = net.batch*net.subdivisions;
     list *plist = get_paths("figures.list");
     char **paths = (char **)list_to_array(plist);
@@ -118,7 +119,7 @@ void test_writing(char *cfgfile, char *weightfile, char *filename)
         float *X = im.data;
         time = clock();
         network_predict(&net, X);
-        printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
+        printf("%s: Predicted in %f seconds.\n", input, sec(clock() - time));
         image pred = get_network_image(&net);
 
         image upsampled = resize_image(pred, im.w, im.h);

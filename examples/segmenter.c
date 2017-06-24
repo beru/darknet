@@ -46,7 +46,8 @@ void train_segmenter(char *datacfg,
 #endif
     ;
 
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
     list *options = read_data_cfg(datacfg);
 
     char *backup_directory = option_find_str(options, "backup", "/backup/");
@@ -96,7 +97,7 @@ void train_segmenter(char *datacfg,
         load_data(args);
         train = buffer;
 #endif
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
+        printf("Loaded: %lf seconds\n", sec(clock() - time));
         time=clock();
 
         float loss = 0;
@@ -174,7 +175,7 @@ void predict_segmenter(char *datafile, char *cfgfile, char *weightfile, char *fi
         cvWaitKey(0);
 #endif
         printf("Predicted: %f\n", predictions[0]);
-        printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
+        printf("%s: Predicted in %f seconds.\n", input, sec(clock() - time));
         free_image(&im);
         free_image(&sized);
         free_image(&rgb);

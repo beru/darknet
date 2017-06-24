@@ -54,7 +54,8 @@ void train_detector(char *datacfg,
                 * ngpus
 #endif
                 ;
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
     data train, buffer;
 
     layer *l = &net.layers[net.n - 1];
@@ -785,7 +786,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         float *X = sized.data;
         time = clock();
         network_predict(&net, X);
-        printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
+        printf("%s: Predicted in %f seconds.\n", input, sec(clock() - time));
         get_region_boxes(l, im.w, im.h, net.w, net.h, thresh, probs, boxes, 0, 0, hier_thresh, 1);
         if (nms) {
             do_nms_obj(boxes, probs, l->w * l->h * l->n, l->classes, nms);

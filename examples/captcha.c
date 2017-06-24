@@ -34,7 +34,8 @@ void train_captcha(char *cfgfile, char *weightfile)
     if (weightfile) {
         load_weights(&net, weightfile);
     }
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+           net.learning_rate, net.momentum, net.decay);
     int imgs = 1024;
     int i = *net.seen / imgs;
     int solved = 1;
@@ -90,7 +91,8 @@ void train_captcha(char *cfgfile, char *weightfile)
             avg_loss = loss;
         }
         avg_loss = avg_loss * .9 + loss * .1;
-        printf("%d: %f, %f avg, %lf seconds, %d images\n", i, loss, avg_loss, sec(clock() - time), *net.seen);
+        printf("%d: %f, %f avg, %lf seconds, %d images\n",
+               i, loss, avg_loss, sec(clock() - time), *net.seen);
         free_data(train);
         if (i%100 == 0) {
             char buff[256];
@@ -207,7 +209,8 @@ void valid_captcha(char *cfgfile, char *weightfile, char *filename)
    if (weightfile) {
    load_weights(&net, weightfile);
    }
-   printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+   printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+          net.learning_rate, net.momentum, net.decay);
    int imgs = 1024;
    int i = net.seen/imgs;
    list *plist = get_paths("/data/captcha/train.auto5");
@@ -226,7 +229,8 @@ void valid_captcha(char *cfgfile, char *weightfile, char *filename)
    net.seen += imgs;
    if (avg_loss == -1) avg_loss = loss;
    avg_loss = avg_loss*.9 + loss*.1;
-   printf("%d: %f, %f avg, %lf seconds, %d images\n", i, loss, avg_loss, sec(clock()-time), net.seen);
+   printf("%d: %f, %f avg, %lf seconds, %d images\n",
+          i, loss, avg_loss, sec(clock()-time), net.seen);
    free_data(train);
    if (i%10==0) {
    char buff[256];
@@ -275,7 +279,8 @@ parse_network_cfg(&net, cfgfile);
 if (weightfile) {
     load_weights(&net, weightfile);
 }
-printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
+       net.learning_rate, net.momentum, net.decay);
 int imgs = 1024;
 int i = net.seen/imgs;
 list *plist = get_paths("/data/captcha/encode.list");
@@ -293,7 +298,8 @@ while (1) {
     net.seen += imgs;
     if (avg_loss == -1) avg_loss = loss;
     avg_loss = avg_loss*.9 + loss*.1;
-    printf("%d: %f, %f avg, %lf seconds, %d images\n", i, loss, avg_loss, sec(clock()-time), net.seen);
+    printf("%d: %f, %f avg, %lf seconds, %d images\n",
+           i, loss, avg_loss, sec(clock()-time), net.seen);
     free_matrix(train.X);
     if (i%100==0) {
         char buff[256];
@@ -335,7 +341,8 @@ void validate_captcha(char *cfgfile, char *weightfile)
         }
         accuracy += allcorrect;
     }
-    printf("Word Accuracy: %f, Char Accuracy %f\n", (float)accuracy/imgs, (float)correct/total);
+    printf("Word Accuracy: %f, Char Accuracy %f\n",
+           (float)accuracy / imgs, (float)correct / total);
     free_data(valid);
 }
 
