@@ -294,7 +294,7 @@ void set_batch_network(network *net, int b)
     net->batch = b;
     for (int i = 0; i < net->n; ++i) {
         net->layers[i].batch = b;
-#ifdef CUDNN
+#if defined(GPU) && defined(CUDNN)
         if (net->layers[i].type == CONVOLUTIONAL) {
             cudnn_convolutional_setup(net->layers + i);
         }
