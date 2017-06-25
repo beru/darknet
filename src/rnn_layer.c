@@ -4,6 +4,7 @@
 #include "cuda.h"
 #include "blas.h"
 #include "gemm.h"
+#include "xplat.h"
 
 #include <math.h>
 #include <stdio.h>

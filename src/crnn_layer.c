@@ -4,6 +4,7 @@
 #include "cuda.h"
 #include "blas.h"
 #include "gemm.h"
+#include "xplat.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -49,15 +50,16 @@ void make_crnn_layer(layer *l,
 
     l->state = xplat_malloc(l->hidden * batch * (steps + 1), sizeof(float));
 
-    l->input_layer = xplat_malloc(sizeof(layer));
+    l->input_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_convolutional_layer(l->input_layer,
-                             batch * steps, h, w, c, hidden_filters, 3, 1, 1,
+                             batch * steps, h, w, c, hidden_filters,
+                             3, 1, 1,
                              activation, batch_normalize, 0, 0, 0,
                              train);
     l->input_layer->batch = batch;
 
-    l->self_layer = xplat_malloc(sizeof(layer));
+    l->self_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_convolutional_layer(l->self_layer,
                              batch * steps, h, w, hidden_filters, hidden_filters, 3, 1, 1,
@@ -65,7 +67,7 @@ void make_crnn_layer(layer *l,
                              train);
     l->self_layer->batch = batch;
 
-    l->output_layer = xplat_malloc(sizeof(layer));
+    l->output_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_convolutional_layer(l->output_layer,
                              batch * steps, h, w, hidden_filters, output_filters, 3, 1, 1,

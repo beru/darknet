@@ -1,6 +1,7 @@
 #include "route_layer.h"
 #include "cuda.h"
 #include "blas.h"
+#include "xplat.h"
 
 #include <stdio.h>
 

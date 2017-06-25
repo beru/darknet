@@ -2,6 +2,7 @@
 #include "cuda.h"
 #include "blas.h"
 #include "activations.h"
+#include "xplat.h"
 
 #include <stdio.h>
 #include <assert.h>

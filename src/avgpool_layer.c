@@ -1,5 +1,6 @@
 #include "avgpool_layer.h"
 #include "cuda.h"
+#include "xplat.h"
 #include <stdio.h>
 
 void make_avgpool_layer(avgpool_layer *l, int batch, int w, int h, int c)

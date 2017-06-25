@@ -1,4 +1,6 @@
 #include "box.h"
+#include "xplat.h"
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>

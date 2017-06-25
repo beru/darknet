@@ -4,6 +4,7 @@
 #include "cuda.h"
 #include <stdio.h>
 #include <math.h>
+#include "xplat.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -169,8 +170,8 @@ void draw_bbox(image a, box bbox, int w, float r, float g, float b)
 
 image **load_alphabet()
 {
-    const int nsize = 8;
-    image **alphabets = xplat_malloc(nsize, sizeof(image));
+    static const int nsize = 8;
+    image **alphabets = (image**)xplat_malloc(nsize, sizeof(image*));
     for (int j = 0; j < nsize; ++j) {
         alphabets[j] = xplat_malloc(128, sizeof(image));
         for (int i = 32; i < 127; ++i) {

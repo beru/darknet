@@ -110,12 +110,12 @@ struct layer{
     int nbiases;
     int extra;
     int truths;
-    int h, w, c;
+    int h, w, c;    // height, width, channels
     int out_h, out_w, out_c;
-    int n;
+    int n;          // filters
     int max_boxes;
     int groups;
-    int size;
+    int size;       // kernel size
     int side;
     int stride;
     int reverse;

@@ -1,6 +1,7 @@
 #include "convolutional_layer.h"
 #include "batchnorm_layer.h"
 #include "blas.h"
+#include "xplat.h"
 #include <stdio.h>
 
 void make_batchnorm_layer(layer *l, int batch, int w, int h, int c)

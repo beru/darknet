@@ -30,6 +30,7 @@
 #include "shortcut_layer.h"
 #include "softmax_layer.h"
 #include "utils.h"
+#include "xplat.h"
 
 typedef struct {
     char *type;

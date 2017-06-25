@@ -38,7 +38,7 @@ void* xplat_malloc(size_t count, size_t size)
 {
 size_t this_time = count * size;
 total += this_time;
-printf("alloc %d total %d.\n", this_time / 1024, total / 1024);
+//printf("alloc %d total %d.\n", this_time / 1024, total / 1024);
 //if (this_time >= 1024 * 1024 * 8) {
 //    DebugBreak();
 //}

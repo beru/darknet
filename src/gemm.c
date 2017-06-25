@@ -5,10 +5,12 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <immintrin.h>
+
 void gemm_bin(int M, int N, int K, float ALPHA, 
-        char  *A, int lda, 
-        float *B, int ldb,
-        float *C, int ldc)
+              const char  *A, int lda, 
+              const float *B, int ldb,
+              float *C, int ldc)
 {
     for (int i = 0; i < M; ++i) {
         for (int k = 0; k < K; ++k) {
@@ -61,32 +63,83 @@ void time_random_matrix(int TA, int TB, int m, int k, int n)
 
 
 void gemm(int TA, int TB, int M, int N, int K, float ALPHA, 
-          float *A, int lda, 
-          float *B, int ldb,
+          const float *A, int lda, 
+          const float *B, int ldb,
           float BETA,
           float *C, int ldc)
 {
     gemm_cpu(TA, TB, M, N, K, ALPHA, A, lda, B, ldb, BETA, C, ldc);
 }
 
+static __forceinline void muladd(float* dst, const float* src, float scale, size_t cnt)
+{
+#if 0
+    for (int i = 0; i < cnt; ++i) {
+        dst[i] += scale * src[i];
+    }
+#else
+    __m256 scales = _mm256_set1_ps(scale);
+    size_t n64 = cnt / 64;
+    for (size_t i=0; i<n64; ++i) {
+        __m256 d0 = _mm256_loadu_ps(&dst[0]);
+        __m256 d1 = _mm256_loadu_ps(&dst[8]);
+        __m256 d2 = _mm256_loadu_ps(&dst[16]);
+        __m256 d3 = _mm256_loadu_ps(&dst[24]);
+        __m256 d4 = _mm256_loadu_ps(&dst[32]);
+        __m256 d5 = _mm256_loadu_ps(&dst[40]);
+        __m256 d6 = _mm256_loadu_ps(&dst[48]);
+        __m256 d7 = _mm256_loadu_ps(&dst[56]);
+        __m256 s0 = _mm256_loadu_ps(&src[0]);
+        __m256 s1 = _mm256_loadu_ps(&src[8]);
+        __m256 s2 = _mm256_loadu_ps(&src[16]);
+        __m256 s3 = _mm256_loadu_ps(&src[24]);
+        __m256 s4 = _mm256_loadu_ps(&src[32]);
+        __m256 s5 = _mm256_loadu_ps(&src[40]);
+        __m256 s6 = _mm256_loadu_ps(&src[48]);
+        __m256 s7 = _mm256_loadu_ps(&src[56]);
+        d0 = _mm256_fmadd_ps(scales, s0, d0);
+        d1 = _mm256_fmadd_ps(scales, s1, d1);
+        d2 = _mm256_fmadd_ps(scales, s2, d2);
+        d3 = _mm256_fmadd_ps(scales, s3, d3);
+        d4 = _mm256_fmadd_ps(scales, s4, d4);
+        d5 = _mm256_fmadd_ps(scales, s5, d5);
+        d6 = _mm256_fmadd_ps(scales, s6, d6);
+        d7 = _mm256_fmadd_ps(scales, s7, d7);
+        _mm256_storeu_ps(&dst[0], d0);
+        _mm256_storeu_ps(&dst[8], d1);
+        _mm256_storeu_ps(&dst[16], d2);
+        _mm256_storeu_ps(&dst[24], d3);
+        _mm256_storeu_ps(&dst[32], d4);
+        _mm256_storeu_ps(&dst[40], d5);
+        _mm256_storeu_ps(&dst[48], d6);
+        _mm256_storeu_ps(&dst[56], d7);
+        dst += 64;
+        src += 64;
+    }
+#endif
+}
+
 void gemm_nn(int M, int N, int K, float ALPHA, 
-             float *A, int lda, 
-             float *B, int ldb,
+             const float *A, int lda, 
+             const float *B, int ldb,
              float *C, int ldc)
 {
     for (int i = 0; i < M; ++i) {
         for (int k = 0; k < K; ++k) {
             register float A_PART = ALPHA * A[i * lda + k];
-            for (int j = 0; j < N; ++j) {
-                C[i * ldc + j] += A_PART * B[k * ldb + j];
-            }
+            muladd(
+                &C[i * ldc],
+                &B[k * ldb],
+                A_PART,
+                N
+            );
         }
     }
 }
 
 void gemm_nt(int M, int N, int K, float ALPHA, 
-             float *A, int lda, 
-             float *B, int ldb,
+             const float *A, int lda, 
+             const float *B, int ldb,
              float *C, int ldc)
 {
     for (int i = 0; i < M; ++i) {
@@ -101,8 +154,8 @@ void gemm_nt(int M, int N, int K, float ALPHA,
 }
 
 void gemm_tn(int M, int N, int K, float ALPHA, 
-             float *A, int lda, 
-             float *B, int ldb,
+             const float *A, int lda, 
+             const float *B, int ldb,
              float *C, int ldc)
 {
     for (int i = 0; i < M; ++i) {
@@ -116,8 +169,8 @@ void gemm_tn(int M, int N, int K, float ALPHA,
 }
 
 void gemm_tt(int M, int N, int K, float ALPHA, 
-             float *A, int lda, 
-             float *B, int ldb,
+             const float *A, int lda, 
+             const float *B, int ldb,
              float *C, int ldc)
 {
     for (int i = 0; i < M; ++i) {
@@ -133,8 +186,8 @@ void gemm_tt(int M, int N, int K, float ALPHA,
 
 void gemm_cpu(int TA, int TB, int M, int N, int K,
               float ALPHA, 
-              float *A, int lda, 
-              float *B, int ldb,
+              const float *A, int lda, 
+              const float *B, int ldb,
               float BETA,
               float *C, int ldc)
 {
@@ -159,8 +212,8 @@ void gemm_cpu(int TA, int TB, int M, int N, int K,
 #include <math.h>
 
 void gemm_ongpu(int TA, int TB, int M, int N, int K, float ALPHA, 
-                float *A_gpu, int lda, 
-                float *B_gpu, int ldb,
+                const float *A_gpu, int lda, 
+                const float *B_gpu, int ldb,
                 float BETA,
                 float *C_gpu, int ldc)
 {
@@ -171,8 +224,8 @@ void gemm_ongpu(int TA, int TB, int M, int N, int K, float ALPHA,
 }
 
 void gemm_gpu(int TA, int TB, int M, int N, int K, float ALPHA, 
-              float *A, int lda, 
-              float *B, int ldb,
+              const float *A, int lda, 
+              const float *B, int ldb,
               float BETA,
               float *C, int ldc)
 {

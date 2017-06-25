@@ -7,6 +7,7 @@
 #include "gemm.h"
 #include <stdio.h>
 #include <time.h>
+#include <assert.h>
 
 #ifdef AI2
 #include "xnor_layer.h"
@@ -187,7 +188,6 @@ void make_convolutional_layer(convolutional_layer *l,
     l->batch_normalize = batch_normalize;
 
     l->weights = xplat_malloc(c * n * size * size, sizeof(float));
-printf("\n");
     if (train) {
         l->weight_updates = xplat_malloc(c * n * size * size, sizeof(float));
     }
@@ -457,17 +457,37 @@ void forward_convolutional_layer(convolutional_layer *l, network *net)
     int m = l->n;
     int k = l->size * l->size * l->c;
     int n = out_h * out_w;
-
-    float *a = l->weights;
-    float *b = net->workspace;
-    float *c = l->output;
+    float *output = l->output;
 
 double t0 = what_time_is_it_now();
     for (int i = 0; i < l->batch; ++i) {
+#if 1
         im2col_cpu(net->input, l->c, l->h, l->w, 
-                   l->size, l->stride, l->pad, b);
-        gemm(0, 0, m, n, k, 1, a, k, b, n, 1, c, n);
-        c += n * m;
+                   l->size, l->stride, l->pad, net->workspace);
+        gemm(0, 0, m, n, k, 1, l->weights, k, net->workspace, n, 1, output, n);
+#else
+        // this doesn't work at all....
+        assert(l->stride == 1);
+        for (int h=0; h<out_h; ++h) {
+            for (int w=0; w<out_w; ++w) {
+                for (int x=0; x<l->size; ++x) {
+                    for (int y=0; y<l->size; ++y) {
+                        for (int m=0; m<l->n; ++m) {
+                            float sum = 0;
+                            for (int d=0; d<l->c; ++d) {
+                                // output(w, h, m) += input(w+x, h+y, d) * filter(m, x, y, d)
+                                sum
+                                    += net->input[(l->h * l->w * d) + (h + y) * l->w + (w + x)]
+                                    * l->weights[(d * l->n * l->size * l->size) + (m * l->size * l->size) + (y * l->size) + x];
+                            }
+                            output[(out_h * out_w * m) + (h * out_w + w)] += sum;
+                        }
+                    }
+                }
+            }
+        }
+#endif
+        output += n * m;
         net->input += l->c * l->h * l->w;
     }
 double t1 = what_time_is_it_now();
