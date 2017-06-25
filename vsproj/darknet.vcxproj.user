@@ -6,7 +6,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>detect cfg/tiny-yolo.cfg tiny-yolo.weights data/dog.jpg</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>detect cfg/yolo.cfg yolo.weights data/dog.jpg</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
@@ -16,7 +16,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>detect cfg/tiny-yolo.cfg tiny-yolo.weights data/dog.jpg</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>detect cfg/yolo.cfg yolo.weights data/dog.jpg</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
