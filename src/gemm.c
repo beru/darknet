@@ -76,6 +76,9 @@ void gemm_nn(int M, int N, int K, float ALPHA,
              const float *B, int ldb,
              float *C, int ldc)
 {
+    const size_t n64 = N / 64;
+    const size_t n8 = (N % 64) / 8;
+    const remain = N % 8;
     for (int i = 0; i < M; ++i) {
         for (int k = 0; k < K; ++k) {
             register float A_PART = ALPHA * A[i * lda + k];
@@ -87,7 +90,6 @@ void gemm_nn(int M, int N, int K, float ALPHA,
             __m256 scales = _mm256_set1_ps(A_PART);
             const float *src = &B[k * ldb];
             float *dst = &C[i * ldc];
-            size_t n64 = N / 64;
             for (size_t j=0; j<n64; ++j) {
                 __m256 d0 = _mm256_loadu_ps(&dst[0]);
                 __m256 d1 = _mm256_loadu_ps(&dst[8]);
@@ -124,8 +126,6 @@ void gemm_nn(int M, int N, int K, float ALPHA,
                 dst += 64;
                 src += 64;
             }
-            size_t remain = N % 64;
-            size_t n8 = remain / 8;
             for (size_t j=0; j<n8; ++j) {
                 __m256 d0 = _mm256_loadu_ps(dst);
                 __m256 s0 = _mm256_loadu_ps(src);
@@ -134,7 +134,6 @@ void gemm_nn(int M, int N, int K, float ALPHA,
                 dst += 8;
                 src += 8;
             }
-            remain = remain % 8;
             for (size_t j=0; j<remain; ++j) {
                 dst[j] += A_PART * src[j];
             }
