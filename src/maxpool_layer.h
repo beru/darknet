@@ -8,7 +8,7 @@
 typedef layer maxpool_layer;
 
 image get_maxpool_image(maxpool_layer *l);
-void make_maxpool_layer(maxpool_layer *l, int batch, int h, int w, int c, int size, int stride, int padding);
+void make_maxpool_layer(maxpool_layer *l, int batch, int h, int w, int c, int size, int stride, int padding, int train);
 void resize_maxpool_layer(maxpool_layer *l, int w, int h);
 void forward_maxpool_layer(maxpool_layer *l, network *net);
 void backward_maxpool_layer(maxpool_layer *l, network *net);

@@ -193,7 +193,8 @@ void parse_convolutional(convolutional_layer *l, list *options, size_params para
                              batch, h, w, c, n,
                              size, stride, padding,
                              activation, batch_normalize,
-                             binary, xnor, params.net.adam);
+                             binary, xnor, params.net.adam,
+                             params.net.train);
     l->flipped = option_find_int_quiet(options, "flipped", 0);
     l->dot = option_find_float_quiet(options, "dot", 0);
     if (params.net.adam) {
@@ -214,7 +215,8 @@ void parse_crnn(layer *l, list *options, size_params params)
     make_crnn_layer(l,
                     params.batch, params.w, params.h, params.c,
                     hidden_filters, output_filters, params.time_steps,
-                    activation, batch_normalize);
+                    activation, batch_normalize,
+                    params.net.train);
 
     l->shortcut = option_find_int_quiet(options, "shortcut", 0);
 }
@@ -419,7 +421,7 @@ void parse_maxpool(maxpool_layer *l, list *options, size_params params)
         error("Layer before maxpool layer must output image.");
     }
 
-    make_maxpool_layer(l, batch, h, w, c, size, stride, padding);
+    make_maxpool_layer(l, batch, h, w, c, size, stride, padding, params.net.train);
 }
 
 void parse_avgpool(avgpool_layer *l, list *options, size_params params)

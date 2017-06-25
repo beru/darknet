@@ -169,7 +169,8 @@ void cudnn_convolutional_setup(layer *l)
 void make_convolutional_layer(convolutional_layer *l,
                               int batch, int h, int w, int c, int n,
                               int size, int stride, int padding, ACTIVATION activation,
-                              int batch_normalize, int binary, int xnor, int adam)
+                              int batch_normalize, int binary, int xnor, int adam,
+                              int train)
 {
     l->type = CONVOLUTIONAL;
 
@@ -210,7 +211,9 @@ void make_convolutional_layer(convolutional_layer *l,
     l->inputs = l->w * l->h * l->c;
 
     l->output = calloc(l->batch * l->outputs, sizeof(float));
-    l->delta  = calloc(l->batch * l->outputs, sizeof(float));
+    if (train) {
+        l->delta  = calloc(l->batch * l->outputs, sizeof(float));
+    }
 
     l->forward = forward_convolutional_layer;
     l->backward = backward_convolutional_layer;
@@ -240,8 +243,10 @@ void make_convolutional_layer(convolutional_layer *l,
 
         l->rolling_mean = calloc(n, sizeof(float));
         l->rolling_variance = calloc(n, sizeof(float));
-        l->x = calloc(l->batch * l->outputs, sizeof(float));
-        l->x_norm = calloc(l->batch * l->outputs, sizeof(float));
+        if (train) {
+            l->x = calloc(l->batch * l->outputs, sizeof(float));
+            l->x_norm = calloc(l->batch * l->outputs, sizeof(float));
+        }
     }
     if (adam) {
         l->adam = 1;
@@ -339,7 +344,7 @@ void denormalize_convolutional_layer(convolutional_layer *l)
 void test_convolutional_layer()
 {
     convolutional_layer l;
-    make_convolutional_layer(&l, 1, 5, 5, 3, 2, 5, 2, 1, LEAKY, 1, 0, 0, 0);
+    make_convolutional_layer(&l, 1, 5, 5, 3, 2, 5, 2, 1, LEAKY, 1, 0, 0, 0, 0);
     l->batch_normalize = 1;
     float data[] = {1,1,1,1,1,
         1,1,1,1,1,

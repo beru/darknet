@@ -28,7 +28,8 @@ static void increment_layer(layer *l, int steps)
 
 void make_crnn_layer(layer *l,
                      int batch, int h, int w, int c, int hidden_filters, int output_filters, int steps,
-                     ACTIVATION activation, int batch_normalize)
+                     ACTIVATION activation, int batch_normalize,
+                     int train)
 {
     fprintf(stderr, "CRNN Layer: %d x %d x %d image, %d filters\n",
             h, w, c, output_filters);
@@ -52,21 +53,24 @@ void make_crnn_layer(layer *l,
     fprintf(stderr, "\t\t");
     make_convolutional_layer(l->input_layer,
                              batch * steps, h, w, c, hidden_filters, 3, 1, 1,
-                             activation, batch_normalize, 0, 0, 0);
+                             activation, batch_normalize, 0, 0, 0,
+                             train);
     l->input_layer->batch = batch;
 
     l->self_layer = malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
     make_convolutional_layer(l->self_layer,
                              batch * steps, h, w, hidden_filters, hidden_filters, 3, 1, 1,
-                             activation, batch_normalize, 0, 0, 0);
+                             activation, batch_normalize, 0, 0, 0,
+                             train);
     l->self_layer->batch = batch;
 
     l->output_layer = malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
     make_convolutional_layer(l->output_layer,
                              batch * steps, h, w, hidden_filters, output_filters, 3, 1, 1,
-                             activation, batch_normalize, 0, 0, 0);
+                             activation, batch_normalize, 0, 0, 0,
+                             train);
     l->output_layer->batch = batch;
 
     l->output = l->output_layer->output;

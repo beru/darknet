@@ -20,7 +20,8 @@ image get_maxpool_delta(maxpool_layer *l)
 
 void make_maxpool_layer(maxpool_layer *l,
                         int batch, int h, int w, int c,
-                        int size, int stride, int padding)
+                        int size, int stride, int padding,
+                        int train)
 {
     l->type = MAXPOOL;
     l->batch = batch;
@@ -36,17 +37,22 @@ void make_maxpool_layer(maxpool_layer *l,
     l->size = size;
     l->stride = stride;
     int output_size = l->out_h * l->out_w * l->out_c * batch;
-    l->indexes = calloc(output_size, sizeof(int));
-    l->output =  calloc(output_size, sizeof(float));
-    l->delta =   calloc(output_size, sizeof(float));
-    l->forward = forward_maxpool_layer;
-    l->backward = backward_maxpool_layer;
 #ifdef GPU
     l->forward_gpu = forward_maxpool_layer_gpu;
     l->backward_gpu = backward_maxpool_layer_gpu;
     l->indexes_gpu = cuda_make_int_array(0, output_size);
     l->output_gpu  = cuda_make_array(l->output, output_size);
-    l->delta_gpu   = cuda_make_array(l->delta, output_size);
+    if (train) {
+        l->delta_gpu   = cuda_make_array(l->delta, output_size);
+    }
+#else
+    l->forward = forward_maxpool_layer;
+    l->backward = backward_maxpool_layer;
+    l->indexes = calloc(output_size, sizeof(int));
+    l->output =  calloc(output_size, sizeof(float));
+    if (train) {
+        l->delta =   calloc(output_size, sizeof(float));
+    }
 #endif
     fprintf(stderr, "max          %d x %d / %d  %4d x%4d x%4d   ->  %4d x%4d x%4d\n",
             size, size, stride, w, h, c, l->out_w, l->out_h, l->out_c);

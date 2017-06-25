@@ -151,9 +151,11 @@ void fill_cpu(int N, float ALPHA, float *X, int INCX)
     for (int i = 0; i < N; ++i) X[i * INCX] = ALPHA;
 }
 
-void copy_cpu(int N, float *X, int INCX, float *Y, int INCY)
+void copy_cpu(int N, const float *X, int INCX, float *Y, int INCY)
 {
-    for (int i = 0; i < N; ++i) Y[i * INCY] = X[i * INCX];
+    for (int i = 0; i < N; ++i) {
+        Y[i * INCY] = X[i * INCX];
+    }
 }
 
 void smooth_l1_cpu(int n, float *pred, float *truth, float *delta, float *error)
@@ -189,10 +191,12 @@ void l2_cpu(int n, float *pred, float *truth, float *delta, float *error)
     }
 }
 
-float dot_cpu(int N, float *X, int INCX, float *Y, int INCY)
+float dot_cpu(int N, const float *X, int INCX, const float *Y, int INCY)
 {
     float dot = 0;
-    for (int i = 0; i < N; ++i) dot += X[i * INCX] * Y[i * INCY];
+    for (int i = 0; i < N; ++i) {
+        dot += X[i * INCX] * Y[i * INCY];
+    }
     return dot;
 }
 
