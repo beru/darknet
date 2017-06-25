@@ -71,54 +71,6 @@ void gemm(int TA, int TB, int M, int N, int K, float ALPHA,
     gemm_cpu(TA, TB, M, N, K, ALPHA, A, lda, B, ldb, BETA, C, ldc);
 }
 
-static __forceinline void muladd(float* dst, const float* src, float scale, size_t cnt)
-{
-#if 0
-    for (int i = 0; i < cnt; ++i) {
-        dst[i] += scale * src[i];
-    }
-#else
-    __m256 scales = _mm256_set1_ps(scale);
-    size_t n64 = cnt / 64;
-    for (size_t i=0; i<n64; ++i) {
-        __m256 d0 = _mm256_loadu_ps(&dst[0]);
-        __m256 d1 = _mm256_loadu_ps(&dst[8]);
-        __m256 d2 = _mm256_loadu_ps(&dst[16]);
-        __m256 d3 = _mm256_loadu_ps(&dst[24]);
-        __m256 d4 = _mm256_loadu_ps(&dst[32]);
-        __m256 d5 = _mm256_loadu_ps(&dst[40]);
-        __m256 d6 = _mm256_loadu_ps(&dst[48]);
-        __m256 d7 = _mm256_loadu_ps(&dst[56]);
-        __m256 s0 = _mm256_loadu_ps(&src[0]);
-        __m256 s1 = _mm256_loadu_ps(&src[8]);
-        __m256 s2 = _mm256_loadu_ps(&src[16]);
-        __m256 s3 = _mm256_loadu_ps(&src[24]);
-        __m256 s4 = _mm256_loadu_ps(&src[32]);
-        __m256 s5 = _mm256_loadu_ps(&src[40]);
-        __m256 s6 = _mm256_loadu_ps(&src[48]);
-        __m256 s7 = _mm256_loadu_ps(&src[56]);
-        d0 = _mm256_fmadd_ps(scales, s0, d0);
-        d1 = _mm256_fmadd_ps(scales, s1, d1);
-        d2 = _mm256_fmadd_ps(scales, s2, d2);
-        d3 = _mm256_fmadd_ps(scales, s3, d3);
-        d4 = _mm256_fmadd_ps(scales, s4, d4);
-        d5 = _mm256_fmadd_ps(scales, s5, d5);
-        d6 = _mm256_fmadd_ps(scales, s6, d6);
-        d7 = _mm256_fmadd_ps(scales, s7, d7);
-        _mm256_storeu_ps(&dst[0], d0);
-        _mm256_storeu_ps(&dst[8], d1);
-        _mm256_storeu_ps(&dst[16], d2);
-        _mm256_storeu_ps(&dst[24], d3);
-        _mm256_storeu_ps(&dst[32], d4);
-        _mm256_storeu_ps(&dst[40], d5);
-        _mm256_storeu_ps(&dst[48], d6);
-        _mm256_storeu_ps(&dst[56], d7);
-        dst += 64;
-        src += 64;
-    }
-#endif
-}
-
 void gemm_nn(int M, int N, int K, float ALPHA, 
              const float *A, int lda, 
              const float *B, int ldb,
@@ -127,12 +79,66 @@ void gemm_nn(int M, int N, int K, float ALPHA,
     for (int i = 0; i < M; ++i) {
         for (int k = 0; k < K; ++k) {
             register float A_PART = ALPHA * A[i * lda + k];
-            muladd(
-                &C[i * ldc],
-                &B[k * ldb],
-                A_PART,
-                N
-            );
+#if 0
+            for (int j = 0; j < N; ++j) {
+                C[i * ldc + j] += A_PART * B[k * ldb + j];
+            }
+#else
+            __m256 scales = _mm256_set1_ps(A_PART);
+            const float *src = &B[k * ldb];
+            float *dst = &C[i * ldc];
+            size_t n64 = N / 64;
+            for (size_t j=0; j<n64; ++j) {
+                __m256 d0 = _mm256_loadu_ps(&dst[0]);
+                __m256 d1 = _mm256_loadu_ps(&dst[8]);
+                __m256 d2 = _mm256_loadu_ps(&dst[16]);
+                __m256 d3 = _mm256_loadu_ps(&dst[24]);
+                __m256 d4 = _mm256_loadu_ps(&dst[32]);
+                __m256 d5 = _mm256_loadu_ps(&dst[40]);
+                __m256 d6 = _mm256_loadu_ps(&dst[48]);
+                __m256 d7 = _mm256_loadu_ps(&dst[56]);
+                __m256 s0 = _mm256_loadu_ps(&src[0]);
+                __m256 s1 = _mm256_loadu_ps(&src[8]);
+                __m256 s2 = _mm256_loadu_ps(&src[16]);
+                __m256 s3 = _mm256_loadu_ps(&src[24]);
+                __m256 s4 = _mm256_loadu_ps(&src[32]);
+                __m256 s5 = _mm256_loadu_ps(&src[40]);
+                __m256 s6 = _mm256_loadu_ps(&src[48]);
+                __m256 s7 = _mm256_loadu_ps(&src[56]);
+                d0 = _mm256_fmadd_ps(scales, s0, d0);
+                d1 = _mm256_fmadd_ps(scales, s1, d1);
+                d2 = _mm256_fmadd_ps(scales, s2, d2);
+                d3 = _mm256_fmadd_ps(scales, s3, d3);
+                d4 = _mm256_fmadd_ps(scales, s4, d4);
+                d5 = _mm256_fmadd_ps(scales, s5, d5);
+                d6 = _mm256_fmadd_ps(scales, s6, d6);
+                d7 = _mm256_fmadd_ps(scales, s7, d7);
+                _mm256_storeu_ps(&dst[0], d0);
+                _mm256_storeu_ps(&dst[8], d1);
+                _mm256_storeu_ps(&dst[16], d2);
+                _mm256_storeu_ps(&dst[24], d3);
+                _mm256_storeu_ps(&dst[32], d4);
+                _mm256_storeu_ps(&dst[40], d5);
+                _mm256_storeu_ps(&dst[48], d6);
+                _mm256_storeu_ps(&dst[56], d7);
+                dst += 64;
+                src += 64;
+            }
+            size_t remain = N % 64;
+            size_t n8 = remain / 8;
+            for (size_t j=0; j<n8; ++j) {
+                __m256 d0 = _mm256_loadu_ps(dst);
+                __m256 s0 = _mm256_loadu_ps(src);
+                d0 = _mm256_fmadd_ps(scales, s0, d0);
+                _mm256_storeu_ps(&dst[0], d0);
+                dst += 8;
+                src += 8;
+            }
+            remain = remain % 8;
+            for (size_t j=0; j<remain; ++j) {
+                dst[j] += A_PART * src[j];
+            }
+#endif
         }
     }
 }
