@@ -118,7 +118,7 @@ void cuda_random(float *x_gpu, size_t n)
 
 float cuda_compare(float *x_gpu, float *x, size_t n, char *s)
 {
-    float *tmp = calloc(n, sizeof(float));
+    float *tmp = xplat_malloc(n, sizeof(float));
     cuda_pull_array(x_gpu, tmp, n);
     //for (int i = 0; i < n; ++i) printf("%f %f\n", tmp[i], x[i]);
     axpy_cpu(n, -1, x, 1, tmp, 1);
@@ -166,7 +166,7 @@ void cuda_pull_array(float *x_gpu, float *x, size_t n)
 
 float cuda_mag_array(float *x_gpu, size_t n)
 {
-    float *temp = calloc(n, sizeof(float));
+    float *temp = xplat_malloc(n, sizeof(float));
     cuda_pull_array(x_gpu, temp, n);
     float m = mag_array(temp, n);
     free(temp);

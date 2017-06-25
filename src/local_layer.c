@@ -47,11 +47,11 @@ void make_local_layer(local_layer *l,
     l->outputs = l->out_h * l->out_w * l->out_c;
     l->inputs = l->w * l->h * l->c;
 
-    l->weights = calloc(c * n * size * size * locations, sizeof(float));
-    l->weight_updates = calloc(c * n * size * size * locations, sizeof(float));
+    l->weights = xplat_malloc(c * n * size * size * locations, sizeof(float));
+    l->weight_updates = xplat_malloc(c * n * size * size * locations, sizeof(float));
 
-    l->biases = calloc(l->outputs, sizeof(float));
-    l->bias_updates = calloc(l->outputs, sizeof(float));
+    l->biases = xplat_malloc(l->outputs, sizeof(float));
+    l->bias_updates = xplat_malloc(l->outputs, sizeof(float));
 
     // float scale = 1./sqrt(size*size*c);
     float scale = sqrt(2. / (size * size * c));
@@ -59,8 +59,8 @@ void make_local_layer(local_layer *l,
         l->weights[i] = scale * rand_uniform(-1, 1);
     }
 
-    l->output = calloc(l->batch * out_h * out_w * n, sizeof(float));
-    l->delta  = calloc(l->batch * out_h * out_w * n, sizeof(float));
+    l->output = xplat_malloc(l->batch * out_h * out_w * n, sizeof(float));
+    l->delta  = xplat_malloc(l->batch * out_h * out_w * n, sizeof(float));
 
     l->workspace_size = out_h * out_w * size * size * c;
     

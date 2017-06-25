@@ -15,7 +15,7 @@ void free_matrix(matrix m)
 
 float matrix_topk_accuracy(matrix truth, matrix guess, int k)
 {
-    int *indexes = calloc(k, sizeof(int));
+    int *indexes = xplat_malloc(k, sizeof(int));
     int n = truth.cols;
     int correct = 0;
     for (int i = 0; i < truth.rows; ++i) {
@@ -47,7 +47,7 @@ matrix resize_matrix(matrix m, int size)
     if (m.rows < size) {
         m.vals = realloc(m.vals, size * sizeof(float*));
         for (int i = m.rows; i < size; ++i) {
-            m.vals[i] = calloc(m.cols, sizeof(float));
+            m.vals[i] = xplat_malloc(m.cols, sizeof(float));
         }
     }else if (m.rows > size) {
         for (int i = size; i < m.rows; ++i) {
@@ -74,9 +74,9 @@ matrix copy_matrix(matrix m)
     matrix c = {0};
     c.rows = m.rows;
     c.cols = m.cols;
-    c.vals = calloc(c.rows, sizeof(float *));
+    c.vals = xplat_malloc(c.rows, sizeof(float *));
     for (int i = 0; i < c.rows; ++i) {
-        c.vals[i] = calloc(c.cols, sizeof(float));
+        c.vals[i] = xplat_malloc(c.cols, sizeof(float));
         copy_cpu(c.cols, m.vals[i], 1, c.vals[i], 1);
     }
     return c;
@@ -87,9 +87,9 @@ matrix make_matrix(int rows, int cols)
     matrix m;
     m.rows = rows;
     m.cols = cols;
-    m.vals = calloc(m.rows, sizeof(float *));
+    m.vals = xplat_malloc(m.rows, sizeof(float *));
     for (int i = 0; i < m.rows; ++i) {
-        m.vals[i] = calloc(m.cols, sizeof(float));
+        m.vals[i] = xplat_malloc(m.cols, sizeof(float));
     }
     return m;
 }
@@ -99,7 +99,7 @@ matrix hold_out_matrix(matrix *m, int n)
     matrix h;
     h.rows = n;
     h.cols = m->cols;
-    h.vals = calloc(h.rows, sizeof(float *));
+    h.vals = xplat_malloc(h.rows, sizeof(float *));
     for (int i = 0; i < n; ++i) {
         int index = rand() % m->rows;
         h.vals[i] = m->vals[index];
@@ -110,7 +110,7 @@ matrix hold_out_matrix(matrix *m, int n)
 
 float *pop_column(matrix *m, int c)
 {
-    float *col = calloc(m->rows, sizeof(float));
+    float *col = xplat_malloc(m->rows, sizeof(float));
     for (int i = 0; i < m->rows; ++i) {
         col[i] = m->vals[i][c];
         for (int j = c; j < m->cols-1; ++j) {
@@ -133,7 +133,7 @@ matrix csv_to_matrix(char *filename)
 
     int n = 0;
     int size = 1024;
-    m.vals = calloc(size, sizeof(float*));
+    m.vals = xplat_malloc(size, sizeof(float*));
     while ((line = fgetl(fp))) {
         if (m.cols == -1) m.cols = count_fields(line);
         if (n == size) {

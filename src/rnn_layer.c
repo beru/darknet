@@ -39,19 +39,19 @@ void make_rnn_layer(layer *l,
     l->hidden = hidden;
     l->inputs = inputs;
 
-    l->state = calloc(batch * hidden * (steps + 1), sizeof(float));
+    l->state = xplat_malloc(batch * hidden * (steps + 1), sizeof(float));
 
-    l->input_layer = calloc(1, sizeof(layer));
+    l->input_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_connected_layer(l->input_layer, batch * steps, inputs, hidden, activation, batch_normalize);
     l->input_layer->batch = batch;
 
-    l->self_layer = calloc(1, sizeof(layer));
+    l->self_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_connected_layer(l->self_layer, batch * steps, hidden, hidden, (log == 2) ? LOGGY : (log == 1 ? LOGISTIC : activation), batch_normalize);
     l->self_layer->batch = batch;
 
-    l->output_layer = calloc(1, sizeof(layer));
+    l->output_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_connected_layer(l->output_layer, batch * steps, hidden, outputs, activation, batch_normalize);
     l->output_layer->batch = batch;

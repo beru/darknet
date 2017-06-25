@@ -22,8 +22,8 @@ void make_shortcut_layer(layer *l, int batch, int index, int w, int h, int c, in
 
     l->index = index;
 
-    l->delta =  calloc(l->outputs * batch, sizeof(float));
-    l->output = calloc(l->outputs * batch, sizeof(float));;
+    l->delta =  xplat_malloc(l->outputs * batch, sizeof(float));
+    l->output = xplat_malloc(l->outputs * batch, sizeof(float));;
 
     l->forward = forward_shortcut_layer;
     l->backward = backward_shortcut_layer;

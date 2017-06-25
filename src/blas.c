@@ -32,7 +32,7 @@ void reorg_cpu(float *x, int w, int h, int c, int batch, int stride, int forward
 
 void flatten(float *x, int size, int layers, int batch, int forward)
 {
-    float *swap = calloc(size * layers * batch, sizeof(float));
+    float *swap = xplat_malloc(size * layers * batch, sizeof(float));
     for (int b = 0; b < batch; ++b) {
         for (int c = 0; c < layers; ++c) {
             for (int i = 0; i < size; ++i) {

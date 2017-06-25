@@ -256,7 +256,7 @@ int nms_comparator(const void *pa, const void *pb)
 
 void do_nms_obj(box *boxes, float **probs, int total, int classes, float thresh)
 {
-    sortable_bbox *s = calloc(total, sizeof(sortable_bbox));
+    sortable_bbox *s = xplat_malloc(total, sizeof(sortable_bbox));
 
     for (int i = 0; i < total; ++i) {
         s[i].index = i;       
@@ -285,7 +285,7 @@ void do_nms_obj(box *boxes, float **probs, int total, int classes, float thresh)
 
 void do_nms_sort(box *boxes, float **probs, int total, int classes, float thresh)
 {
-    sortable_bbox *s = calloc(total, sizeof(sortable_bbox));
+    sortable_bbox *s = xplat_malloc(total, sizeof(sortable_bbox));
 
     for (int i = 0; i < total; ++i) {
         s[i].index = i;       

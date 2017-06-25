@@ -20,8 +20,8 @@ void make_activation_layer(layer *l,
     l->outputs = inputs;
     l->batch = batch;
 
-    l->output = calloc(batch * inputs, sizeof(float*));
-    l->delta = calloc(batch * inputs, sizeof(float*));
+    l->output = xplat_malloc(batch * inputs, sizeof(float*));
+    l->delta = xplat_malloc(batch * inputs, sizeof(float*));
 
     l->forward = forward_activation_layer;
     l->backward = backward_activation_layer;

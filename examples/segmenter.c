@@ -17,7 +17,7 @@ void train_segmenter(char *datacfg,
     srand(time(0));
 #ifdef GPU
     printf("%d\n", ngpus);
-    network *nets = calloc(ngpus, sizeof(network));
+    network *nets = xplat_malloc(ngpus, sizeof(network));
     int seed = rand();
     for (int i = 0; i < ngpus; ++i) {
         srand(seed);
@@ -258,7 +258,7 @@ void run_segmenter(int argc, char **argv)
         for (int i = 0; i < len; ++i) {
             if (gpu_list[i] == ',') ++ngpus;
         }
-        gpus = calloc(ngpus, sizeof(int));
+        gpus = xplat_malloc(ngpus, sizeof(int));
         for (int i = 0; i < ngpus; ++i) {
             gpus[i] = atoi(gpu_list);
             gpu_list = strchr(gpu_list, ',')+1;

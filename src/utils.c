@@ -22,13 +22,13 @@ int *read_intlist(char *gpu_list, int *ngpus, int d)
         for (int i = 0; i < len; ++i) {
             if (gpu_list[i] == ',') ++*ngpus;
         }
-        gpus = calloc(*ngpus, sizeof(int));
+        gpus = xplat_malloc(*ngpus, sizeof(int));
         for (int i = 0; i < *ngpus; ++i) {
             gpus[i] = atoi(gpu_list);
             gpu_list = strchr(gpu_list, ',')+1;
         }
     }else {
-        gpus = calloc(1, sizeof(float));
+        gpus = xplat_malloc(1, sizeof(float));
         *gpus = d;
         *ngpus = 1;
     }
@@ -64,7 +64,7 @@ void sorta_shuffle(void *arr, size_t n, size_t size, size_t sections)
 void shuffle(void *arr, size_t n, size_t size)
 {
     size_t i;
-    void *swp = calloc(1, size);
+    void *swp = xplat_malloc(1, size);
     for (i = 0; i < n - 1; ++i) {
         size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
         memcpy(swp,                     (char*)arr + (j * size), size);
@@ -275,7 +275,7 @@ char *fgetl(FILE *fp)
 {
     if (feof(fp)) return 0;
     size_t size = 512;
-    char *line = malloc(size * sizeof(char));
+    char *line = xplat_malloc(size, sizeof(char));
     if (!fgets(line, size, fp)) {
         free(line);
         return 0;
@@ -361,7 +361,7 @@ void write_all(int fd, char *buffer, size_t bytes)
 
 char *copy_string(char *s)
 {
-    char *copy = malloc(strlen(s) + 1);
+    char *copy = xplat_malloc(strlen(s) + 1, 1);
     strncpy(copy, s, strlen(s) + 1);
     return copy;
 }
@@ -397,7 +397,7 @@ int count_fields(char *line)
 
 float *parse_fields(char *line, int n)
 {
-    float *field = calloc(n, sizeof(float));
+    float *field = xplat_malloc(n, sizeof(float));
     char *c, *p, *end;
     int count = 0;
     int done = 0;
@@ -624,9 +624,9 @@ float rand_scale(float s)
 
 float **one_hot_encode(float *a, int n, int k)
 {
-    float **t = calloc(n, sizeof(float*));
+    float **t = xplat_malloc(n, sizeof(float*));
     for (int i = 0; i < n; ++i) {
-        t[i] = calloc(k, sizeof(float));
+        t[i] = xplat_malloc(k, sizeof(float));
         int index = (int)a[i];
         t[i][index] = 1;
     }

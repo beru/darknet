@@ -133,16 +133,16 @@ void validate_yolo(char *cfgfile, char *weightfile)
     layer *l = &net.layers[net.n - 1];
     int classes = l->classes;
 
-    FILE **fps = calloc(classes, sizeof(FILE *));
+    FILE **fps = xplat_malloc(classes, sizeof(FILE *));
     for (int j = 0; j < classes; ++j) {
         char buff[1024];
         snprintf(buff, 1024, "%s%s.txt", base, voc_names[j]);
         fps[j] = fopen(buff, "w");
     }
-    box *boxes = calloc(l->side * l->side * l->n, sizeof(box));
-    float **probs = calloc(l->side * l->side * l->n, sizeof(float *));
+    box *boxes = xplat_malloc(l->side * l->side * l->n, sizeof(box));
+    float **probs = xplat_malloc(l->side * l->side * l->n, sizeof(float *));
     for (int j = 0; j < l->side * l->side * l->n; ++j) {
-        probs[j] = calloc(classes, sizeof(float *));
+        probs[j] = xplat_malloc(classes, sizeof(float *));
     }
 
     int m = plist->size;
@@ -155,11 +155,11 @@ void validate_yolo(char *cfgfile, char *weightfile)
 #ifdef THREAD
     int t;
     int nthreads = 8;
-    image *val = calloc(nthreads, sizeof(image));
-    image *val_resized = calloc(nthreads, sizeof(image));
-    image *buf = calloc(nthreads, sizeof(image));
-    image *buf_resized = calloc(nthreads, sizeof(image));
-    pthread_t *thr = calloc(nthreads, sizeof(pthread_t));
+    image *val = xplat_malloc(nthreads, sizeof(image));
+    image *val_resized = xplat_malloc(nthreads, sizeof(image));
+    image *buf = xplat_malloc(nthreads, sizeof(image));
+    image *buf_resized = xplat_malloc(nthreads, sizeof(image));
+    pthread_t *thr = xplat_malloc(nthreads, sizeof(pthread_t));
 
     load_args args = {0};
     args.w = net.w;
@@ -260,16 +260,16 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
     int side = l->side;
 
     int j, k;
-    FILE **fps = calloc(classes, sizeof(FILE *));
+    FILE **fps = xplat_malloc(classes, sizeof(FILE *));
     for (j = 0; j < classes; ++j) {
         char buff[1024];
         snprintf(buff, 1024, "%s%s.txt", base, voc_names[j]);
         fps[j] = fopen(buff, "w");
     }
-    box *boxes = calloc(side * side * l->n, sizeof(box));
-    float **probs = calloc(side * side * l->n, sizeof(float *));
+    box *boxes = xplat_malloc(side * side * l->n, sizeof(box));
+    float **probs = xplat_malloc(side * side * l->n, sizeof(float *));
     for (j = 0; j < side * side * l->n; ++j) {
-        probs[j] = calloc(classes, sizeof(float *));
+        probs[j] = xplat_malloc(classes, sizeof(float *));
     }
 
     int m = plist->size;
@@ -347,10 +347,10 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
     char buff[256];
     char *input = buff;
     float nms = .4;
-    box *boxes = calloc(l->side * l->side * l->n, sizeof(box));
-    float **probs = calloc(l->side * l->side * l->n, sizeof(float *));
+    box *boxes = xplat_malloc(l->side * l->side * l->n, sizeof(box));
+    float **probs = xplat_malloc(l->side * l->side * l->n, sizeof(float *));
     for (int j = 0; j < l->side * l->side * l->n; ++j) {
-        probs[j] = calloc(l->classes, sizeof(float *));
+        probs[j] = xplat_malloc(l->classes, sizeof(float *));
     }
     while (1) {
         if (filename) {

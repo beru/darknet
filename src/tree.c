@@ -86,7 +86,7 @@ tree *read_tree(char *filename)
     int groups = 0;
     int n = 0;
     while ((line = fgetl(fp)) != 0) {
-        char *id = calloc(256, sizeof(char));
+        char *id = xplat_malloc(256, sizeof(char));
         int parent = -1;
         sscanf(line, "%s %d", id, &parent);
         t.parent = realloc(t.parent, (n + 1) * sizeof(int));
@@ -121,12 +121,12 @@ tree *read_tree(char *filename)
     t.group_size[groups - 1] = group_size;
     t.n = n;
     t.groups = groups;
-    t.leaf = calloc(n, sizeof(int));
+    t.leaf = xplat_malloc(n, sizeof(int));
     for (int i = 0; i < n; ++i) t.leaf[i] = 1;
     for (int i = 0; i < n; ++i) if (t.parent[i] >= 0) t.leaf[t.parent[i]] = 0;
 
     fclose(fp);
-    tree *tree_ptr = calloc(1, sizeof(tree));
+    tree *tree_ptr = xplat_malloc(1, sizeof(tree));
     *tree_ptr = t;
     //error(0);
     return tree_ptr;

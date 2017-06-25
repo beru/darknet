@@ -186,11 +186,14 @@ void make_convolutional_layer(convolutional_layer *l,
     l->pad = padding;
     l->batch_normalize = batch_normalize;
 
-    l->weights = calloc(c * n * size * size, sizeof(float));
-    l->weight_updates = calloc(c * n * size * size, sizeof(float));
+    l->weights = xplat_malloc(c * n * size * size, sizeof(float));
+printf("\n");
+    if (train) {
+        l->weight_updates = xplat_malloc(c * n * size * size, sizeof(float));
+    }
 
-    l->biases = calloc(n, sizeof(float));
-    l->bias_updates = calloc(n, sizeof(float));
+    l->biases = xplat_malloc(n, sizeof(float));
+    l->bias_updates = xplat_malloc(n, sizeof(float));
 
     l->nweights = c * n * size * size;
     l->nbiases = n;
@@ -210,52 +213,51 @@ void make_convolutional_layer(convolutional_layer *l,
     l->outputs = l->out_h * l->out_w * l->out_c;
     l->inputs = l->w * l->h * l->c;
 
-    l->output = calloc(l->batch * l->outputs, sizeof(float));
+    l->output = xplat_malloc(l->batch * l->outputs, sizeof(float));
     if (train) {
-        l->delta  = calloc(l->batch * l->outputs, sizeof(float));
+        l->delta  = xplat_malloc(l->batch * l->outputs, sizeof(float));
     }
-
     l->forward = forward_convolutional_layer;
     l->backward = backward_convolutional_layer;
     l->update = update_convolutional_layer;
     if (binary) {
-        l->binary_weights = calloc(c * n * size * size, sizeof(float));
-        l->cweights = calloc(c * n * size * size, sizeof(char));
-        l->scales = calloc(n, sizeof(float));
+        l->binary_weights = xplat_malloc(c * n * size * size, sizeof(float));
+        l->cweights = xplat_malloc(c * n * size * size, sizeof(char));
+        l->scales = xplat_malloc(n, sizeof(float));
     }
     if (xnor) {
-        l->binary_weights = calloc(c * n * size * size, sizeof(float));
-        l->binary_input = calloc(l->inputs * l->batch, sizeof(float));
+        l->binary_weights = xplat_malloc(c * n * size * size, sizeof(float));
+        l->binary_input = xplat_malloc(l->inputs * l->batch, sizeof(float));
     }
 
     if (batch_normalize) {
-        l->scales = calloc(n, sizeof(float));
-        l->scale_updates = calloc(n, sizeof(float));
+        l->scales = xplat_malloc(n, sizeof(float));
+        l->scale_updates = xplat_malloc(n, sizeof(float));
         for (int i = 0; i < n; ++i) {
             l->scales[i] = 1;
         }
 
-        l->mean = calloc(n, sizeof(float));
-        l->variance = calloc(n, sizeof(float));
+        l->mean = xplat_malloc(n, sizeof(float));
+        l->variance = xplat_malloc(n, sizeof(float));
 
-        l->mean_delta = calloc(n, sizeof(float));
-        l->variance_delta = calloc(n, sizeof(float));
+        l->mean_delta = xplat_malloc(n, sizeof(float));
+        l->variance_delta = xplat_malloc(n, sizeof(float));
 
-        l->rolling_mean = calloc(n, sizeof(float));
-        l->rolling_variance = calloc(n, sizeof(float));
+        l->rolling_mean = xplat_malloc(n, sizeof(float));
+        l->rolling_variance = xplat_malloc(n, sizeof(float));
         if (train) {
-            l->x = calloc(l->batch * l->outputs, sizeof(float));
-            l->x_norm = calloc(l->batch * l->outputs, sizeof(float));
+            l->x = xplat_malloc(l->batch * l->outputs, sizeof(float));
+            l->x_norm = xplat_malloc(l->batch * l->outputs, sizeof(float));
         }
     }
     if (adam) {
         l->adam = 1;
-        l->m = calloc(c * n * size * size, sizeof(float));
-        l->v = calloc(c * n * size * size, sizeof(float));
-        l->bias_m = calloc(n, sizeof(float));
-        l->scale_m = calloc(n, sizeof(float));
-        l->bias_v = calloc(n, sizeof(float));
-        l->scale_v = calloc(n, sizeof(float));
+        l->m = xplat_malloc(c * n * size * size, sizeof(float));
+        l->v = xplat_malloc(c * n * size * size, sizeof(float));
+        l->bias_m = xplat_malloc(n, sizeof(float));
+        l->scale_m = xplat_malloc(n, sizeof(float));
+        l->bias_v = xplat_malloc(n, sizeof(float));
+        l->scale_v = xplat_malloc(n, sizeof(float));
     }
 
 #ifdef GPU
@@ -569,7 +571,7 @@ void rescale_weights(convolutional_layer *l, float scale, float trans)
 
 image *get_weights(convolutional_layer *l)
 {
-    image *weights = calloc(l->n, sizeof(image));
+    image *weights = xplat_malloc(l->n, sizeof(image));
     for (int i = 0; i < l->n; ++i) {
         weights[i] = copy_image(get_convolutional_weight(l, i));
         normalize_image(weights[i]);

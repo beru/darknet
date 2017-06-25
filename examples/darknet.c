@@ -257,12 +257,12 @@ void reset_normalize_net(char *cfgfile, char *weightfile, char *outfile)
 void normalize_layer(layer *l, int n)
 {
     l->batch_normalize = 1;
-    l->scales = calloc(n, sizeof(float));
+    l->scales = xplat_malloc(n, sizeof(float));
     for (int j = 0; j < n; ++j) {
         l->scales[j] = 1;
     }
-    l->rolling_mean = calloc(n, sizeof(float));
-    l->rolling_variance = calloc(n, sizeof(float));
+    l->rolling_mean = xplat_malloc(n, sizeof(float));
+    l->rolling_variance = xplat_malloc(n, sizeof(float));
 }
 
 void normalize_net(char *cfgfile, char *weightfile, char *outfile)

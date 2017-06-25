@@ -24,14 +24,14 @@ void make_region_layer(layer *l, int batch, int w, int h, int n, int classes, in
     l->out_c = l->c;
     l->classes = classes;
     l->coords = coords;
-    l->cost = calloc(1, sizeof(float));
-    l->biases = calloc(n * 2, sizeof(float));
-    l->bias_updates = calloc(n * 2, sizeof(float));
+    l->cost = xplat_malloc(1, sizeof(float));
+    l->biases = xplat_malloc(n * 2, sizeof(float));
+    l->bias_updates = xplat_malloc(n * 2, sizeof(float));
     l->outputs = h * w * n * (classes + coords + 1);
     l->inputs = l->outputs;
     l->truths = 30 * (l->coords + 1);
-    l->delta = calloc(batch * l->outputs, sizeof(float));
-    l->output = calloc(batch * l->outputs, sizeof(float));
+    l->delta = xplat_malloc(batch * l->outputs, sizeof(float));
+    l->output = xplat_malloc(batch * l->outputs, sizeof(float));
     for (int i = 0; i < n * 2; ++i) {
         l->biases[i] = .5;
     }
@@ -543,7 +543,7 @@ void forward_region_layer_gpu(layer *l, network *net)
     float *truth_cpu = 0;
     if (net->truth_gpu) {
         int num_truth = l->batch * l->truths;
-        truth_cpu = calloc(num_truth, sizeof(float));
+        truth_cpu = xplat_malloc(num_truth, sizeof(float));
         cuda_pull_array(net->truth_gpu, truth_cpu, num_truth);
     }
     cuda_pull_array(l->output_gpu, net->input, l->batch*l->inputs);

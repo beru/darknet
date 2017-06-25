@@ -61,8 +61,8 @@ void train_lsd3(char *fcfg, char *fweight, char *gcfg, char *gweight, char *acfg
     fnet.train = 1;
     int x_size = fnet.inputs*fnet.batch;
     int y_size = fnet.truths*fnet.batch;
-    float *X = calloc(x_size, sizeof(float));
-    float *y = calloc(y_size, sizeof(float));
+    float *X = xplat_malloc(x_size, sizeof(float));
+    float *y = xplat_malloc(y_size, sizeof(float));
 
 
     int ax_size = anet.inputs*anet.batch;
@@ -264,9 +264,9 @@ void train_pix2pix(char *cfg, char *weight, char *acfg, char *aweight, int clear
     gstate.truth = cuda_make_array(0, y_size);
     gstate.delta = 0;
     gstate.train = 1;
-    float *pixs = calloc(x_size, sizeof(float));
-    float *graypixs = calloc(x_size, sizeof(float));
-    float *y = calloc(y_size, sizeof(float));
+    float *pixs = xplat_malloc(x_size, sizeof(float));
+    float *graypixs = xplat_malloc(x_size, sizeof(float));
+    float *y = xplat_malloc(y_size, sizeof(float));
 
     network_state astate = {0};
     astate.index = 0;
@@ -438,7 +438,7 @@ void test_dcgan(char *cfgfile, char *weightfile)
 
 void dcgan_batch(network gnet, network anet)
 {
-    //float *input = calloc(x_size, sizeof(float));
+    //float *input = xplat_malloc(x_size, sizeof(float));
 }
 
 
@@ -680,9 +680,9 @@ void train_colorizer(char *cfg, char *weight, char *acfg, char *aweight, int cle
     int y_size = x_size;
     net.delta = 0;
     net.train = 1;
-    float *pixs = calloc(x_size, sizeof(float));
-    float *graypixs = calloc(x_size, sizeof(float));
-    float *y = calloc(y_size, sizeof(float));
+    float *pixs = xplat_malloc(x_size, sizeof(float));
+    float *graypixs = xplat_malloc(x_size, sizeof(float));
+    float *y = xplat_malloc(y_size, sizeof(float));
 
     int ay_size = anet.outputs * anet.batch;
     anet.delta = 0;
@@ -877,8 +877,8 @@ void train_lsd2(char *cfgfile, char *weightfile, char *acfgfile, char *aweightfi
     gstate.truth = 0;
     gstate.delta = 0;
     gstate.train = 1;
-    float *X = calloc(x_size, sizeof(float));
-    float *y = calloc(y_size, sizeof(float));
+    float *X = xplat_malloc(x_size, sizeof(float));
+    float *y = xplat_malloc(y_size, sizeof(float));
 
     network_state astate = {0};
     astate.index = 0;

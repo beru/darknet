@@ -167,10 +167,10 @@ void validate_coco(char *cfgfile, char *weightfile)
     FILE *fp = fopen(buff, "w");
     fprintf(fp, "[\n");
 
-    box *boxes = calloc(side * side * l->n, sizeof(box));
-    float **probs = calloc(side * side * l->n, sizeof(float *));
+    box *boxes = xplat_malloc(side * side * l->n, sizeof(box));
+    float **probs = xplat_malloc(side * side * l->n, sizeof(float *));
     for (int j = 0; j < side * side * l->n; ++j) {
-        probs[j] = calloc(classes, sizeof(float *));
+        probs[j] = xplat_malloc(classes, sizeof(float *));
     }
 
     int m = plist->size;
@@ -188,11 +188,11 @@ void validate_coco(char *cfgfile, char *weightfile)
 #ifdef THREAD
     int t;
     int nthreads = 8;
-    image *val = calloc(nthreads, sizeof(image));
-    image *val_resized = calloc(nthreads, sizeof(image));
-    image *buf = calloc(nthreads, sizeof(image));
-    image *buf_resized = calloc(nthreads, sizeof(image));
-    pthread_t *thr = calloc(nthreads, sizeof(pthread_t));
+    image *val = xplat_malloc(nthreads, sizeof(image));
+    image *val_resized = xplat_malloc(nthreads, sizeof(image));
+    image *buf = xplat_malloc(nthreads, sizeof(image));
+    image *buf_resized = xplat_malloc(nthreads, sizeof(image));
+    pthread_t *thr = xplat_malloc(nthreads, sizeof(pthread_t));
 
     for (t = 0; t < nthreads; ++t) {
         args.path = paths[i + t];
@@ -285,15 +285,15 @@ void validate_coco_recall(char *cfgfile, char *weightfile)
     int side = l->side;
 
     int j, k;
-    FILE **fps = calloc(classes, sizeof(FILE *));
+    FILE **fps = xplat_malloc(classes, sizeof(FILE *));
     for (j = 0; j < classes; ++j) {
         char buff[1024];
         snprintf(buff, 1024, "%s%s.txt", base, coco_classes[j]);
         fps[j] = fopen(buff, "w");
     }
-    box *boxes = calloc(side * side * l->n, sizeof(box));
-    float **probs = calloc(side * side * l->n, sizeof(float *));
-    for (j = 0; j < side * side * l->n; ++j) probs[j] = calloc(classes, sizeof(float *));
+    box *boxes = xplat_malloc(side * side * l->n, sizeof(box));
+    float **probs = xplat_malloc(side * side * l->n, sizeof(float *));
+    for (j = 0; j < side * side * l->n; ++j) probs[j] = xplat_malloc(classes, sizeof(float *));
 
     int m = plist->size;
     int i = 0;
@@ -371,10 +371,10 @@ void test_coco(char *cfgfile, char *weightfile, char *filename, float thresh)
     clock_t time;
     char buff[256];
     char *input = buff;
-    box *boxes = calloc(l->side * l->side * l->n, sizeof(box));
-    float **probs = calloc(l->side * l->side * l->n, sizeof(float *));
+    box *boxes = xplat_malloc(l->side * l->side * l->n, sizeof(box));
+    float **probs = xplat_malloc(l->side * l->side * l->n, sizeof(float *));
     for (int j = 0; j < l->side * l->side * l->n; ++j) {
-        probs[j] = calloc(l->classes, sizeof(float *));
+        probs[j] = xplat_malloc(l->classes, sizeof(float *));
     }
     while (1) {
         if (filename) {

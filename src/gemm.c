@@ -28,7 +28,7 @@ void gemm_bin(int M, int N, int K, float ALPHA,
 
 float *random_matrix(int rows, int cols)
 {
-    float *m = calloc(rows * cols, sizeof(float));
+    float *m = xplat_malloc(rows * cols, sizeof(float));
     for (int i = 0; i < rows * cols; ++i) {
         m[i] = (float)rand() / RAND_MAX;
     }

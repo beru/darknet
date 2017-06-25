@@ -19,10 +19,10 @@ float_pair get_rnn_vid_data(network net, char **files, int n, int batch, int ste
     image out_im = get_network_image(net);
     int output_size = out_im.w*out_im.h*out_im.c;
     printf("%d %d %d\n", out_im.w, out_im.h, out_im.c);
-    float *feats = calloc(net.batch*batch*output_size, sizeof(float));
+    float *feats = xplat_malloc(net.batch*batch*output_size, sizeof(float));
     for (b = 0; b < batch; ++b) {
         int input_size = net.w*net.h*net.c;
-        float *input = calloc(input_size*net.batch, sizeof(float));
+        float *input = xplat_malloc(input_size*net.batch, sizeof(float));
         char *filename = files[rand()%n];
         CvCapture *cap = cvCaptureFromFile(filename);
         int frames = cvGetCaptureProperty(cap, CV_CAP_PROP_FRAME_COUNT);

@@ -201,7 +201,7 @@ int bbox_comparator(const void *a, const void *b)
 
     image im1 = load_image_color(box1.filename, net.w, net.h);
     image im2 = load_image_color(box2.filename, net.w, net.h);
-    float *X  = calloc(net.w * net.h * net.c, sizeof(float));
+    float *X  = xplat_malloc(net.w * net.h * net.c, sizeof(float));
     memcpy(X,                         im1.data, im1.w * im1.h * im1.c * sizeof(float));
     memcpy(X + im1.w * im1.h * im1.c, im2.data, im2.w * im2.h * im2.c * sizeof(float));
     float *predictions = network_predict(&net, X);
@@ -230,7 +230,7 @@ void bbox_fight(network net, sortable_bbox *a, sortable_bbox *b, int classes, in
 {
     image im1 = load_image_color(a->filename, net.w, net.h);
     image im2 = load_image_color(b->filename, net.w, net.h);
-    float *X  = calloc(net.w * net.h * net.c, sizeof(float));
+    float *X  = xplat_malloc(net.w * net.h * net.c, sizeof(float));
     memcpy(X,                         im1.data, im1.w * im1.h * im1.c * sizeof(float));
     memcpy(X + im1.w * im1.h * im1.c, im2.data, im2.w * im2.h * im2.c * sizeof(float));
     float *predictions = network_predict(&net, X);
@@ -263,7 +263,7 @@ void SortMaster3000(char *filename, char *weightfile)
     char **paths = (char **)list_to_array(plist);
     int N = plist->size;
     free_list(plist);
-    sortable_bbox *boxes = calloc(N, sizeof(sortable_bbox));
+    sortable_bbox *boxes = xplat_malloc(N, sizeof(sortable_bbox));
     printf("Sorting %d boxes...\n", N);
     for (int i = 0; i < N; ++i) {
         boxes[i].filename = paths[i];
@@ -299,13 +299,13 @@ void BattleRoyaleWithCheese(char *filename, char *weightfile)
     int N = plist->size;
     int total = N;
     free_list(plist);
-    sortable_bbox *boxes = calloc(N, sizeof(sortable_bbox));
+    sortable_bbox *boxes = xplat_malloc(N, sizeof(sortable_bbox));
     printf("Battling %d boxes...\n", N);
     for (int i = 0; i < N; ++i) {
         boxes[i].filename = paths[i];
         boxes[i].net = net;
         boxes[i].classes = classes;
-        boxes[i].elos = calloc(classes, sizeof(float));;
+        boxes[i].elos = xplat_malloc(classes, sizeof(float));;
         for (int j = 0; j < classes; ++j) {
             boxes[i].elos[j] = 1500;
         }

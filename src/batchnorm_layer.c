@@ -12,25 +12,25 @@ void make_batchnorm_layer(layer *l, int batch, int w, int h, int c)
     l->h = l->out_h = h;
     l->w = l->out_w = w;
     l->c = l->out_c = c;
-    l->output = calloc(h * w * c * batch, sizeof(float));
-    l->delta  = calloc(h * w * c * batch, sizeof(float));
+    l->output = xplat_malloc(h * w * c * batch, sizeof(float));
+    l->delta  = xplat_malloc(h * w * c * batch, sizeof(float));
     l->inputs = w * h * c;
     l->outputs = l->inputs;
 
-    l->scales = calloc(c, sizeof(float));
-    l->scale_updates = calloc(c, sizeof(float));
-    l->biases = calloc(c, sizeof(float));
-    l->bias_updates = calloc(c, sizeof(float));
+    l->scales = xplat_malloc(c, sizeof(float));
+    l->scale_updates = xplat_malloc(c, sizeof(float));
+    l->biases = xplat_malloc(c, sizeof(float));
+    l->bias_updates = xplat_malloc(c, sizeof(float));
     
     for (int i = 0; i < c; ++i) {
         l->scales[i] = 1;
     }
 
-    l->mean = calloc(c, sizeof(float));
-    l->variance = calloc(c, sizeof(float));
+    l->mean = xplat_malloc(c, sizeof(float));
+    l->variance = xplat_malloc(c, sizeof(float));
 
-    l->rolling_mean = calloc(c, sizeof(float));
-    l->rolling_variance = calloc(c, sizeof(float));
+    l->rolling_mean = xplat_malloc(c, sizeof(float));
+    l->rolling_variance = xplat_malloc(c, sizeof(float));
 
     l->forward = forward_batchnorm_layer;
     l->backward = backward_batchnorm_layer;

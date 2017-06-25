@@ -20,8 +20,8 @@ void make_route_layer(route_layer *l, int batch, int n, int *input_layers, int *
     fprintf(stderr, "\n");
     l->outputs = outputs;
     l->inputs = outputs;
-    l->delta =  calloc(outputs * batch, sizeof(float));
-    l->output = calloc(outputs * batch, sizeof(float));;
+    l->delta =  xplat_malloc(outputs * batch, sizeof(float));
+    l->output = xplat_malloc(outputs * batch, sizeof(float));;
 
     l->forward = forward_route_layer;
     l->backward = backward_route_layer;

@@ -48,10 +48,10 @@ void make_maxpool_layer(maxpool_layer *l,
 #else
     l->forward = forward_maxpool_layer;
     l->backward = backward_maxpool_layer;
-    l->indexes = calloc(output_size, sizeof(int));
-    l->output =  calloc(output_size, sizeof(float));
+    l->indexes = xplat_malloc(output_size, sizeof(int));
+    l->output =  xplat_malloc(output_size, sizeof(float));
     if (train) {
-        l->delta =   calloc(output_size, sizeof(float));
+        l->delta =   xplat_malloc(output_size, sizeof(float));
     }
 #endif
     fprintf(stderr, "max          %d x %d / %d  %4d x%4d x%4d   ->  %4d x%4d x%4d\n",

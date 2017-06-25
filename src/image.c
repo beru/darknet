@@ -170,9 +170,9 @@ void draw_bbox(image a, box bbox, int w, float r, float g, float b)
 image **load_alphabet()
 {
     const int nsize = 8;
-    image **alphabets = calloc(nsize, sizeof(image));
+    image **alphabets = xplat_malloc(nsize, sizeof(image));
     for (int j = 0; j < nsize; ++j) {
-        alphabets[j] = calloc(128, sizeof(image));
+        alphabets[j] = xplat_malloc(128, sizeof(image));
         for (int i = 32; i < 127; ++i) {
             char buff[256];
             sprintf(buff, "data/labels/%d_%d.png", i, j);
@@ -372,8 +372,8 @@ void normalize_image(image p)
 
 void normalize_image2(image p)
 {
-    float *min = calloc(p.c, sizeof(float));
-    float *max = calloc(p.c, sizeof(float));
+    float *min = xplat_malloc(p.c, sizeof(float));
+    float *max = xplat_malloc(p.c, sizeof(float));
     for (int i = 0; i < p.c; ++i) min[i] = max[i] = p.data[i * p.h * p.w];
 
     for (int j = 0; j < p.c; ++j) {
@@ -406,7 +406,7 @@ void copy_image_into(image src, image dest)
 image copy_image(image p)
 {
     image copy = p;
-    copy.data = calloc(p.h * p.w * p.c, sizeof(float));
+    copy.data = xplat_malloc(p.h * p.w * p.c, sizeof(float));
     memcpy(copy.data, p.data, p.h * p.w * p.c * sizeof(float));
     return copy;
 }
@@ -580,7 +580,7 @@ void save_image_png(image im, const char *name)
     char buff[256];
     //sprintf(buff, "%s (%d)", name, windows);
     sprintf(buff, "%s.png", name);
-    unsigned char *data = calloc(im.w * im.h * im.c, sizeof(char));
+    unsigned char *data = xplat_malloc(im.w * im.h * im.c, sizeof(char));
     for (int k = 0; k < im.c; ++k) {
         for (int i = 0; i < im.w * im.h; ++i) {
             data[i * im.c + k] = (unsigned char) (255 * im.data[i + k * im.w * im.h]);
@@ -631,14 +631,14 @@ image make_empty_image(int w, int h, int c)
 image make_image(int w, int h, int c)
 {
     image out = make_empty_image(w, h, c);
-    out.data = calloc(h * w * c, sizeof(float));
+    out.data = xplat_malloc(h * w * c, sizeof(float));
     return out;
 }
 
 image make_random_image(int w, int h, int c)
 {
     image out = make_empty_image(w, h, c);
-    out.data = calloc(h * w * c, sizeof(float));
+    out.data = xplat_malloc(h * w * c, sizeof(float));
     for (int i = 0; i < w * h * c; ++i) {
         out.data[i] = (rand_normal() * .25) + .5;
     }

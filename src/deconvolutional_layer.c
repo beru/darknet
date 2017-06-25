@@ -32,11 +32,11 @@ void make_deconvolutional_layer(layer *l,
     l->nweights = c * n * size * size;
     l->nbiases = n;
 
-    l->weights = calloc(c * n * size * size, sizeof(float));
-    l->weight_updates = calloc(c * n * size * size, sizeof(float));
+    l->weights = xplat_malloc(c * n * size * size, sizeof(float));
+    l->weight_updates = xplat_malloc(c * n * size * size, sizeof(float));
 
-    l->biases = calloc(n, sizeof(float));
-    l->bias_updates = calloc(n, sizeof(float));
+    l->biases = xplat_malloc(n, sizeof(float));
+    l->bias_updates = xplat_malloc(n, sizeof(float));
     float scale = .02;
     for (int i = 0; i < c * n * size * size; ++i) {
         l->weights[i] = scale * rand_normal();
@@ -52,8 +52,8 @@ void make_deconvolutional_layer(layer *l,
     l->outputs = l->out_w * l->out_h * l->out_c;
     l->inputs = l->w * l->h * l->c;
 
-    l->output = calloc(l->batch * l->outputs, sizeof(float));
-    l->delta  = calloc(l->batch * l->outputs, sizeof(float));
+    l->output = xplat_malloc(l->batch * l->outputs, sizeof(float));
+    l->delta  = xplat_malloc(l->batch * l->outputs, sizeof(float));
 
     l->forward = forward_deconvolutional_layer;
     l->backward = backward_deconvolutional_layer;
@@ -62,31 +62,31 @@ void make_deconvolutional_layer(layer *l,
     l->batch_normalize = batch_normalize;
 
     if (batch_normalize) {
-        l->scales = calloc(n, sizeof(float));
-        l->scale_updates = calloc(n, sizeof(float));
+        l->scales = xplat_malloc(n, sizeof(float));
+        l->scale_updates = xplat_malloc(n, sizeof(float));
         for (int i = 0; i < n; ++i) {
             l->scales[i] = 1;
         }
 
-        l->mean = calloc(n, sizeof(float));
-        l->variance = calloc(n, sizeof(float));
+        l->mean = xplat_malloc(n, sizeof(float));
+        l->variance = xplat_malloc(n, sizeof(float));
 
-        l->mean_delta = calloc(n, sizeof(float));
-        l->variance_delta = calloc(n, sizeof(float));
+        l->mean_delta = xplat_malloc(n, sizeof(float));
+        l->variance_delta = xplat_malloc(n, sizeof(float));
 
-        l->rolling_mean = calloc(n, sizeof(float));
-        l->rolling_variance = calloc(n, sizeof(float));
-        l->x = calloc(l->batch * l->outputs, sizeof(float));
-        l->x_norm = calloc(l->batch * l->outputs, sizeof(float));
+        l->rolling_mean = xplat_malloc(n, sizeof(float));
+        l->rolling_variance = xplat_malloc(n, sizeof(float));
+        l->x = xplat_malloc(l->batch * l->outputs, sizeof(float));
+        l->x_norm = xplat_malloc(l->batch * l->outputs, sizeof(float));
     }
     if (adam) {
         l->adam = 1;
-        l->m = calloc(c * n * size * size, sizeof(float));
-        l->v = calloc(c * n * size * size, sizeof(float));
-        l->bias_m = calloc(n, sizeof(float));
-        l->scale_m = calloc(n, sizeof(float));
-        l->bias_v = calloc(n, sizeof(float));
-        l->scale_v = calloc(n, sizeof(float));
+        l->m = xplat_malloc(c * n * size * size, sizeof(float));
+        l->v = xplat_malloc(c * n * size * size, sizeof(float));
+        l->bias_m = xplat_malloc(n, sizeof(float));
+        l->scale_m = xplat_malloc(n, sizeof(float));
+        l->bias_v = xplat_malloc(n, sizeof(float));
+        l->scale_v = xplat_malloc(n, sizeof(float));
     }
 
 #ifdef GPU

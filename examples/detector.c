@@ -22,7 +22,7 @@ void train_detector(char *datacfg,
 
     srand(time(0));
 #ifdef GPU
-    network *nets = calloc(ngpus, sizeof(network));
+    network *nets = xplat_malloc(ngpus, sizeof(network));
     int seed = rand();
     for (int i = 0; i < ngpus; ++i) {
         srand(seed);
@@ -343,17 +343,17 @@ void validate_detector_flip(char *datacfg, char *cfgfile, char *weightfile, char
         if (!outfile) {
             outfile = "comp4_det_test_";
         }
-        fps = calloc(classes, sizeof(FILE *));
+        fps = xplat_malloc(classes, sizeof(FILE *));
         for (int j = 0; j < classes; ++j) {
             snprintf(buff, 1024, "%s/%s%s.txt", prefix, outfile, names[j]);
             fps[j] = fopen(buff, "w");
         }
     }
 
-    box *boxes = calloc(l->w * l->h * l->n, sizeof(box));
-    float **probs = calloc(l->w * l->h * l->n, sizeof(float *));
+    box *boxes = xplat_malloc(l->w * l->h * l->n, sizeof(box));
+    float **probs = xplat_malloc(l->w * l->h * l->n, sizeof(float *));
     for (int j = 0; j < l->w * l->h * l->n; ++j) {
-        probs[j] = calloc(classes + 1, sizeof(float *));
+        probs[j] = xplat_malloc(classes + 1, sizeof(float *));
     }
     int m = plist->size;
     float thresh = .005;
@@ -367,12 +367,12 @@ void validate_detector_flip(char *datacfg, char *cfgfile, char *weightfile, char
 
 #ifdef THREAD
     int nthreads = 4;
-    image *val = calloc(nthreads, sizeof(image));
-    image *val_resized = calloc(nthreads, sizeof(image));
-    image *buf = calloc(nthreads, sizeof(image));
-    image *buf_resized = calloc(nthreads, sizeof(image));
+    image *val = xplat_malloc(nthreads, sizeof(image));
+    image *val_resized = xplat_malloc(nthreads, sizeof(image));
+    image *buf = xplat_malloc(nthreads, sizeof(image));
+    image *buf_resized = xplat_malloc(nthreads, sizeof(image));
     image input = make_image(net.w, net.h, net.c * 2);
-    pthread_t *thr = calloc(nthreads, sizeof(pthread_t));
+    pthread_t *thr = xplat_malloc(nthreads, sizeof(pthread_t));
     for (int t = 0; t < nthreads; ++t) {
         args.path = paths[t];
         args.im = &buf[t];
@@ -526,17 +526,17 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
         if (!outfile) {
             outfile = "comp4_det_test_";
         }
-        fps = calloc(classes, sizeof(FILE *));
+        fps = xplat_malloc(classes, sizeof(FILE *));
         for (int j = 0; j < classes; ++j) {
             snprintf(buff, 1024, "%s/%s%s.txt", prefix, outfile, names[j]);
             fps[j] = fopen(buff, "w");
         }
     }
 
-    box *boxes = calloc(l->w * l->h * l->n, sizeof(box));
-    float **probs = calloc(l->w * l->h * l->n, sizeof(float *));
+    box *boxes = xplat_malloc(l->w * l->h * l->n, sizeof(box));
+    float **probs = xplat_malloc(l->w * l->h * l->n, sizeof(float *));
     for (int j = 0; j < l->w * l->h * l->n; ++j) {
-        probs[j] = calloc(classes + 1, sizeof(float *));
+        probs[j] = xplat_malloc(classes + 1, sizeof(float *));
     }
 
     int m = plist->size;
@@ -548,11 +548,11 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
 #ifdef THREAD
     int t;
     int nthreads = 4;
-    image *val = calloc(nthreads, sizeof(image));
-    image *val_resized = calloc(nthreads, sizeof(image));
-    image *buf = calloc(nthreads, sizeof(image));
-    image *buf_resized = calloc(nthreads, sizeof(image));
-    pthread_t *thr = calloc(nthreads, sizeof(pthread_t));
+    image *val = xplat_malloc(nthreads, sizeof(image));
+    image *val_resized = xplat_malloc(nthreads, sizeof(image));
+    image *buf = xplat_malloc(nthreads, sizeof(image));
+    image *buf_resized = xplat_malloc(nthreads, sizeof(image));
+    pthread_t *thr = xplat_malloc(nthreads, sizeof(pthread_t));
 
     load_args args = {0};
     args.w = net.w;
@@ -673,9 +673,11 @@ void validate_detector_recall(char *cfgfile, char *weightfile)
     int classes = l->classes;
 
     int j, k;
-    box *boxes = calloc(l->w * l->h * l->n, sizeof(box));
-    float **probs = calloc(l->w * l->h * l->n, sizeof(float *));
-    for (j = 0; j < l->w * l->h * l->n; ++j) probs[j] = calloc(classes + 1, sizeof(float *));
+    box *boxes = xplat_malloc(l->w * l->h * l->n, sizeof(box));
+    float **probs = xplat_malloc(l->w * l->h * l->n, sizeof(float *));
+    for (j = 0; j < l->w * l->h * l->n; ++j) {
+        probs[j] = xplat_malloc(classes + 1, sizeof(float *));
+    }
 
     int m = plist->size;
     int i = 0;
@@ -777,10 +779,10 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         //resize_network(&net, sized.w, sized.h);
         layer *l = &net.layers[net.n-1];
 
-        box *boxes = calloc(l->w * l->h * l->n, sizeof(box));
-        float **probs = calloc(l->w * l->h * l->n, sizeof(float *));
+        box *boxes = xplat_malloc(l->w * l->h * l->n, sizeof(box));
+        float **probs = xplat_malloc(l->w * l->h * l->n, sizeof(float *));
         for (int j = 0; j < l->w * l->h * l->n; ++j) {
-            probs[j] = calloc(l->classes + 1, sizeof(float *));
+            probs[j] = xplat_malloc(l->classes + 1, sizeof(float *));
         }
 
         float *X = sized.data;
@@ -846,7 +848,7 @@ void run_detector(int argc, char **argv)
                 ++ngpus;
             }
         }
-        gpus = calloc(ngpus, sizeof(int));
+        gpus = xplat_malloc(ngpus, sizeof(int));
         for (int i = 0; i < ngpus; ++i) {
             gpus[i] = atoi(gpu_list);
             gpu_list = strchr(gpu_list, ',') + 1;

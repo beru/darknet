@@ -137,7 +137,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
 {
     demo_delay = delay;
     demo_frame = avg_frames;
-    predictions = calloc(demo_frame, sizeof(float*));
+    predictions = xplat_malloc(demo_frame, sizeof(float*));
     image **alphabet = load_alphabet();
     demo_names = names;
     demo_alphabet = alphabet;
@@ -177,17 +177,17 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
     layer l = net.layers[net.n - 1];
     demo_detections = l.n * l.w * l.h;
 
-    avg = (float *) calloc(l.outputs, sizeof(float));
-    last_avg  = (float *) calloc(l.outputs, sizeof(float));
-    last_avg2 = (float *) calloc(l.outputs, sizeof(float));
+    avg = (float *) xplat_malloc(l.outputs, sizeof(float));
+    last_avg  = (float *) xplat_malloc(l.outputs, sizeof(float));
+    last_avg2 = (float *) xplat_malloc(l.outputs, sizeof(float));
     for (int j = 0; j < demo_frame; ++j) {
-        predictions[j] = (float *) calloc(l.outputs, sizeof(float));
+        predictions[j] = (float *) xplat_malloc(l.outputs, sizeof(float));
     }
 
-    boxes = (box *)calloc(l.w * l.h * l.n, sizeof(box));
-    probs = (float **)calloc(l.w * l.h * l.n, sizeof(float *));
+    boxes = (box *)xplat_malloc(l.w * l.h * l.n, sizeof(box));
+    probs = (float **)xplat_malloc(l.w * l.h * l.n, sizeof(float *));
     for (j = 0; j < l.w * l.h * l.n; ++j) {
-        probs[j] = (float *)calloc(l.classes + 1, sizeof(float));
+        probs[j] = (float *)xplat_malloc(l.classes + 1, sizeof(float));
     }
 
     buff[0] = get_image_from_stream(cap);

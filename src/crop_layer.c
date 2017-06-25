@@ -35,7 +35,7 @@ void make_crop_layer(crop_layer *l,
     l->out_c = c;
     l->inputs = l->w * l->h * l->c;
     l->outputs = l->out_w * l->out_h * l->out_c;
-    l->output = calloc(l->outputs * batch, sizeof(float));
+    l->output = xplat_malloc(l->outputs * batch, sizeof(float));
     l->forward = forward_crop_layer;
     l->backward = backward_crop_layer;
 

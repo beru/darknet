@@ -18,10 +18,10 @@ void make_normalization_layer(layer *l,
     l->size = size;
     l->alpha = alpha;
     l->beta = beta;
-    l->output = calloc(h * w * c * batch, sizeof(float));
-    l->delta = calloc(h * w * c * batch, sizeof(float));
-    l->squared = calloc(h * w * c * batch, sizeof(float));
-    l->norms = calloc(h * w * c * batch, sizeof(float));
+    l->output = xplat_malloc(h * w * c * batch, sizeof(float));
+    l->delta = xplat_malloc(h * w * c * batch, sizeof(float));
+    l->squared = xplat_malloc(h * w * c * batch, sizeof(float));
+    l->norms = xplat_malloc(h * w * c * batch, sizeof(float));
     l->inputs = w * h * c;
     l->outputs = l->inputs;
 

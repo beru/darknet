@@ -26,7 +26,7 @@ char *fgetgo(FILE *fp)
         return 0;
     }
     size_t size = 94;
-    char *line = malloc(size*sizeof(char));
+    char *line = xplat_malloc(size, sizeof(char));
     if (size != fread(line, sizeof(char), size, fp)) {
         free(line);
         return 0;
@@ -39,7 +39,7 @@ moves load_go_moves(char *filename)
 {
     moves m;
     m.n = 128;
-    m.data = calloc(128, sizeof(char*));
+    m.data = xplat_malloc(128, sizeof(char*));
     FILE *fp = fopen(filename, "rb");
     int count = 0;
     char *line = 0;
@@ -146,7 +146,7 @@ void train_go(char *cfgfile,
     srand(time(0));
 #ifdef GPU
     printf("%d\n", ngpus);
-    network *nets = calloc(ngpus, sizeof(network));
+    network *nets = xplat_malloc(ngpus, sizeof(network));
     int seed = rand();
     for (int i = 0; i < ngpus; ++i) {
         srand(seed);
@@ -250,7 +250,7 @@ void propagate_liberty(float *board, int *lib, int *visited, int row, int col, i
 
 int *calculate_liberties(float *board)
 {
-    int *lib = calloc(19*19, sizeof(int));
+    int *lib = xplat_malloc(19 * 19, sizeof(int));
     int visited[361];
     for (int j = 0; j < 19; ++j) {
         for (int i = 0; i < 19; ++i) {
@@ -501,8 +501,8 @@ void valid_go(char *cfgfile, char *weightfile, int multi, char *filename)
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n",
            net.learning_rate, net.momentum, net.decay);
 
-    float *board = calloc(19 * 19, sizeof(float));
-    float *move = calloc(19 * 19 + 1, sizeof(float));
+    float *board = xplat_malloc(19 * 19, sizeof(float));
+    float *move = xplat_malloc(19 * 19 + 1, sizeof(float));
    // moves m = load_go_moves("/home/pjreddie/backup/go.test");
     moves m = load_go_moves(filename);
 
@@ -546,9 +546,9 @@ void engine_go(char *filename, char *weightfile, int multi)
     }
     srand(time(0));
     set_batch_network(&net, 1);
-    float *board = calloc(19*19, sizeof(float));
-    char *one = calloc(91, sizeof(char));
-    char *two = calloc(91, sizeof(char));
+    float *board = xplat_malloc(19*19, sizeof(float));
+    char *one = xplat_malloc(91, sizeof(char));
+    char *two = xplat_malloc(91, sizeof(char));
     int passed = 0;
     while (1) {
         char buff[256];
@@ -737,8 +737,8 @@ void test_go(char *cfg, char *weights, int multi)
     }
     srand(time(0));
     set_batch_network(&net, 1);
-    float *board = calloc(19*19, sizeof(float));
-    float *move = calloc(19*19+1, sizeof(float));
+    float *board = xplat_malloc(19*19, sizeof(float));
+    float *move = xplat_malloc(19*19+1, sizeof(float));
     int color = 1;
     while (1) {
         predict_move(net, board, move, multi);
@@ -857,9 +857,9 @@ void self_go(char *filename, char *weightfile, char *f2, char *w2, int multi)
     int count = 0;
     set_batch_network(&net, 1);
     set_batch_network(&net2, 1);
-    float *board = calloc(19 * 19, sizeof(float));
-    char *one = calloc(91, sizeof(char));
-    char *two = calloc(91, sizeof(char));
+    float *board = xplat_malloc(19 * 19, sizeof(float));
+    char *one = xplat_malloc(91, sizeof(char));
+    char *two = xplat_malloc(91, sizeof(char));
     int done = 0;
     int player = 1;
     int p1 = 0;
@@ -937,7 +937,7 @@ void run_go(int argc, char **argv)
         for (int i = 0; i < len; ++i) {
             if (gpu_list[i] == ',') ++ngpus;
         }
-        gpus = calloc(ngpus, sizeof(int));
+        gpus = xplat_malloc(ngpus, sizeof(int));
         for (int i = 0; i < ngpus; ++i) {
             gpus[i] = atoi(gpu_list);
             gpu_list = strchr(gpu_list, ',')+1;

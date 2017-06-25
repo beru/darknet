@@ -163,9 +163,9 @@ char *get_layer_string(LAYER_TYPE a)
 void make_network(network *net, int n)
 {
     net->n = n;
-    net->layers = calloc(net->n, sizeof(layer));
-    net->seen = calloc(1, sizeof(int));
-    net->cost = calloc(1, sizeof(float));
+    net->layers = xplat_malloc(net->n, sizeof(layer));
+    net->seen = xplat_malloc(1, sizeof(int));
+    net->cost = xplat_malloc(1, sizeof(float));
 }
 
 void forward_network(network *net)
@@ -359,8 +359,8 @@ int resize_network(network *net, int w, int h)
     net->output = out->output;
     free(net->input);
     free(net->truth);
-    net->input = calloc(net->inputs * net->batch, sizeof(float));
-    net->truth = calloc(net->truths * net->batch, sizeof(float));
+    net->input = xplat_malloc(net->inputs * net->batch, sizeof(float));
+    net->truth = xplat_malloc(net->truths * net->batch, sizeof(float));
 #ifdef GPU
     if (gpu_index >= 0) {
         cuda_free(net->input_gpu);
@@ -370,11 +370,11 @@ int resize_network(network *net, int w, int h)
         net->workspace = cuda_make_array(0, (workspace_size - 1) / sizeof(float) + 1);
     }else {
         free(net->workspace);
-        net->workspace = calloc(1, workspace_size);
+        net->workspace = xplat_malloc(1, workspace_size);
     }
 #else
     free(net->workspace);
-    net->workspace = calloc(1, workspace_size);
+    net->workspace = xplat_malloc(1, workspace_size);
 #endif
     //fprintf(stderr, " Done!\n");
     return 0;
@@ -449,7 +449,7 @@ matrix network_predict_data_multi(network *net, data test, int n)
 {
     int k = net->outputs;
     matrix pred = make_matrix(test.X.rows, k);
-    float *X = calloc(net->batch * test.X.rows, sizeof(float));
+    float *X = xplat_malloc(net->batch * test.X.rows, sizeof(float));
     for (int i = 0; i < test.X.rows; i += net->batch) {
         for (int b = 0; b < net->batch; ++b) {
             if (i+b == test.X.rows) break;
@@ -473,7 +473,7 @@ matrix network_predict_data(network *net, data test)
 {
     int k = net->outputs;
     matrix pred = make_matrix(test.X.rows, k);
-    float *X = calloc(net->batch * test.X.cols, sizeof(float));
+    float *X = xplat_malloc(net->batch * test.X.cols, sizeof(float));
     for (int i = 0; i < test.X.rows; i += net->batch) {
         for (int b = 0; b < net->batch; ++b) {
             if (i + b == test.X.rows) break;

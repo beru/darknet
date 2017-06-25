@@ -42,9 +42,9 @@ void make_cost_layer(cost_layer *l, int batch, int inputs, COST_TYPE cost_type, 
     l->inputs = inputs;
     l->outputs = inputs;
     l->cost_type = cost_type;
-    l->delta = calloc(inputs * batch, sizeof(float));
-    l->output = calloc(inputs * batch, sizeof(float));
-    l->cost = calloc(1, sizeof(float));
+    l->delta = xplat_malloc(inputs * batch, sizeof(float));
+    l->output = xplat_malloc(inputs * batch, sizeof(float));
+    l->cost = xplat_malloc(1, sizeof(float));
 
     l->forward = forward_cost_layer;
     l->backward = backward_cost_layer;

@@ -18,8 +18,8 @@ void make_softmax_layer(softmax_layer *l, int batch, int inputs, int groups)
     l->groups = groups;
     l->inputs = inputs;
     l->outputs = inputs;
-    l->output = calloc(inputs * batch, sizeof(float));
-    l->delta = calloc(inputs * batch, sizeof(float));
+    l->output = xplat_malloc(inputs * batch, sizeof(float));
+    l->delta = xplat_malloc(inputs * batch, sizeof(float));
 
     l->forward = forward_softmax_layer;
     l->backward = backward_softmax_layer;

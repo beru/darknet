@@ -35,32 +35,32 @@ void make_gru_layer(layer *l, int batch, int inputs, int outputs, int steps, int
     l->steps = steps;
     l->inputs = inputs;
 
-    l->input_z_layer = calloc(1, sizeof(layer));
+    l->input_z_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_connected_layer(l->input_z_layer, batch * steps, inputs, outputs, LINEAR, batch_normalize);
     l->input_z_layer->batch = batch;
 
-    l->state_z_layer = calloc(1, sizeof(layer));
+    l->state_z_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_connected_layer(l->state_z_layer, batch * steps, outputs, outputs, LINEAR, batch_normalize);
     l->state_z_layer->batch = batch;
 
-    l->input_r_layer = calloc(1, sizeof(layer));
+    l->input_r_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_connected_layer(l->input_r_layer, batch * steps, inputs, outputs, LINEAR, batch_normalize);
     l->input_r_layer->batch = batch;
 
-    l->state_r_layer = calloc(1, sizeof(layer));
+    l->state_r_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_connected_layer(l->state_r_layer, batch * steps, outputs, outputs, LINEAR, batch_normalize);
     l->state_r_layer->batch = batch;
 
-    l->input_h_layer = calloc(1, sizeof(layer));
+    l->input_h_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_connected_layer(l->input_h_layer, batch * steps, inputs, outputs, LINEAR, batch_normalize);
     l->input_h_layer->batch = batch;
 
-    l->state_h_layer = calloc(1, sizeof(layer));
+    l->state_h_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_connected_layer(l->state_h_layer, batch * steps, outputs, outputs, LINEAR, batch_normalize);
     l->state_h_layer->batch = batch;
@@ -77,16 +77,16 @@ void make_gru_layer(layer *l, int batch, int inputs, int outputs, int steps, int
     l->batch_normalize = batch_normalize;
 
     l->outputs = outputs;
-    l->output = calloc(outputs * batch * steps, sizeof(float));
-    l->delta = calloc(outputs * batch * steps, sizeof(float));
-    l->state = calloc(outputs * batch, sizeof(float));
-    l->prev_state = calloc(outputs * batch, sizeof(float));
-    l->forgot_state = calloc(outputs * batch, sizeof(float));
-    l->forgot_delta = calloc(outputs * batch, sizeof(float));
+    l->output = xplat_malloc(outputs * batch * steps, sizeof(float));
+    l->delta = xplat_malloc(outputs * batch * steps, sizeof(float));
+    l->state = xplat_malloc(outputs * batch, sizeof(float));
+    l->prev_state = xplat_malloc(outputs * batch, sizeof(float));
+    l->forgot_state = xplat_malloc(outputs * batch, sizeof(float));
+    l->forgot_delta = xplat_malloc(outputs * batch, sizeof(float));
 
-    l->r_cpu = calloc(outputs * batch, sizeof(float));
-    l->z_cpu = calloc(outputs * batch, sizeof(float));
-    l->h_cpu = calloc(outputs * batch, sizeof(float));
+    l->r_cpu = xplat_malloc(outputs * batch, sizeof(float));
+    l->z_cpu = xplat_malloc(outputs * batch, sizeof(float));
+    l->h_cpu = xplat_malloc(outputs * batch, sizeof(float));
 
     l->forward = forward_gru_layer;
     l->backward = backward_gru_layer;

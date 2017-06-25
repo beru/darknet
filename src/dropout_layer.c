@@ -11,7 +11,7 @@ void make_dropout_layer(dropout_layer *l, int batch, int inputs, float probabili
     l->inputs = inputs;
     l->outputs = inputs;
     l->batch = batch;
-    l->rand = calloc(inputs * batch, sizeof(float));
+    l->rand = xplat_malloc(inputs * batch, sizeof(float));
     l->scale = 1. / (1. - probability);
     l->forward = forward_dropout_layer;
     l->backward = backward_dropout_layer;

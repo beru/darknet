@@ -27,14 +27,14 @@ void make_connected_layer(connected_layer *l,
     l->out_w = 1;
     l->out_c = outputs;
 
-    l->output = calloc(batch * outputs, sizeof(float));
-    l->delta = calloc(batch * outputs, sizeof(float));
+    l->output = xplat_malloc(batch * outputs, sizeof(float));
+    l->delta = xplat_malloc(batch * outputs, sizeof(float));
 
-    l->weight_updates = calloc(inputs * outputs, sizeof(float));
-    l->bias_updates = calloc(outputs, sizeof(float));
+    l->weight_updates = xplat_malloc(inputs * outputs, sizeof(float));
+    l->bias_updates = xplat_malloc(outputs, sizeof(float));
 
-    l->weights = calloc(outputs * inputs, sizeof(float));
-    l->biases = calloc(outputs, sizeof(float));
+    l->weights = xplat_malloc(outputs * inputs, sizeof(float));
+    l->biases = xplat_malloc(outputs, sizeof(float));
 
     l->forward = forward_connected_layer;
     l->backward = backward_connected_layer;
@@ -51,22 +51,22 @@ void make_connected_layer(connected_layer *l,
     }
 
     if (batch_normalize) {
-        l->scales = calloc(outputs, sizeof(float));
-        l->scale_updates = calloc(outputs, sizeof(float));
+        l->scales = xplat_malloc(outputs, sizeof(float));
+        l->scale_updates = xplat_malloc(outputs, sizeof(float));
         for (int i = 0; i < outputs; ++i) {
             l->scales[i] = 1;
         }
 
-        l->mean = calloc(outputs, sizeof(float));
-        l->mean_delta = calloc(outputs, sizeof(float));
-        l->variance = calloc(outputs, sizeof(float));
-        l->variance_delta = calloc(outputs, sizeof(float));
+        l->mean = xplat_malloc(outputs, sizeof(float));
+        l->mean_delta = xplat_malloc(outputs, sizeof(float));
+        l->variance = xplat_malloc(outputs, sizeof(float));
+        l->variance_delta = xplat_malloc(outputs, sizeof(float));
 
-        l->rolling_mean = calloc(outputs, sizeof(float));
-        l->rolling_variance = calloc(outputs, sizeof(float));
+        l->rolling_mean = xplat_malloc(outputs, sizeof(float));
+        l->rolling_variance = xplat_malloc(outputs, sizeof(float));
 
-        l->x = calloc(batch * outputs, sizeof(float));
-        l->x_norm = calloc(batch * outputs, sizeof(float));
+        l->x = xplat_malloc(batch * outputs, sizeof(float));
+        l->x_norm = xplat_malloc(batch * outputs, sizeof(float));
     }
 
 #ifdef GPU

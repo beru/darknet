@@ -27,11 +27,11 @@ void make_detection_layer(detection_layer *l,
     l->w = side;
     l->h = side;
     assert(side * side * ((1 + l->coords) * l->n + l->classes) == inputs);
-    l->cost = calloc(1, sizeof(float));
+    l->cost = xplat_malloc(1, sizeof(float));
     l->outputs = l->inputs;
     l->truths = l->side * l->side * (1 + l->coords + l->classes);
-    l->output = calloc(batch * l->outputs, sizeof(float));
-    l->delta = calloc(batch * l->outputs, sizeof(float));
+    l->output = xplat_malloc(batch * l->outputs, sizeof(float));
+    l->delta = xplat_malloc(batch * l->outputs, sizeof(float));
 
     l->forward = forward_detection_layer;
     l->backward = backward_detection_layer;
@@ -182,7 +182,7 @@ void forward_detection_layer(detection_layer *l, network *net)
         }
 
         if (0) {
-            float *costs = calloc(l->batch * locations * l->n, sizeof(float));
+            float *costs = xplat_malloc(l->batch * locations * l->n, sizeof(float));
             for (int b = 0; b < l->batch; ++b) {
                 int index = b * l->inputs;
                 for (int i = 0; i < locations; ++i) {
@@ -264,7 +264,7 @@ void forward_detection_layer_gpu(detection_layer *l, network *net)
         return;
     }
 
-    //float *in_cpu = calloc(l->batch*l->inputs, sizeof(float));
+    //float *in_cpu = xplat_malloc(l->batch*l->inputs, sizeof(float));
     //float *truth_cpu = 0;
 
     forward_detection_layer(l, net);

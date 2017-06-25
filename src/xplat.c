@@ -30,5 +30,12 @@ void xplat_sleep(double seconds)
     Sleep(seconds * 1000);
 }
 
-
 #endif
+
+void* xplat_malloc(size_t count, size_t size)
+{
+static size_t total;
+total += count * size;
+printf("alloc %d total %d.\n", count * size / 1024, total / 1024);
+    return calloc(count, size);
+}

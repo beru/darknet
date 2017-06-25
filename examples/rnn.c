@@ -10,7 +10,7 @@ int *read_tokenized_data(char *filename, size_t *read)
     size_t size = 512;
     size_t count = 0;
     FILE *fp = fopen(filename, "r");
-    int *d = calloc(size, sizeof(int));
+    int *d = xplat_malloc(size, sizeof(int));
     int n, one;
     one = fscanf(fp, "%d", &n);
     while (one == 1) {
@@ -33,7 +33,7 @@ char **read_tokens(char *filename, size_t *read)
     size_t size = 512;
     size_t count = 0;
     FILE *fp = fopen(filename, "r");
-    char **d = calloc(size, sizeof(char *));
+    char **d = xplat_malloc(size, sizeof(char *));
     char *line;
     while ((line = fgetl(fp)) != 0) {
         ++count;
@@ -51,8 +51,8 @@ char **read_tokens(char *filename, size_t *read)
 
 float_pair get_rnn_token_data(int *tokens, size_t *offsets, int characters, size_t len, int batch, int steps)
 {
-    float *x = calloc(batch * steps * characters, sizeof(float));
-    float *y = calloc(batch * steps * characters, sizeof(float));
+    float *x = xplat_malloc(batch * steps * characters, sizeof(float));
+    float *y = xplat_malloc(batch * steps * characters, sizeof(float));
     for (int i = 0; i < batch; ++i) {
         for (int j = 0; j < steps; ++j) {
             int curr = tokens[(offsets[i])%len];
@@ -76,8 +76,8 @@ float_pair get_rnn_token_data(int *tokens, size_t *offsets, int characters, size
 
 float_pair get_rnn_data(unsigned char *text, size_t *offsets, int characters, size_t len, int batch, int steps)
 {
-    float *x = calloc(batch * steps * characters, sizeof(float));
-    float *y = calloc(batch * steps * characters, sizeof(float));
+    float *x = xplat_malloc(batch * steps * characters, sizeof(float));
+    float *y = xplat_malloc(batch * steps * characters, sizeof(float));
     for (int i = 0; i < batch; ++i) {
         for (int j = 0; j < steps; ++j) {
             unsigned char curr = text[(offsets[i])%len];
@@ -130,7 +130,7 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
         size = ftell(fp);
         fseek(fp, 0, SEEK_SET); 
 
-        text = calloc(size+1, sizeof(char));
+        text = xplat_malloc(size+1, sizeof(char));
         fread(text, 1, size, fp);
         fclose(fp);
     }
@@ -153,7 +153,7 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
     int i = (*net.seen)/net.batch;
 
     int streams = batch/steps;
-    size_t *offsets = calloc(streams, sizeof(size_t));
+    size_t *offsets = xplat_malloc(streams, sizeof(size_t));
     for (int j = 0; j < streams; ++j) {
         offsets[j] = rand_size_t()%size;
     }
@@ -236,7 +236,7 @@ void test_char_rnn(char *cfgfile, char *weightfile, int num, char *seed, float t
     for (int i = 0; i < net.n; ++i) net.layers[i].temperature = temp;
     int c = 0;
     int len = strlen(seed);
-    float *input = calloc(inputs, sizeof(float));
+    float *input = xplat_malloc(inputs, sizeof(float));
 
     /*
        fill_cpu(inputs, 0, input, 1);
@@ -292,7 +292,7 @@ void test_tactic_rnn(char *cfgfile, char *weightfile, int num, float temp, int r
 
     for (int i = 0; i < net.n; ++i) net.layers[i].temperature = temp;
     int c = 0;
-    float *input = calloc(inputs, sizeof(float));
+    float *input = xplat_malloc(inputs, sizeof(float));
     float *out = 0;
 
     while ((c = getc(stdin)) != EOF) {
@@ -332,7 +332,7 @@ void valid_tactic_rnn(char *cfgfile, char *weightfile, char *seed)
     int words = 1;
     int c;
     int len = strlen(seed);
-    float *input = calloc(inputs, sizeof(float));
+    float *input = xplat_malloc(inputs, sizeof(float));
     for (int i = 0; i < len; ++i) {
         c = seed[i];
         input[(int)c] = 1;
@@ -385,7 +385,7 @@ void valid_char_rnn(char *cfgfile, char *weightfile, char *seed)
     int words = 1;
     int c;
     int len = strlen(seed);
-    float *input = calloc(inputs, sizeof(float));
+    float *input = xplat_malloc(inputs, sizeof(float));
     for (int i = 0; i < len; ++i) {
         c = seed[i];
         input[(int)c] = 1;
@@ -425,7 +425,7 @@ void vec_char_rnn(char *cfgfile, char *weightfile, char *seed)
 
     int c;
     int seed_len = strlen(seed);
-    float *input = calloc(inputs, sizeof(float));
+    float *input = xplat_malloc(inputs, sizeof(float));
     char *line;
     while ((line=fgetl(stdin)) != 0) {
         reset_rnn_state(net, 0);

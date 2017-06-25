@@ -43,8 +43,8 @@ void make_reorg_layer(layer *l,
                 stride, w, h, c, l->out_w, l->out_h, l->out_c);
     }
     int output_size = l->outputs * batch;
-    l->output =  calloc(output_size, sizeof(float));
-    l->delta =   calloc(output_size, sizeof(float));
+    l->output =  xplat_malloc(output_size, sizeof(float));
+    l->delta =   xplat_malloc(output_size, sizeof(float));
 
     l->forward = forward_reorg_layer;
     l->backward = backward_reorg_layer;
