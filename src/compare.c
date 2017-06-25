@@ -91,7 +91,7 @@ void train_compare(char *cfgfile, char *weightfile)
     free_network(&net);
     free_ptrs((void**)paths, plist->size);
     free_list(plist);
-    free(base);
+    xplat_free(base);
 }
 
 void validate_compare(char *filename, char *weightfile)
@@ -208,7 +208,7 @@ int bbox_comparator(const void *a, const void *b)
     
     free_image(&im1);
     free_image(&im2);
-    free(X);
+    xplat_free(X);
     if (predictions[class * 2] > predictions[class * 2 + 1]) {
         return 1;
     }
@@ -245,7 +245,7 @@ void bbox_fight(network net, sortable_bbox *a, sortable_bbox *b, int classes, in
     
     free_image(&im1);
     free_image(&im2);
-    free(X);
+    xplat_free(X);
 }
 
 void SortMaster3000(char *filename, char *weightfile)

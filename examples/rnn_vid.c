@@ -29,7 +29,7 @@ float_pair get_rnn_vid_data(network net, char **files, int n, int batch, int ste
         int index = rand() % (frames - steps - 2);
         if (frames < (steps + 4)) {
             --b;
-            free(input);
+            xplat_free(input);
             continue;
         }
 
@@ -49,7 +49,7 @@ float_pair get_rnn_vid_data(network net, char **files, int n, int batch, int ste
         }
         float *output = network_predict(&net, input);
 
-        free(input);
+        xplat_free(input);
 
         for (int i = 0; i < net.batch; ++i) {
             memcpy(feats + (b + i*batch)*output_size, output + i*output_size, output_size*sizeof(float));
@@ -106,7 +106,7 @@ void train_vid_rnn(char *cfgfile, char *weightfile)
         float loss = train_network_datum(&net) / (net.batch);
 
 
-        free(p.x);
+        xplat_free(p.x);
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
 

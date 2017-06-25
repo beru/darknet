@@ -75,18 +75,18 @@ LAYER_TYPE string_to_layer_type(char *type)
 
 void free_section(section *s)
 {
-    free(s->type);
+    xplat_free(s->type);
     node *n = s->options->front;
     while (n) {
         kvp *pair = (kvp *)n->val;
-        free(pair->key);
-        free(pair);
+        xplat_free(pair->key);
+        xplat_free(pair);
         node *next = n->next;
-        free(n);
+        xplat_free(n);
         n = next;
     }
-    free(s->options);
-    free(s);
+    xplat_free(s->options);
+    xplat_free(s);
 }
 
 void parse_data(char *data, float *a, int n)
@@ -760,8 +760,8 @@ void parse_network_cfg(network *net, char *filename)
         net->truths = net->layers[net->n - 1].truths;
     }
     net->output = out->output;
-    net->input = xplat_malloc(net->inputs * net->batch, sizeof(float));
-    net->truth = xplat_malloc(net->truths * net->batch, sizeof(float));
+    //net->input = xplat_malloc(net->inputs * net->batch, sizeof(float));
+    //net->truth = xplat_malloc(net->truths * net->batch, sizeof(float));
 #ifdef GPU
     net->output_gpu = out->output_gpu;
     net->input_gpu = cuda_make_array(net->input, net->inputs * net->batch);
@@ -804,13 +804,13 @@ list *read_cfg(char *filename)
         case '\0':
         case '#':
         case ';':
-            free(line);
+            xplat_free(line);
             break;
         default:
             if (!read_option(line, current->options)) {
                 fprintf(stderr, "Config file error line %d, could parse: %s\n",
                         nu, line);
-                free(line);
+                xplat_free(line);
             }
             break;
         }
@@ -982,7 +982,7 @@ void transpose_matrix(float *a, int rows, int cols)
         }
     }
     memcpy(a, transpose, rows * cols * sizeof(float));
-    free(transpose);
+    xplat_free(transpose);
 }
 
 void load_connected_weights(layer *l, FILE *fp, int transpose)

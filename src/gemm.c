@@ -54,9 +54,9 @@ void time_random_matrix(int TA, int TB, int m, int k, int n)
     end = clock();
     printf("Matrix Multiplication %dx%d * %dx%d, TA=%d, TB=%d: %lf ms\n",
            m, k, k, n, TA, TB, (float)(end - start) / CLOCKS_PER_SEC);
-    free(a);
-    free(b);
-    free(c);
+    xplat_free(a);
+    xplat_free(b);
+    xplat_free(c);
 }
 
 
@@ -212,9 +212,9 @@ void time_gpu_random_matrix(int TA, int TB, int m, int k, int n)
     end = clock();
     printf("Matrix Multiplication %dx%d * %dx%d, TA=%d, TB=%d: %lf s\n",
            m, k, k, n, TA, TB, (float)(end - start) / CLOCKS_PER_SEC);
-    free(a);
-    free(b);
-    free(c);
+    xplat_free(a);
+    xplat_free(b);
+    xplat_free(c);
 }
 
 void time_ongpu(int TA, int TB, int m, int k, int n)
@@ -246,9 +246,9 @@ void time_ongpu(int TA, int TB, int m, int k, int n)
     cuda_free(a_cl);
     cuda_free(b_cl);
     cuda_free(c_cl);
-    free(a);
-    free(b);
-    free(c);
+    xplat_free(a);
+    xplat_free(b);
+    xplat_free(c);
 }
 
 void test_gpu_accuracy(int TA, int TB, int m, int k, int n)
@@ -282,10 +282,10 @@ void test_gpu_accuracy(int TA, int TB, int m, int k, int n)
     }
     printf("Matrix Multiplication %dx%d * %dx%d, TA=%d, TB=%d: %g SSE\n",
            m, k, k, n, TA, TB, sse / (m * n));
-    free(a);
-    free(b);
-    free(c);
-    free(c_gpu);
+    xplat_free(a);
+    xplat_free(b);
+    xplat_free(c);
+    xplat_free(c_gpu);
 }
 
 int test_gpu_blas()

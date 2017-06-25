@@ -258,7 +258,7 @@ void fill_truth_swag(char *path, float *truth, int classes, int flip,
             truth[index + id] = 1;
         }
     }
-    free(boxes);
+    xplat_free(boxes);
 }
 
 void fill_truth_region(char *path, float *truth, int classes, int num_boxes, int flip,
@@ -312,7 +312,7 @@ void fill_truth_region(char *path, float *truth, int classes, int num_boxes, int
         truth[index++] = w;
         truth[index++] = h;
     }
-    free(boxes);
+    xplat_free(boxes);
 }
 
 void fill_truth_detection(char *path, int num_boxes, float *truth, int classes, int flip,
@@ -354,7 +354,7 @@ void fill_truth_detection(char *path, int num_boxes, float *truth, int classes, 
         truth[i*5+3] = h;
         truth[i*5+4] = id;
     }
-    free(boxes);
+    xplat_free(boxes);
 }
 
 #define NUMCHARS 37
@@ -398,7 +398,7 @@ data load_data_captcha(char **paths, int n, int m, int k, int w, int h)
         fill_truth_captcha(paths[i], k, d.y.vals[i]);
     }
     if (m) {
-        free(paths);
+        xplat_free(paths);
     }
     return d;
 }
@@ -414,7 +414,7 @@ data load_data_captcha_encode(char **paths, int n, int m, int w, int h)
     d.X.cols = 17100;
     d.y = d.X;
     if (m) {
-        free(paths);
+        xplat_free(paths);
     }
     return d;
 }
@@ -536,8 +536,8 @@ void free_data(data d)
         free_matrix(d.X);
         free_matrix(d.y);
     }else {
-        free(d.X.vals);
-        free(d.y.vals);
+        xplat_free(d.X.vals);
+        xplat_free(d.y.vals);
     }
 }
 
@@ -601,7 +601,7 @@ image get_segmentation_image(char *path, int w, int h, int classes)
         int *rle = read_intlist(buff, &n, 0);
         load_rle(part, rle, n);
         or_image(part, mask, id);
-        free(rle);
+        xplat_free(rle);
     }
     fill_bg_mask(mask);
     fclose(file);
@@ -658,7 +658,7 @@ data load_data_seg(int n, char **paths, int m, int w, int h,
            free_image(&rgb);
          */
     }
-    free(random_paths);
+    xplat_free(random_paths);
     return d;
 }
 
@@ -714,7 +714,7 @@ data load_data_region(int n, char **paths, int m, int w, int h, int size, int cl
         free_image(&orig);
         free_image(&cropped);
     }
-    free(random_paths);
+    xplat_free(random_paths);
     return d;
 }
 
@@ -784,7 +784,7 @@ data load_data_compare(int n, char **paths, int m, int classes, int w, int h)
         free_image(&im2);
     }
     if (m) {
-        free(paths);
+        xplat_free(paths);
     }
     return d;
 }
@@ -896,7 +896,7 @@ data load_data_detection(int n, char **paths, int m, int w, int h,
 
         free_image(&orig);
     }
-    free(random_paths);
+    xplat_free(random_paths);
     return d;
 }
 
@@ -955,7 +955,7 @@ void *load_data_impl(struct load_args *pa)
 void *load_thread(void *ptr)
 {
     void *ret = load_data_impl((struct load_args*)ptr);
-    free(ptr);
+    xplat_free(ptr);
     return ret;
 }
 
@@ -974,7 +974,7 @@ void *load_threads(void *ptr)
     if (args.threads == 0) args.threads = 1;
     data *out = args.d;
     int total = args.n;
-    free(ptr);
+    xplat_free(ptr);
     data *buffers = xplat_malloc(args.threads, sizeof(data));
     pthread_t *threads = xplat_malloc(args.threads, sizeof(pthread_t));
     for (int i = 0; i < args.threads; ++i) {
@@ -991,8 +991,8 @@ void *load_threads(void *ptr)
         buffers[i].shallow = 1;
         free_data(buffers[i]);
     }
-    free(buffers);
-    free(threads);
+    xplat_free(buffers);
+    xplat_free(threads);
     return 0;
 }
 
@@ -1029,9 +1029,9 @@ data load_data_writing(char **paths, int n, int m, int w, int h, int out_w, int 
     d.shallow = 0;
     d.X = load_image_paths(paths, n, w, h);
     d.y = load_image_paths_gray(replace_paths, n, out_w, out_h);
-    if (m) free(paths);
-    for (int i = 0; i < n; ++i) free(replace_paths[i]);
-    free(replace_paths);
+    if (m) xplat_free(paths);
+    for (int i = 0; i < n; ++i) xplat_free(replace_paths[i]);
+    xplat_free(replace_paths);
     return d;
 }
 
@@ -1042,7 +1042,7 @@ data load_data_old(char **paths, int n, int m, char **labels, int k, int w, int 
     d.shallow = 0;
     d.X = load_image_paths(paths, n, w, h);
     d.y = load_labels_paths(paths, n, labels, k, 0);
-    if (m) free(paths);
+    if (m) xplat_free(paths);
     return d;
 }
 
@@ -1055,7 +1055,7 @@ data load_data_old(char **paths, int n, int m, char **labels, int k, int w, int 
    d.shallow = 0;
    d.X = load_image_augment_paths(paths, n, min, max, size, angle, aspect, hue, saturation, exposure);
    d.y = load_labels_paths(paths, n, labels, k);
-   if (m) free(paths);
+   if (m) xplat_free(paths);
    return d;
    }
  */
@@ -1085,7 +1085,7 @@ data load_data_super(char **paths, int n, int m, int w, int h, int scale)
         free_image(&im);
     }
 
-    if (m) free(paths);
+    if (m) xplat_free(paths);
     return d;
 }
 
@@ -1098,7 +1098,7 @@ data load_data_regression(char **paths, int n, int m,
     d.shallow = 0;
     d.X = load_image_augment_paths(paths, n, min, max, size, angle, aspect, hue, saturation, exposure, 0);
     d.y = load_regression_labels_paths(paths, n);
-    if (m) free(paths);
+    if (m) xplat_free(paths);
     return d;
 }
 
@@ -1111,7 +1111,7 @@ data load_data_augment(char **paths, int n, int m, char **labels, int k, tree *h
     d.shallow = 0;
     d.X = load_image_augment_paths(paths, n, min, max, size, angle, aspect, hue, saturation, exposure, center);
     d.y = load_labels_paths(paths, n, labels, k, hierarchy);
-    if (m) free(paths);
+    if (m) xplat_free(paths);
     return d;
 }
 
@@ -1126,7 +1126,7 @@ data load_data_tag(char **paths, int n, int m, int k,
     d.shallow = 0;
     d.X = load_image_augment_paths(paths, n, min, max, size, angle, aspect, hue, saturation, exposure, 0);
     d.y = load_tags_paths(paths, n, k);
-    if (m) free(paths);
+    if (m) xplat_free(paths);
     return d;
 }
 
@@ -1179,7 +1179,7 @@ data load_categorical_data_csv(char *filename, int target, int k)
     y.vals = truth;
     d.X = X;
     d.y = y;
-    free(truth_1d);
+    xplat_free(truth_1d);
     return d;
 }
 
@@ -1298,8 +1298,8 @@ data load_go(char *filename)
             X.vals[count][i] = val;
         }
         ++count;
-        free(label);
-        free(board);
+        xplat_free(label);
+        xplat_free(board);
     }
     X = resize_matrix(X, count);
     y = resize_matrix(y, count);

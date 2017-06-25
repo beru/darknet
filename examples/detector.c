@@ -414,7 +414,7 @@ void validate_detector_flip(char *datacfg, char *cfgfile, char *weightfile, char
             }else {
                 print_detector_detections(fps, id, boxes, probs, l->w * l->h * l->n, classes, w, h);
             }
-            free(id);
+            xplat_free(id);
             free_image(&val[t]);
             free_image(&val_resized[t]);
         }
@@ -451,7 +451,7 @@ void validate_detector_flip(char *datacfg, char *cfgfile, char *weightfile, char
         }else {
             print_detector_detections(fps, id, boxes, probs, l->w * l->h * l->n, classes, w, h);
         }
-        free(id);
+        xplat_free(id);
         free_image(&val);
         free_image(&val_resized);
     }
@@ -598,7 +598,7 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
             }else {
                 print_detector_detections(fps, id, boxes, probs, l->w * l->h * l->n, classes, w, h);
             }
-            free(id);
+            xplat_free(id);
             free_image(&val[t]);
             free_image(&val_resized[t]);
         }
@@ -636,7 +636,7 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
         }else {
             print_detector_detections(fps, id, boxes, probs, l->w * l->h * l->n, classes, w, h);
         }
-        free(id);
+        xplat_free(id);
         free_image(&val);
         free_image(&val_resized);
     }
@@ -733,7 +733,7 @@ void validate_detector_recall(char *cfgfile, char *weightfile)
 
         fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n",
                 i, correct, total, (float)proposals / (i + 1), avg_iou * 100 / total, 100. * correct / total);
-        free(id);
+        xplat_free(id);
         free_image(&orig);
         free_image(&sized);
     }
@@ -813,7 +813,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 
         free_image(&im);
         free_image(&sized);
-        free(boxes);
+        xplat_free(boxes);
         free_ptrs((void **)probs, l->w * l->h * l->n);
         if (filename) {
             break;

@@ -267,8 +267,8 @@ void strip_char(char *s, char bad)
 
 void free_ptrs(void **ptrs, int n)
 {
-    for (int i = 0; i < n; ++i) free(ptrs[i]);
-    free(ptrs);
+    for (int i = 0; i < n; ++i) xplat_free(ptrs[i]);
+    xplat_free(ptrs);
 }
 
 char *fgetl(FILE *fp)
@@ -277,7 +277,7 @@ char *fgetl(FILE *fp)
     size_t size = 512;
     char *line = xplat_malloc(size, sizeof(char));
     if (!fgets(line, size, fp)) {
-        free(line);
+        xplat_free(line);
         return 0;
     }
 

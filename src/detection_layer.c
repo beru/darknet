@@ -206,7 +206,7 @@ void forward_detection_layer(detection_layer *l, network *net)
                     }
                 }
             }
-            free(costs);
+            xplat_free(costs);
         }
 
         *(l->cost) = pow(mag_array(l->delta, l->outputs * l->batch), 2);

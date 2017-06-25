@@ -150,7 +150,7 @@ void train_classifier(char *datacfg,
     free_ptrs((void**)labels, classes);
     free_ptrs((void**)paths, plist->size);
     free_list(plist);
-    free(base);
+    xplat_free(base);
 }
 
 
@@ -272,7 +272,7 @@ free_network(&net);
 free_ptrs((void**)labels, classes);
 free_ptrs((void**)paths, plist->size);
 free_list(plist);
-free(base);
+xplat_free(base);
 }
 */
 
@@ -417,7 +417,7 @@ void validate_classifier_10(char *datacfg, char *filename, char *weightfile)
         }
         free_image(&im);
         top_k(pred, classes, topk, indexes);
-        free(pred);
+        xplat_free(pred);
         if (indexes[0] == class) {
             avg_acc += 1;
         }
@@ -628,7 +628,7 @@ void validate_classifier_multi(char *datacfg, char *filename, char *weightfile)
         }
         free_image(&im);
         top_k(pred, classes, topk, indexes);
-        free(pred);
+        xplat_free(pred);
         if (indexes[0] == class) {
             avg_acc += 1;
         }

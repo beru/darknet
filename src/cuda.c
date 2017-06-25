@@ -124,7 +124,7 @@ float cuda_compare(float *x_gpu, float *x, size_t n, char *s)
     axpy_cpu(n, -1, x, 1, tmp, 1);
     float err = dot_cpu(n, tmp, 1, tmp, 1);
     printf("Error %s: %f\n", s, sqrt(err / n));
-    free(tmp);
+    xplat_free(tmp);
     return err;
 }
 
@@ -169,7 +169,7 @@ float cuda_mag_array(float *x_gpu, size_t n)
     float *temp = xplat_malloc(n, sizeof(float));
     cuda_pull_array(x_gpu, temp, n);
     float m = mag_array(temp, n);
-    free(temp);
+    xplat_free(temp);
     return m;
 }
 

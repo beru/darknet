@@ -135,7 +135,7 @@ void train_segmenter(char *datacfg,
     free_network(&net);
     free_ptrs((void**)paths, plist->size);
     free_list(plist);
-    free(base);
+    xplat_free(base);
 }
 
 void predict_segmenter(char *datafile, char *cfgfile, char *weightfile, char *filename)

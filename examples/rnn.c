@@ -172,8 +172,8 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
         memcpy(net.input, p.x, net.inputs * net.batch);
         memcpy(net.truth, p.y, net.truths * net.batch);
         float loss = train_network_datum(&net) / (batch);
-        free(p.x);
-        free(p.y);
+        xplat_free(p.x);
+        xplat_free(p.y);
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
 

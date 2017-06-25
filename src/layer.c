@@ -6,52 +6,52 @@
 void free_layer(layer l)
 {
     if (l.type == DROPOUT) {
-        if (l.rand)           free(l.rand);
+        if (l.rand)           xplat_free(l.rand);
 #ifdef GPU
         if (l.rand_gpu)       cuda_free(l.rand_gpu);
 #endif
         return;
     }
-    if (l.cweights)           free(l.cweights);
-    if (l.indexes)            free(l.indexes);
-    if (l.input_layers)       free(l.input_layers);
-    if (l.input_sizes)        free(l.input_sizes);
-    if (l.map)                free(l.map);
-    if (l.rand)               free(l.rand);
-    if (l.cost)               free(l.cost);
-    if (l.state)              free(l.state);
-    if (l.prev_state)         free(l.prev_state);
-    if (l.forgot_state)       free(l.forgot_state);
-    if (l.forgot_delta)       free(l.forgot_delta);
-    if (l.state_delta)        free(l.state_delta);
-    if (l.concat)             free(l.concat);
-    if (l.concat_delta)       free(l.concat_delta);
-    if (l.binary_weights)     free(l.binary_weights);
-    if (l.biases)             free(l.biases);
-    if (l.bias_updates)       free(l.bias_updates);
-    if (l.scales)             free(l.scales);
-    if (l.scale_updates)      free(l.scale_updates);
-    if (l.weights)            free(l.weights);
-    if (l.weight_updates)     free(l.weight_updates);
-    if (l.delta)              free(l.delta);
-    if (l.output)             free(l.output);
-    if (l.squared)            free(l.squared);
-    if (l.norms)              free(l.norms);
-    if (l.spatial_mean)       free(l.spatial_mean);
-    if (l.mean)               free(l.mean);
-    if (l.variance)           free(l.variance);
-    if (l.mean_delta)         free(l.mean_delta);
-    if (l.variance_delta)     free(l.variance_delta);
-    if (l.rolling_mean)       free(l.rolling_mean);
-    if (l.rolling_variance)   free(l.rolling_variance);
-    if (l.x)                  free(l.x);
-    if (l.x_norm)             free(l.x_norm);
-    if (l.m)                  free(l.m);
-    if (l.v)                  free(l.v);
-    if (l.z_cpu)              free(l.z_cpu);
-    if (l.r_cpu)              free(l.r_cpu);
-    if (l.h_cpu)              free(l.h_cpu);
-    if (l.binary_input)       free(l.binary_input);
+    if (l.cweights)           xplat_free(l.cweights);
+    if (l.indexes)            xplat_free(l.indexes);
+    if (l.input_layers)       xplat_free(l.input_layers);
+    if (l.input_sizes)        xplat_free(l.input_sizes);
+    if (l.map)                xplat_free(l.map);
+    if (l.rand)               xplat_free(l.rand);
+    if (l.cost)               xplat_free(l.cost);
+    if (l.state)              xplat_free(l.state);
+    if (l.prev_state)         xplat_free(l.prev_state);
+    if (l.forgot_state)       xplat_free(l.forgot_state);
+    if (l.forgot_delta)       xplat_free(l.forgot_delta);
+    if (l.state_delta)        xplat_free(l.state_delta);
+    if (l.concat)             xplat_free(l.concat);
+    if (l.concat_delta)       xplat_free(l.concat_delta);
+    if (l.binary_weights)     xplat_free(l.binary_weights);
+    if (l.biases)             xplat_free(l.biases);
+    if (l.bias_updates)       xplat_free(l.bias_updates);
+    if (l.scales)             xplat_free(l.scales);
+    if (l.scale_updates)      xplat_free(l.scale_updates);
+    if (l.weights)            xplat_free(l.weights);
+    if (l.weight_updates)     xplat_free(l.weight_updates);
+    if (l.delta)              xplat_free(l.delta);
+    if (l.output)             xplat_free(l.output);
+    if (l.squared)            xplat_free(l.squared);
+    if (l.norms)              xplat_free(l.norms);
+    if (l.spatial_mean)       xplat_free(l.spatial_mean);
+    if (l.mean)               xplat_free(l.mean);
+    if (l.variance)           xplat_free(l.variance);
+    if (l.mean_delta)         xplat_free(l.mean_delta);
+    if (l.variance_delta)     xplat_free(l.variance_delta);
+    if (l.rolling_mean)       xplat_free(l.rolling_mean);
+    if (l.rolling_variance)   xplat_free(l.rolling_variance);
+    if (l.x)                  xplat_free(l.x);
+    if (l.x_norm)             xplat_free(l.x_norm);
+    if (l.m)                  xplat_free(l.m);
+    if (l.v)                  xplat_free(l.v);
+    if (l.z_cpu)              xplat_free(l.z_cpu);
+    if (l.r_cpu)              xplat_free(l.r_cpu);
+    if (l.h_cpu)              xplat_free(l.h_cpu);
+    if (l.binary_input)       xplat_free(l.binary_input);
  
 #ifdef GPU
     if (l.indexes_gpu)           cuda_free((float *)l.indexes_gpu);

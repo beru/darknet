@@ -44,7 +44,7 @@ void flatten(float *x, int size, int layers, int batch, int forward)
         }
     }
     memcpy(x, swap, size * layers * batch * sizeof(float));
-    free(swap);
+    xplat_free(swap);
 }
 
 void weighted_sum_cpu(float *a, float *b, float *s, int n, float *c)

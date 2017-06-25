@@ -357,8 +357,8 @@ int resize_network(network *net, int w, int h)
     net->truths = out->outputs;
     if (net->layers[net->n - 1].truths) net->truths = net->layers[net->n - 1].truths;
     net->output = out->output;
-    free(net->input);
-    free(net->truth);
+    xplat_free(net->input);
+    xplat_free(net->truth);
     net->input = xplat_malloc(net->inputs * net->batch, sizeof(float));
     net->truth = xplat_malloc(net->truths * net->batch, sizeof(float));
 #ifdef GPU
@@ -369,11 +369,11 @@ int resize_network(network *net, int w, int h)
         net->truth_gpu = cuda_make_array(net->truth, net->truths * net->batch);
         net->workspace = cuda_make_array(0, (workspace_size - 1) / sizeof(float) + 1);
     }else {
-        free(net->workspace);
+        xplat_free(net->workspace);
         net->workspace = xplat_malloc(1, workspace_size);
     }
 #else
-    free(net->workspace);
+    xplat_free(net->workspace);
     net->workspace = xplat_malloc(1, workspace_size);
 #endif
     //fprintf(stderr, " Done!\n");
@@ -465,7 +465,7 @@ matrix network_predict_data_multi(network *net, data test, int n)
             }
         }
     }
-    free(X);
+    xplat_free(X);
     return pred;   
 }
 
@@ -487,7 +487,7 @@ matrix network_predict_data(network *net, data test)
             }
         }
     }
-    free(X);
+    xplat_free(X);
     return pred;
 }
 
@@ -567,9 +567,9 @@ void free_network(network *net)
     for (int i = 0; i < net->n; ++i) {
         free_layer(net->layers[i]);
     }
-    free(net->layers);
-    if (net->input) free(net->input);
-    if (net->truth) free(net->truth);
+    xplat_free(net->layers);
+    if (net->input) xplat_free(net->input);
+    if (net->truth) xplat_free(net->truth);
 #ifdef GPU
     if (net->input_gpu) cuda_free(net->input_gpu);
     if (net->truth_gpu) cuda_free(net->truth_gpu);

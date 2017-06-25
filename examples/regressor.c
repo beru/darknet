@@ -144,7 +144,7 @@ void train_regressor(char *datacfg,
     free_network(&net);
     free_ptrs((void**)paths, plist->size);
     free_list(plist);
-    free(base);
+    xplat_free(base);
 }
 
 void predict_regressor(char *cfgfile, char *weightfile, char *filename)

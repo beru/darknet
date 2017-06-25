@@ -279,7 +279,7 @@ void do_nms_obj(box *boxes, float **probs, int total, int classes, float thresh)
             }
         }
     }
-    free(s);
+    xplat_free(s);
 }
 
 
@@ -311,7 +311,7 @@ void do_nms_sort(box *boxes, float **probs, int total, int classes, float thresh
             }
         }
     }
-    free(s);
+    xplat_free(s);
 }
 
 void do_nms(box *boxes, float **probs, int total, int classes, float thresh)

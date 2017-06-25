@@ -32,10 +32,21 @@ void xplat_sleep(double seconds)
 
 #endif
 
+static size_t total;
+
 void* xplat_malloc(size_t count, size_t size)
 {
-static size_t total;
-total += count * size;
-printf("alloc %d total %d.\n", count * size / 1024, total / 1024);
+size_t this_time = count * size;
+total += this_time;
+printf("alloc %d total %d.\n", this_time / 1024, total / 1024);
+//if (this_time >= 1024 * 1024 * 8) {
+//    DebugBreak();
+//}
     return calloc(count, size);
 }
+
+void xplat_free(void* mem)
+{
+    free(mem);
+}
+

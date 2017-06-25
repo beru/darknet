@@ -198,7 +198,7 @@ void validate_yolo(char *cfgfile, char *weightfile)
                 do_nms_sort(boxes, probs, l->side * l->side * l->n, classes, iou_thresh);
             }
             print_yolo_detections(fps, id, boxes, probs, l->side * l->side * l->n, classes, w, h);
-            free(id);
+            xplat_free(id);
             free_image(&val[t]);
             free_image(&val_resized[t]);
         }
@@ -230,7 +230,7 @@ void validate_yolo(char *cfgfile, char *weightfile)
             do_nms_sort(boxes, probs, l->side * l->side * l->n, classes, iou_thresh);
         }
         print_yolo_detections(fps, id, boxes, probs, l->side * l->side * l->n, classes, w, h);
-        free(id);
+        xplat_free(id);
         free_image(&val);
         free_image(&val_resized);
     }
@@ -326,7 +326,7 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
 
         fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n",
                 i, correct, total, (float)proposals / (i + 1), avg_iou * 100 / total, 100. * correct / total);
-        free(id);
+        xplat_free(id);
         free_image(&orig);
         free_image(&sized);
     }

@@ -28,7 +28,7 @@ char *fgetgo(FILE *fp)
     size_t size = 94;
     char *line = xplat_malloc(size, sizeof(char));
     if (size != fread(line, sizeof(char), size, fp)) {
-        free(line);
+        xplat_free(line);
         return 0;
     }
 
@@ -225,7 +225,7 @@ void train_go(char *cfgfile,
     save_weights(&net, buff);
 
     free_network(&net);
-    free(base);
+    xplat_free(base);
 }
 
 void propagate_liberty(float *board, int *lib, int *visited, int row, int col, int side)
@@ -375,7 +375,7 @@ void move_go(float *b, int p, int r, int c)
     remove_connected(b, l, -p, r-1, c);
     remove_connected(b, l, -p, r, c+1);
     remove_connected(b, l, -p, r, c-1);
-    free(l);
+    xplat_free(l);
 }
 
 int makes_safe_go(float *b, int *lib, int p, int r, int c) {
@@ -399,7 +399,7 @@ int suicide_go(float *b, int p, int r, int c)
     safe = safe || makes_safe_go(b, l, p, r-1, c);
     safe = safe || makes_safe_go(b, l, p, r, c+1);
     safe = safe || makes_safe_go(b, l, p, r, c-1);
-    free(l);
+    xplat_free(l);
     return !safe;
 }
 
@@ -566,7 +566,7 @@ void engine_go(char *filename, char *weightfile, int multi)
             printf("=%s DarkGo\n\n", ids);
         }else if (!strcmp(buff, "time_settings") || !strcmp(buff, "time_left")) {
             char *line = fgetl(stdin);
-            free(line);
+            xplat_free(line);
             printf("=%s \n\n", ids);
         }else if (!strcmp(buff, "version")) {
             printf("=%s 1.0. Want more DarkGo? You can find me on OGS, unlimited games, no waiting! https://online-go.com/user/view/434218\n\n", ids);
@@ -639,7 +639,7 @@ void engine_go(char *filename, char *weightfile, int multi)
                 passed = 1;
                 printf("=%s \n\n", ids);
                 char *line = fgetl(stdin);
-                free(line);
+                xplat_free(line);
                 fflush(stdout);
                 fflush(stderr);
                 continue;
@@ -699,7 +699,7 @@ void engine_go(char *filename, char *weightfile, int multi)
             scanf("%s", type);
             fprintf(stderr, "final_status\n");
             char *line = fgetl(stdin);
-            free(line);
+            xplat_free(line);
             if (type[0] == 'd' || type[0] == 'D') {
                 FILE *f = fopen("game.txt", "w");
                 int count = print_game(board, f);
@@ -707,20 +707,20 @@ void engine_go(char *filename, char *weightfile, int multi)
                 fclose(f);
                 FILE *p = popen("./gnugo --mode gtp < game.txt", "r");
                 for (int i = 0; i < count; ++i) {
-                    free(fgetl(p));
-                    free(fgetl(p));
+                    xplat_free(fgetl(p));
+                    xplat_free(fgetl(p));
                 }
                 char *l = 0;
                 while ((l = fgetl(p))) {
                     printf("%s\n", l);
-                    free(l);
+                    xplat_free(l);
                 }
             }else {
                 printf("?%s unknown command\n\n", ids);
             }
         }else {
             char *line = fgetl(stdin);
-            free(line);
+            xplat_free(line);
             printf("?%s unknown command\n\n", ids);
         }
         fflush(stdout);
@@ -806,7 +806,7 @@ void test_go(char *cfg, char *weights, int multi)
                 if (num == 3) board[row * 19 + col] = 0;
             }
         }
-        free(line);
+        xplat_free(line);
         flip_board(board);
         color = -color;
     }
@@ -820,8 +820,8 @@ float score_game(float *board)
     fclose(f);
     FILE *p = popen("./gnugo --mode gtp < game.txt", "r");
     for (int i = 0; i < count; ++i) {
-        free(fgetl(p));
-        free(fgetl(p));
+        xplat_free(fgetl(p));
+        xplat_free(fgetl(p));
     }
     char *l = 0;
     float score = 0;
@@ -829,7 +829,7 @@ float score_game(float *board)
     while ((l = fgetl(p))) {
         fprintf(stderr, "%s  \t", l);
         int n = sscanf(l, "= %c+%f", &player, &score);
-        free(l);
+        xplat_free(l);
         if (n == 2) break;
     }
     if (player == 'W') score = -score;
