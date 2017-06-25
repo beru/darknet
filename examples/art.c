@@ -1,6 +1,6 @@
 #include "darknet.h"
 
-#include <sys/time.h>
+#include "xplat.h"
 
 void demo_art(char *cfgfile, char *weightfile, int cam_index)
 {

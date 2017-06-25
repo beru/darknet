@@ -1,5 +1,5 @@
 #include "darknet.h"
-#include <sys/time.h>
+#include "xplat.h"
 #include <assert.h>
 
 void train_regressor(char *datacfg,

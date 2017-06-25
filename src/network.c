@@ -29,8 +29,7 @@
 #include "shortcut_layer.h"
 #include "parser.h"
 #include "data.h"
-
-#include <sys/time.h>
+#include "xplat.h"
 
 load_args get_base_args(network *net)
 {

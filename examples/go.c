@@ -1,11 +1,19 @@
 #include "darknet.h"
 
-#include <unistd.h>
 #include <stdio.h>
+
+#include "xplat.h"
 
 int inverted = 1;
 int noi = 1;
+
+#ifdef _MSC_VER
+#define nind 2
+#define popen _popen
+#define pclose _pclose
+#else
 static const int nind = 2;
+#endif
 
 typedef struct {
     char **data;
@@ -864,7 +872,7 @@ void self_go(char *filename, char *weightfile, char *f2, char *w2, int multi)
             else ++p2;
             ++total;
             fprintf(stderr, "Total: %d, Player 1: %f, Player 2: %f\n", total, (float)p1 / total, (float)p2 / total);
-            sleep(1);
+            xplat_sleep(1);
             /*
             int i = (score > 0)? 0 : 1;
             for (; i < count; i += 2) {

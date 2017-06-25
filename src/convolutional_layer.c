@@ -12,7 +12,7 @@
 #include "xnor_layer.h"
 #endif
 
-#include <sys/time.h>
+#include "xplat.h"
 
 void swap_binary(convolutional_layer *l)
 {

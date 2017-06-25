@@ -1,0 +1,336 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{8a3c047c-b0d4-4469-9893-b732b037b39d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="examples">
+      <UniqueIdentifier>{f2975481-b2e3-48e7-98a7-b79890c95fed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{cf40db3d-cfd4-4a15-96be-587c4e8ded23}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\reorg_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\rnn_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\route_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\shortcut_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\softmax_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stb_image.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stb_image_write.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tree.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\utils.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\xplat.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\activation_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\activations.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\avgpool_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\batchnorm_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\blas.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\box.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\classifier.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\col2im.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\connected_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\convolutional_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cost_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\crnn_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\crop_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cuda.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\data.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deconvolutional_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\demo.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\detection_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\dropout_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gemm.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gru_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\im2col.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\image.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\list.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\local_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\matrix.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\maxpool_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\network.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\normalization_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\option_list.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\parser.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\region_layer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\darknet.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\rnn_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\route_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\shortcut_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\softmax_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tree.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\xplat.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\activation_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\activations.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\avgpool_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\batchnorm_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\blas.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\box.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\col2im.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\compare.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\connected_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\convolutional_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cost_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\crnn_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\crop_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cuda.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\data.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deconvolutional_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\demo.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\detection_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dropout_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gemm.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gru_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\im2col.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\image.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\list.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\local_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\matrix.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\maxpool_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\network.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\normalization_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\option_list.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parser.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\region_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\reorg_layer.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\captcha.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\cifar.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\classifier.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\coco.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\darknet.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\detector.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\dice.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\go.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\lsd.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\nightmare.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\regressor.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\rnn.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\rnn_vid.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\segmenter.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\super.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\swag.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\tag.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\voxel.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\writing.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\yolo.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\examples\art.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
