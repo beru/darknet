@@ -1,6 +1,10 @@
+#define _POSIX_C_SOURCE 199309L
 #include "xplat.h"
 
 #ifdef __linux__
+
+#include <time.h>
+#include <unistd.h>
 
 double what_time_is_it_now()
 {

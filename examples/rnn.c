@@ -1,4 +1,5 @@
 #include "darknet.h"
+#include "xplat.h"
 
 typedef struct {
     float *x;

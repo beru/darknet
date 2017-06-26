@@ -1,7 +1,8 @@
+#include <stdlib.h>
+
 #include "layer.h"
 #include "cuda.h"
-
-#include <stdlib.h>
+#include "xplat.h"
 
 void free_layer(layer l)
 {

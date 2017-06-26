@@ -1,8 +1,10 @@
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "dropout_layer.h"
 #include "utils.h"
 #include "cuda.h"
-#include <stdlib.h>
-#include <stdio.h>
+#include "xplat.h"
 
 void make_dropout_layer(dropout_layer *l, int batch, int inputs, float probability)
 {

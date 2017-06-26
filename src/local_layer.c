@@ -92,8 +92,8 @@ void make_local_layer(local_layer *l,
 
 void forward_local_layer(local_layer *l, network *net)
 {
-    int out_h = local_out_height(&l);
-    int out_w = local_out_width(&l);
+    int out_h = local_out_height(l);
+    int out_w = local_out_width(l);
     int locations = out_h * out_w;
 
     for (int i = 0; i < l->batch; ++i) {

@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "parser.h"
 #include "box.h"
+#include "xplat.h"
 
 void train_compare(char *cfgfile, char *weightfile)
 {

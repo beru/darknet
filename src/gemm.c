@@ -1,9 +1,11 @@
-#include "gemm.h"
-#include "utils.h"
-#include "cuda.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+#include "gemm.h"
+#include "utils.h"
+#include "cuda.h"
+#include "xplat.h"
 
 #include <immintrin.h>
 
@@ -78,7 +80,7 @@ void gemm_nn(int M, int N, int K, float ALPHA,
 {
     const size_t n64 = N / 64;
     const size_t n8 = (N % 64) / 8;
-    const remain = N % 8;
+    const size_t remain = N % 8;
     for (int i = 0; i < M; ++i) {
         float *dst_org = &C[i * ldc];
         for (int k = 0; k < K; ++k) {

@@ -1,7 +1,7 @@
-#include "darknet.h"
-
+#define _XOPEN_SOURCE
 #include <stdio.h>
 
+#include "darknet.h"
 #include "xplat.h"
 
 int inverted = 1;

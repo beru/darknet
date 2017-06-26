@@ -9,6 +9,7 @@
 #include <float.h>
 #include <limits.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "utils.h"
 #include "xplat.h"

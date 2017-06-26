@@ -1,6 +1,7 @@
-#include "darknet.h"
-
 #include <stdio.h>
+
+#include "darknet.h"
+#include "xplat.h"
 
 void train_tag(char *cfgfile, char *weightfile, int clear)
 {
