@@ -262,6 +262,7 @@ struct layer{
     tree *softmax_tree;
 
     size_t workspace_size;
+    struct network* net;
 
 #ifdef GPU
     int *indexes_gpu;

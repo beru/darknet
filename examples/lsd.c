@@ -1,4 +1,5 @@
 #include "darknet.h"
+#include "xplat.h"
 
 /*
 void train_lsd3(char *fcfg, char *fweight, char *gcfg, char *gweight, char *acfg, char *aweight, int clear)
@@ -505,7 +506,7 @@ void train_dcgan(char *cfg, char *weight, char *acfg, char *aweight, int clear, 
     int y_size = gnet.truths * gnet.batch;
     float *imerror = cuda_make_array(0, y_size);
 
-    int ay_size = anet.truths*anet.batch;
+    int ay_size = anet.truths * anet.batch;
 
     float aloss_avg = -1;
 

@@ -442,7 +442,7 @@ void mask_kernel(int n,  float *x, float mask_num, float *mask)
 }
 
 __global__
-void copy_kernel(int N,  float *X, int OFFX, int INCX, float *Y, int OFFY, int INCY)
+void copy_kernel(int N, const float *X, int OFFX, int INCX, float *Y, int OFFY, int INCY)
 {
     int i = (blockIdx.x + blockIdx.y * gridDim.x) * blockDim.x + threadIdx.x;
     if (i < N) Y[i * INCY + OFFY] = X[i * INCX + OFFX];
@@ -571,7 +571,7 @@ void axpy_ongpu_offset(int N, float ALPHA, float * X, int OFFX, int INCX, float 
 }
 
 extern "C"
-void copy_ongpu(int N, float * X, int INCX, float * Y, int INCY)
+void copy_ongpu(int N, const float * X, int INCX, float * Y, int INCY)
 {
     copy_ongpu_offset(N, X, 0, INCX, Y, 0, INCY);
 }
@@ -584,7 +584,7 @@ void mul_ongpu(int N, float * X, int INCX, float * Y, int INCY)
 }
 
 extern "C"
-void copy_ongpu_offset(int N, float * X, int OFFX, int INCX, float * Y, int OFFY, int INCY)
+void copy_ongpu_offset(int N, const float * X, int OFFX, int INCX, float * Y, int OFFY, int INCY)
 {
     copy_kernel<<<cuda_gridsize(N), BLOCK>>>(N, X, OFFX, INCX, Y, OFFY, INCY);
     check_error(cudaPeekAtLastError());

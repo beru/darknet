@@ -45,8 +45,8 @@ void softmax_cpu(float *input, int n, int batch, int batch_offset, int groups, i
 
 void axpy_ongpu(int N, float ALPHA, float * X, int INCX, float * Y, int INCY);
 void axpy_ongpu_offset(int N, float ALPHA, float * X, int OFFX, int INCX, float * Y, int OFFY, int INCY);
-void copy_ongpu(int N, float * X, int INCX, float * Y, int INCY);
-void copy_ongpu_offset(int N, float * X, int OFFX, int INCX, float * Y, int OFFY, int INCY);
+void copy_ongpu(int N, const float * X, int INCX, float * Y, int INCY);
+void copy_ongpu_offset(int N, const float * X, int OFFX, int INCX, float * Y, int OFFY, int INCY);
 void scal_ongpu(int N, float ALPHA, float * X, int INCX);
 void add_ongpu(int N, float ALPHA, float * X, int INCX);
 void supp_ongpu(int N, float ALPHA, float * X, int INCX);

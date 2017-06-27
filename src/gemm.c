@@ -7,7 +7,9 @@
 #include "cuda.h"
 #include "xplat.h"
 
+#ifdef __AVX2__
 #include <immintrin.h>
+#endif
 
 void gemm_bin(int M, int N, int K, float ALPHA, 
               const char  *A, int lda, 
@@ -85,11 +87,7 @@ void gemm_nn(int M, int N, int K, float ALPHA,
         float *dst_org = &C[i * ldc];
         for (int k = 0; k < K; ++k) {
             register float A_PART = ALPHA * A[i * lda + k];
-#if 0
-            for (int j = 0; j < N; ++j) {
-                C[i * ldc + j] += A_PART * B[k * ldb + j];
-            }
-#else
+#ifdef __AVX2__
             __m256 scales = _mm256_set1_ps(A_PART);
             const float *src = &B[k * ldb];
             float *dst = dst_org;
@@ -139,6 +137,10 @@ void gemm_nn(int M, int N, int K, float ALPHA,
             }
             for (size_t j=0; j<remain; ++j) {
                 dst[j] += A_PART * src[j];
+            }
+#else
+            for (int j = 0; j < N; ++j) {
+                C[i * ldc + j] += A_PART * B[k * ldb + j];
             }
 #endif
         }
@@ -218,6 +220,10 @@ void gemm_cpu(int TA, int TB, int M, int N, int K,
 #ifdef GPU
 
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 void gemm_ongpu(int TA, int TB, int M, int N, int K, float ALPHA, 
                 const float *A_gpu, int lda, 
@@ -248,11 +254,6 @@ void gemm_gpu(int TA, int TB, int M, int N, int K, float ALPHA,
     cuda_free(B_gpu);
     cuda_free(C_gpu);
 }
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 
 void time_gpu_random_matrix(int TA, int TB, int m, int k, int n)
 {
@@ -389,5 +390,3 @@ int test_gpu_blas()
 }
 
 #endif  // #ifdef GPU
-
-

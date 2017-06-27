@@ -38,6 +38,13 @@ void make_maxpool_layer(maxpool_layer *l,
     l->size = size;
     l->stride = stride;
     int output_size = l->out_h * l->out_w * l->out_c * batch;
+    l->forward = forward_maxpool_layer;
+    l->backward = backward_maxpool_layer;
+    l->indexes = xplat_malloc(output_size, sizeof(int));
+    l->output =  xplat_malloc(output_size, sizeof(float));
+    if (train) {
+        l->delta =   xplat_malloc(output_size, sizeof(float));
+    }
 #ifdef GPU
     l->forward_gpu = forward_maxpool_layer_gpu;
     l->backward_gpu = backward_maxpool_layer_gpu;
@@ -46,16 +53,8 @@ void make_maxpool_layer(maxpool_layer *l,
     if (train) {
         l->delta_gpu   = cuda_make_array(l->delta, output_size);
     }
-#else
-    l->forward = forward_maxpool_layer;
-    l->backward = backward_maxpool_layer;
-    l->indexes = xplat_malloc(output_size, sizeof(int));
-    l->output =  xplat_malloc(output_size, sizeof(float));
-    if (train) {
-        l->delta =   xplat_malloc(output_size, sizeof(float));
-    }
 #endif
-    fprintf(stderr, "max          %d x %d / %d  %4d x%4d x%4d   ->  %4d x%4d x%4d\n",
+    fprintf(stderr, "max          %d x %d / %d  %5d x%5d x%5d   ->  %5d x%5d x%5d\n",
             size, size, stride, w, h, c, l->out_w, l->out_h, l->out_c);
 }
 
@@ -74,14 +73,14 @@ void resize_maxpool_layer(maxpool_layer *l, int w, int h)
     l->output = realloc(l->output, output_size * sizeof(float));
     l->delta = realloc(l->delta, output_size * sizeof(float));
 
-    #ifdef GPU
+#ifdef GPU
     cuda_free((float *)l->indexes_gpu);
     cuda_free(l->output_gpu);
     cuda_free(l->delta_gpu);
     l->indexes_gpu = cuda_make_int_array(0, output_size);
     l->output_gpu  = cuda_make_array(l->output, output_size);
     l->delta_gpu   = cuda_make_array(l->delta,  output_size);
-    #endif
+#endif
 }
 
 void forward_maxpool_layer(maxpool_layer *l, network *net)

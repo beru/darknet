@@ -55,24 +55,21 @@ void make_crnn_layer(layer *l,
     make_convolutional_layer(l->input_layer,
                              batch * steps, h, w, c, hidden_filters,
                              3, 1, 1,
-                             activation, batch_normalize, 0, 0, 0,
-                             train);
+                             activation, batch_normalize, 0, 0);
     l->input_layer->batch = batch;
 
     l->self_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_convolutional_layer(l->self_layer,
                              batch * steps, h, w, hidden_filters, hidden_filters, 3, 1, 1,
-                             activation, batch_normalize, 0, 0, 0,
-                             train);
+                             activation, batch_normalize, 0, 0);
     l->self_layer->batch = batch;
 
     l->output_layer = xplat_malloc(1, sizeof(layer));
     fprintf(stderr, "\t\t");
     make_convolutional_layer(l->output_layer,
                              batch * steps, h, w, hidden_filters, output_filters, 3, 1, 1,
-                             activation, batch_normalize, 0, 0, 0,
-                             train);
+                             activation, batch_normalize, 0, 0);
     l->output_layer->batch = batch;
 
     l->output = l->output_layer->output;

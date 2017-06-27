@@ -3,12 +3,14 @@
 
 int gpu_index = 0;
 
-#include "cuda.h"
-#include "utils.h"
-#include "blas.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include "cuda.h"
+#include "utils.h"
+#include "blas.h"
+#include "xplat.h"
 
 void cuda_set_device(int n)
 {
@@ -86,7 +88,7 @@ cublasHandle_t blas_handle()
     return handle[i];
 }
 
-float *cuda_make_array(float *x, size_t n)
+float *cuda_make_array(const float *x, size_t n)
 {
     float *x_gpu;
     size_t size = sizeof(float)*n;
@@ -128,7 +130,7 @@ float cuda_compare(float *x_gpu, float *x, size_t n, char *s)
     return err;
 }
 
-int *cuda_make_int_array(int *x, size_t n)
+int *cuda_make_int_array(const int *x, size_t n)
 {
     int *x_gpu;
     size_t size = sizeof(int)*n;
@@ -150,14 +152,14 @@ void cuda_free(float *x_gpu)
     check_error(status);
 }
 
-void cuda_push_array(float *x_gpu, float *x, size_t n)
+void cuda_push_array(float *x_gpu, const float *x, size_t n)
 {
     size_t size = sizeof(float)*n;
     cudaError_t status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
     check_error(status);
 }
 
-void cuda_pull_array(float *x_gpu, float *x, size_t n)
+void cuda_pull_array(const float *x_gpu, float *x, size_t n)
 {
     size_t size = sizeof(float)*n;
     cudaError_t status = cudaMemcpy(x, x_gpu, size, cudaMemcpyDeviceToHost);

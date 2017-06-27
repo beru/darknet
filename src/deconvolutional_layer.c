@@ -144,7 +144,7 @@ void make_deconvolutional_layer(layer *l,
     l->activation = activation;
     l->workspace_size = get_workspace_size(l);
 
-    fprintf(stderr, "deconv%5d %2d x%2d /%2d  %4d x%4d x%4d   ->  %4d x%4d x%4d\n",
+    fprintf(stderr, "deconv%5d %2d x%2d /%2d  %5d x%5d x%5d   ->  %5d x%5d x%5d\n",
             n, size, size, stride,
             w, h, c,
             l->out_w, l->out_h, l->out_c);

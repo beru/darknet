@@ -165,7 +165,6 @@ void parse_deconvolutional(layer *l, list *options, size_params params)
                                activation, batch_normalize, params.net.adam);
 }
 
-
 void parse_convolutional(convolutional_layer *l, list *options, size_params params)
 {
     int n = option_find_int(options, "filters", 1);
@@ -194,8 +193,7 @@ void parse_convolutional(convolutional_layer *l, list *options, size_params para
                              batch, h, w, c, n,
                              size, stride, padding,
                              activation, batch_normalize,
-                             binary, xnor, params.net.adam,
-                             params.net.train);
+                             binary, xnor);
     l->flipped = option_find_int_quiet(options, "flipped", 0);
     l->dot = option_find_float_quiet(options, "dot", 0);
     if (params.net.adam) {
@@ -679,6 +677,7 @@ void parse_network_cfg(network *net, char *filename)
         s = (section *)n->val;
         options = s->options;
         layer *l = &net->layers[count];
+        l->net = net;
         LAYER_TYPE lt = string_to_layer_type(s->type);
         if (lt == CONVOLUTIONAL) {
             parse_convolutional(l, options, params);
