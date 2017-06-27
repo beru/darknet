@@ -145,7 +145,7 @@ void test_dunion()
     box dha= {0, 0, 1, 1 + .0001};
 
     box b = {.5, .5, .2, .2};
-    dbox di = dunion(a,b);
+    dbox di = dunion(a, b);
     printf("Union: %f %f %f %f\n",
            di.dx, di.dy, di.dw, di.dh);
     float inter =  box_union(a, b);
@@ -170,7 +170,7 @@ void test_dintersect()
     box dha= {0, 0, 1, 1+.0001};
 
     box b = {.5, .5, .2, .2};
-    dbox di = dintersect(a,b);
+    dbox di = dintersect(a, b);
     printf("Inter: %f %f %f %f\n",
            di.dx, di.dy, di.dw, di.dh);
     float inter =  box_intersection(a, b);
@@ -219,11 +219,11 @@ void test_box()
 
 dbox diou(box a, box b)
 {
-    float u = box_union(a,b);
-    float i = box_intersection(a,b);
-    dbox di = dintersect(a,b);
-    dbox du = dunion(a,b);
-    dbox dd = {0,0,0,0};
+    float u = box_union(a, b);
+    float i = box_intersection(a, b);
+    dbox di = dintersect(a, b);
+    dbox du = dunion(a, b);
+    dbox dd = {0, 0, 0, 0};
 
     if (i <= 0 || 1) {
         dd.dx = b.x - a.x;

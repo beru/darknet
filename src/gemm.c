@@ -201,7 +201,7 @@ void gemm_cpu(int TA, int TB, int M, int N, int K,
               float BETA,
               float *C, int ldc)
 {
-    //printf("cpu: %d %d %d %d %d %f %d %d %f %d\n",TA, TB, M, N, K, ALPHA, lda, ldb, BETA, ldc);
+    //printf("cpu: %d %d %d %d %d %f %d %d %f %d\n", TA, TB, M, N, K, ALPHA, lda, ldb, BETA, ldc);
     for (int i = 0; i < M; ++i) {
         for (int j = 0; j < N; ++j) {
             C[i * ldc + j] *= BETA;
@@ -329,7 +329,7 @@ void test_gpu_accuracy(int TA, int TB, int m, int k, int n)
     float *c_gpu = random_matrix(m, n);
     memset(c, 0, m * n * sizeof(float));
     memset(c_gpu, 0, m * n * sizeof(float));
-    //pm(m,k,b);
+    //pm(m, k, b);
     gemm_gpu(TA, TB, m, n, k, 1, a, lda, b, ldb, 1, c_gpu, n);
     //printf("GPU\n");
     //pm(m, n, c_gpu);

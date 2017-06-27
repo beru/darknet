@@ -261,7 +261,7 @@ void test_char_rnn(char *cfgfile, char *weightfile, int num, char *seed, float t
         float *out = network_predict(&net, input);
         input[c] = 0;
         for (int j = 32; j < 127; ++j) {
-            //printf("%d %c %f\n",j, j, out[j]);
+            //printf("%d %c %f\n", j, j, out[j]);
         }
         for (int j = 0; j < inputs; ++j) {
             if (out[j] < .0001) out[j] = 0;

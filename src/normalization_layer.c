@@ -135,7 +135,7 @@ void forward_normalization_layer_gpu(layer *l)
             copy_ongpu(w * h, norms + w * h * (k - 1), 1, norms + w * h * k, 1);
             int prev = k - ((l->size - 1) / 2) - 1;
             int next = k + (l->size / 2);
-            if (prev >= 0)      axpy_ongpu(w * h, -l->alpha, squared + w * h * prev, 1, norms + w * h * k, 1);
+            if (prev >= 0)   axpy_ongpu(w * h, -l->alpha, squared + w * h * prev, 1, norms + w * h * k, 1);
             if (next < l->c) axpy_ongpu(w * h,  l->alpha, squared + w * h * next, 1, norms + w * h * k, 1);
         }
     }

@@ -234,7 +234,7 @@ void fill_truth_swag(char *path, float *truth, int classes, int flip,
     box_label *boxes = read_boxes(labelpath, &count);
     randomize_boxes(boxes, count);
     correct_boxes(boxes, count, dx, dy, sx, sy, flip);
-    float x,y,w,h;
+    float x, y, w, h;
     int id;
 
     for (int i = 0; i < count && i < 30; ++i) {
@@ -277,7 +277,7 @@ void fill_truth_region(char *path, float *truth, int classes, int num_boxes, int
     box_label *boxes = read_boxes(labelpath, &count);
     randomize_boxes(boxes, count);
     correct_boxes(boxes, count, dx, dy, sx, sy, flip);
-    float x,y,w,h;
+    float x, y, w, h;
     int id;
 
     for (int i = 0; i < count; ++i) {

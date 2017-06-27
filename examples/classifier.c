@@ -138,7 +138,7 @@ void train_classifier(char *datacfg,
         }
         if (get_current_batch(&net)%1000 == 0) {
             char buff[256];
-            sprintf(buff, "%s/%s.backup",backup_directory,base);
+            sprintf(buff, "%s/%s.backup", backup_directory,base);
             save_weights(&net, buff);
         }
     }

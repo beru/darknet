@@ -8,7 +8,7 @@ void im2col_cpu(float* data_im,
 
 void im2col_ongpu(float *im,
                   int channels, int height, int width,
-                  int ksize, int stride, int pad,float *data_col);
+                  int ksize, int stride, int pad, float *data_col);
 
 #endif
 

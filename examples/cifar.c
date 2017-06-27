@@ -110,7 +110,7 @@ void train_cifar_distill(char *cfgfile, char *weightfile)
         }
         if (get_current_batch(&net)%100 == 0) {
             char buff[256];
-            sprintf(buff, "%s/%s.backup", backup_directory,base);
+            sprintf(buff, "%s/%s.backup", backup_directory, base);
             save_weights(&net, buff);
         }
     }

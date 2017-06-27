@@ -300,7 +300,7 @@ image image_distance(image a, image b)
 
 void ghost_image(image source, image dest, int dx, int dy)
 {
-    int x,y,k;
+    int x, y, k;
     float max_dist = sqrt((-source.w / 2. + .5)*(-source.w / 2. + .5));
     for (k = 0; k < source.c; ++k) {
         for (y = 0; y < source.h; ++y) {
@@ -319,7 +319,7 @@ void ghost_image(image source, image dest, int dx, int dy)
 
 void embed_image(image source, image dest, int dx, int dy)
 {
-    int x,y,k;
+    int x, y, k;
     for (k = 0; k < source.c; ++k) {
         for (y = 0; y < source.h; ++y) {
             for (x = 0; x < source.w; ++x) {
@@ -556,7 +556,7 @@ void save_image_jpg(image p, const char *name)
 {
     image copy = copy_image(p);
     if (p.c == 3) rgbgr_image(copy);
-    int x,y,k;
+    int x, y, k;
 
     char buff[256];
     sprintf(buff, "%s.jpg", name);
@@ -1412,7 +1412,7 @@ image collapse_images_vert(image *ims, int n)
 {
     int color = 1;
     int border = 1;
-    int h,w,c;
+    int h, w, c;
     w = ims[0].w;
     h = (ims[0].h + border) * n - border;
     c = ims[0].c;
@@ -1445,7 +1445,7 @@ image collapse_images_horz(image *ims, int n)
 {
     int color = 1;
     int border = 1;
-    int h,w,c;
+    int h, w, c;
     int size = ims[0].h;
     h = size;
     w = (ims[0].w + border) * n - border;

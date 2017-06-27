@@ -285,7 +285,7 @@ void parse_region(layer *l, list *options, size_params params)
 
     l->softmax = option_find_int(options, "softmax", 0);
     l->background = option_find_int_quiet(options, "background", 0);
-    l->max_boxes = option_find_int_quiet(options, "max",30);
+    l->max_boxes = option_find_int_quiet(options, "max", 30);
     l->jitter = option_find_float(options, "jitter", .2);
     l->rescore = option_find_int_quiet(options, "rescore", 0);
 
