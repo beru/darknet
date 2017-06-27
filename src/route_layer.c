@@ -35,8 +35,9 @@ void make_route_layer(route_layer *l, int batch, int n, int *input_layers, int *
 #endif
 }
 
-void resize_route_layer(route_layer *l, network *net)
+void resize_route_layer(route_layer *l)
 {
+    network *net = l->net;
     layer first = net->layers[l->input_layers[0]];
     l->out_w = first.out_w;
     l->out_h = first.out_h;
@@ -69,8 +70,9 @@ void resize_route_layer(route_layer *l, network *net)
     
 }
 
-void forward_route_layer(route_layer *l, network *net)
+void forward_route_layer(route_layer *l)
 {
+    network *net = l->net;
     int offset = 0;
     for (int i = 0; i < l->n; ++i) {
         int index = l->input_layers[i];
@@ -83,8 +85,9 @@ void forward_route_layer(route_layer *l, network *net)
     }
 }
 
-void backward_route_layer(route_layer *l, network *net)
+void backward_route_layer(route_layer *l)
 {
+    network *net = l->net;
     int offset = 0;
     for (int i = 0; i < l->n; ++i) {
         int index = l->input_layers[i];
@@ -99,8 +102,9 @@ void backward_route_layer(route_layer *l, network *net)
 
 #ifdef GPU
 
-void forward_route_layer_gpu(route_layer *l, network *net)
+void forward_route_layer_gpu(route_layer *l)
 {
+    network *net = l->net;
     int offset = 0;
     for (int i = 0; i < l->n; ++i) {
         int index = l->input_layers[i];
@@ -113,8 +117,9 @@ void forward_route_layer_gpu(route_layer *l, network *net)
     }
 }
 
-void backward_route_layer_gpu(route_layer *l, network *net)
+void backward_route_layer_gpu(route_layer *l)
 {
+    network *net = l->net;
     int offset = 0;
     for (int i = 0; i < l->n; ++i) {
         int index = l->input_layers[i];

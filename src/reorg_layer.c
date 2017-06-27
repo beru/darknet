@@ -91,8 +91,9 @@ void resize_reorg_layer(layer *l, int w, int h)
 #endif
 }
 
-void forward_reorg_layer(layer *l, network *net)
+void forward_reorg_layer(layer *l)
 {
+    network *net = l->net;
     if (l->flatten) {
         memcpy(l->output, net->input, l->outputs * l->batch * sizeof(float));
         if (l->reverse) {
@@ -111,8 +112,9 @@ void forward_reorg_layer(layer *l, network *net)
     }
 }
 
-void backward_reorg_layer(layer *l, network *net)
+void backward_reorg_layer(layer *l)
 {
+    network *net = l->net;
     if (l->flatten) {
         memcpy(net->delta, l->delta, l->outputs * l->batch * sizeof(float));
         if (l->reverse) {
@@ -132,8 +134,9 @@ void backward_reorg_layer(layer *l, network *net)
 }
 
 #ifdef GPU
-void forward_reorg_layer_gpu(layer *l, network *net)
+void forward_reorg_layer_gpu(layer *l)
 {
+    network *net = l->net;
     if (l->flatten) {
         if (l->reverse) {
             flatten_ongpu(net->input_gpu, l->w * l->h, l->c, l->batch, 0, l->output_gpu);
@@ -151,8 +154,9 @@ void forward_reorg_layer_gpu(layer *l, network *net)
     }
 }
 
-void backward_reorg_layer_gpu(layer *l, network *net)
+void backward_reorg_layer_gpu(layer *l)
 {
+    network *net = l->net;
     if (l->flatten) {
         if (l->reverse) {
             flatten_ongpu(l->delta_gpu, l->w * l->h, l->c, l->batch, 1, net->delta_gpu);

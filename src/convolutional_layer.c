@@ -443,8 +443,9 @@ void backward_bias(float *bias_updates, float *delta, int batch, int n, int size
     }
 }
 
-void forward_convolutional_layer(convolutional_layer *l, network *net)
+void forward_convolutional_layer(convolutional_layer *l)
 {
+    network *net = l->net;
     int out_h = l->out_h;
     int out_w = l->out_w;
 
@@ -497,7 +498,7 @@ double t1 = what_time_is_it_now();
 printf("\t %s %f\n", "gemm", t1 - t0);
 
     if (l->batch_normalize) {
-        forward_batchnorm_layer(l, net);
+        forward_batchnorm_layer(l);
     }else {
         add_bias(l->output, l->biases, l->batch, l->n, out_h * out_w);
     }
@@ -508,8 +509,9 @@ printf("\t %s %f\n", "gemm", t1 - t0);
     }
 }
 
-void backward_convolutional_layer(convolutional_layer *l, network *net)
+void backward_convolutional_layer(convolutional_layer *l)
 {
+    network *net = l->net;
     int m = l->n;
     int n = l->size * l->size * l->c;
     int k = l->out_w * l->out_h;
@@ -517,7 +519,7 @@ void backward_convolutional_layer(convolutional_layer *l, network *net)
     gradient_array(l->output, m * k * l->batch, l->activation, l->delta);
 
     if (l->batch_normalize) {
-        backward_batchnorm_layer(l, net);
+        backward_batchnorm_layer(l);
     }else {
         backward_bias(l->bias_updates, l->delta, l->batch, l->n, k);
     }

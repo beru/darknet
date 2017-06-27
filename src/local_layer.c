@@ -90,8 +90,9 @@ void make_local_layer(local_layer *l,
             h, w, c, n, out_h, out_w, n);
 }
 
-void forward_local_layer(local_layer *l, network *net)
+void forward_local_layer(local_layer *l)
 {
+    network *net = l->net;
     int out_h = local_out_height(l);
     int out_w = local_out_width(l);
     int locations = out_h * out_w;
@@ -120,8 +121,9 @@ void forward_local_layer(local_layer *l, network *net)
     activate_array(l->output, l->outputs * l->batch, l->activation);
 }
 
-void backward_local_layer(local_layer *l, network *net)
+void backward_local_layer(local_layer *l)
 {
+    network *net = l->net;
     int locations = l->out_w * l->out_h;
 
     gradient_array(l->output, l->outputs * l->batch, l->activation, l->delta);
@@ -178,8 +180,9 @@ void update_local_layer(local_layer *l, int batch, float learning_rate, float mo
 
 #ifdef GPU
 
-void forward_local_layer_gpu(local_layer *l, network *net)
+void forward_local_layer_gpu(local_layer *l)
 {
+    network *net = l->net;
     int out_h = local_out_height(l);
     int out_w = local_out_width(l);
     int locations = out_h * out_w;
@@ -208,8 +211,9 @@ void forward_local_layer_gpu(local_layer *l, network *net)
     activate_array_ongpu(l->output_gpu, l->outputs * l->batch, l->activation);
 }
 
-void backward_local_layer_gpu(local_layer *l, network *net)
+void backward_local_layer_gpu(local_layer *l)
 {
+    network *net = l->net;
     int locations = l->out_w * l->out_h;
 
     gradient_array_ongpu(l->output_gpu, l->outputs * l->batch, l->activation, l->delta_gpu);

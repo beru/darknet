@@ -37,8 +37,9 @@ void resize_avgpool_layer(avgpool_layer *l, int w, int h)
     l->inputs = h * w * l->c;
 }
 
-void forward_avgpool_layer(avgpool_layer *l, network *net)
+void forward_avgpool_layer(avgpool_layer *l)
 {
+    network *net = l->net;
     for (int b = 0; b < l->batch; ++b) {
         for (int k = 0; k < l->c; ++k) {
             int out_index = k + b * l->c;
@@ -52,8 +53,9 @@ void forward_avgpool_layer(avgpool_layer *l, network *net)
     }
 }
 
-void backward_avgpool_layer(avgpool_layer *l, network *net)
+void backward_avgpool_layer(avgpool_layer *l)
 {
+    network *net = l->net;
     for (int b = 0; b < l->batch; ++b) {
         for (int k = 0; k < l->c; ++k) {
             int out_index = k + b * l->c;

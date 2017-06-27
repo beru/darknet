@@ -83,8 +83,9 @@ void resize_maxpool_layer(maxpool_layer *l, int w, int h)
 #endif
 }
 
-void forward_maxpool_layer(maxpool_layer *l, network *net)
+void forward_maxpool_layer(maxpool_layer *l)
 {
+    network *net = l->net;
     int w_offset = -l->pad;
     int h_offset = -l->pad;
 
@@ -119,8 +120,9 @@ void forward_maxpool_layer(maxpool_layer *l, network *net)
     }
 }
 
-void backward_maxpool_layer(maxpool_layer *l, network *net)
+void backward_maxpool_layer(maxpool_layer *l)
 {
+    network *net = l->net;
     int h = l->out_h;
     int w = l->out_w;
     int c = l->c;

@@ -11,8 +11,8 @@ image get_crop_image(crop_layer *l)
     return float_to_image(w, h, c, l->output);
 }
 
-void backward_crop_layer(crop_layer *l, network *net) {}
-void backward_crop_layer_gpu(crop_layer *l, network *net) {}
+void backward_crop_layer(crop_layer *l) {}
+void backward_crop_layer_gpu(crop_layer *l) {}
 
 void make_crop_layer(crop_layer *l,
                      int batch, int h, int w, int c,
@@ -67,8 +67,9 @@ void resize_crop_layer(layer *l, int w, int h)
 }
 
 
-void forward_crop_layer(crop_layer *l, network *net)
+void forward_crop_layer(crop_layer *l)
 {
+    network *net = l->net;
     int row, col;
     int index;
     int count = 0;

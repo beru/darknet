@@ -72,8 +72,9 @@ void resize_cost_layer(cost_layer *l, int inputs)
 #endif
 }
 
-void forward_cost_layer(cost_layer *l, network *net)
+void forward_cost_layer(cost_layer *l)
 {
+    network *net = l->net;
     if (!net->truth) return;
     if (l->cost_type == MASKED) {
         for (int i = 0; i < l->batch * l->inputs; ++i) {
@@ -92,9 +93,9 @@ void forward_cost_layer(cost_layer *l, network *net)
     l->cost[0] = sum_array(l->output, l->batch*l->inputs);
 }
 
-void backward_cost_layer(cost_layer *l, network *net)
+void backward_cost_layer(cost_layer *l)
 {
-    axpy_cpu(l->batch * l->inputs, l->scale, l->delta, 1, net->delta, 1);
+    axpy_cpu(l->batch * l->inputs, l->scale, l->delta, 1, l->net->delta, 1);
 }
 
 #ifdef GPU
@@ -118,8 +119,9 @@ int float_abs_compare (const void *a, const void *b)
     return (fa > fb) - (fa < fb);
 }
 
-void forward_cost_layer_gpu(cost_layer *l, network *net)
+void forward_cost_layer_gpu(cost_layer *l)
 {
+    network *net = l->net;
     if (!net->truth) return;
     if (l->smooth) {
         scal_ongpu(l->batch * l->inputs, (1 - l->smooth), net->truth_gpu, 1);
@@ -155,9 +157,9 @@ void forward_cost_layer_gpu(cost_layer *l, network *net)
     l->cost[0] = sum_array(l->output, l->batch * l->inputs);
 }
 
-void backward_cost_layer_gpu(cost_layer *l, network *net)
+void backward_cost_layer_gpu(cost_layer *l)
 {
-    axpy_ongpu(l->batch * l->inputs, l->scale, l->delta_gpu, 1, net->delta_gpu, 1);
+    axpy_ongpu(l->batch * l->inputs, l->scale, l->delta_gpu, 1, l->net->delta_gpu, 1);
 }
 
 #endif // #ifdef GPU

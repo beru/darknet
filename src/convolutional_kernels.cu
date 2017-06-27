@@ -70,8 +70,9 @@ void binarize_weights_gpu(float *weights, int n, int size, float *binary)
     check_error(cudaPeekAtLastError());
 }
 
-void forward_convolutional_layer_gpu(convolutional_layer *l, network *net)
+void forward_convolutional_layer_gpu(convolutional_layer *l)
 {
+    network *net = l->net;
     fill_ongpu(l->outputs * l->batch, 0, l->output_gpu, 1);
     if (l->binary) {
         binarize_weights_gpu(l->weights_gpu, l->n, l->c * l->size * l->size, l->binary_weights_gpu);
@@ -115,7 +116,7 @@ void forward_convolutional_layer_gpu(convolutional_layer *l, network *net)
 #endif
 
     if (l->batch_normalize) {
-        forward_batchnorm_layer_gpu(l, net);
+        forward_batchnorm_layer_gpu(l);
     }else {
         add_bias_gpu(l->output_gpu, l->biases_gpu, l->batch, l->n, l->out_w * l->out_h);
     }
@@ -171,8 +172,9 @@ void smooth_layer(layer *l, int size, float rate)
     check_error(cudaPeekAtLastError());
 }
 
-void backward_convolutional_layer_gpu(convolutional_layer *l, network *net)
+void backward_convolutional_layer_gpu(convolutional_layer *l)
 {
+    network *net = l->net;
     if (l->smooth) {
         smooth_layer(l, 5, l->smooth);
     }
@@ -181,7 +183,7 @@ void backward_convolutional_layer_gpu(convolutional_layer *l, network *net)
 
 
     if (l->batch_normalize) {
-        backward_batchnorm_layer_gpu(l, net);
+        backward_batchnorm_layer_gpu(l);
     }else {
         backward_bias_gpu(l->bias_updates_gpu, l->delta_gpu, l->batch, l->n, l->out_w * l->out_h);
     }

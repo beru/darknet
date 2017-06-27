@@ -128,8 +128,9 @@ void update_connected_layer(connected_layer *l, int batch, float learning_rate, 
     scal_cpu(l->inputs * l->outputs, momentum, l->weight_updates, 1);
 }
 
-void forward_connected_layer(connected_layer *l, network *net)
+void forward_connected_layer(connected_layer *l)
 {
+    network *net = l->net;
     fill_cpu(l->outputs * l->batch, 0, l->output, 1);
     int m = l->batch;
     int k = l->inputs;
@@ -162,8 +163,9 @@ void forward_connected_layer(connected_layer *l, network *net)
     activate_array(l->output, l->outputs * l->batch, l->activation);
 }
 
-void backward_connected_layer(connected_layer *l, network *net)
+void backward_connected_layer(connected_layer *l)
 {
+    network *net = l->net;
     gradient_array(l->output, l->outputs * l->batch, l->activation, l->delta);
     for (int i = 0; i < l->batch; ++i) {
         axpy_cpu(l->outputs, 1, l->delta + i * l->outputs, 1, l->bias_updates, 1);
@@ -276,8 +278,9 @@ void update_connected_layer_gpu(connected_layer *l, int batch, float learning_ra
     scal_ongpu(l->inputs * l->outputs, momentum, l->weight_updates_gpu, 1);
 }
 
-void forward_connected_layer_gpu(connected_layer *l, network *net)
+void forward_connected_layer_gpu(connected_layer *l)
 {
+    network *net = l->net;
     fill_ongpu(l->outputs * l->batch, 0, l->output_gpu, 1);
 
     int m = l->batch;
@@ -288,7 +291,7 @@ void forward_connected_layer_gpu(connected_layer *l, network *net)
     float * c = l->output_gpu;
     gemm_ongpu(0, 1, m, n, k, 1, a, k, b, k, 1, c, n);
     if (l->batch_normalize) {
-        forward_batchnorm_layer_gpu(l, net);
+        forward_batchnorm_layer_gpu(l);
     }
     for (int i = 0; i < l->batch; ++i) {
         axpy_ongpu(l->outputs, 1, l->biases_gpu, 1, l->output_gpu + i * l->outputs, 1);
@@ -296,8 +299,9 @@ void forward_connected_layer_gpu(connected_layer *l, network *net)
     activate_array_ongpu(l->output_gpu, l->outputs * l->batch, l->activation);
 }
 
-void backward_connected_layer_gpu(connected_layer *l, network *net)
+void backward_connected_layer_gpu(connected_layer *l)
 {
+    network *net = l->net;
     constrain_ongpu(l->outputs * l->batch, 1, l->delta_gpu, 1);
     gradient_array_ongpu(l->output_gpu, l->outputs * l->batch, l->activation, l->delta_gpu);
     for (int i = 0; i < l->batch; ++i) {
@@ -305,7 +309,7 @@ void backward_connected_layer_gpu(connected_layer *l, network *net)
     }
 
     if (l->batch_normalize) {
-        backward_batchnorm_layer_gpu(l, net);
+        backward_batchnorm_layer_gpu(l);
     }
 
     int m = l->outputs;

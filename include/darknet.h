@@ -91,12 +91,12 @@ struct layer{
     LAYER_TYPE type;
     ACTIVATION activation;
     COST_TYPE cost_type;
-    void (*forward)   (struct layer*, struct network*);
-    void (*backward)  (struct layer*, struct network*);
+    void (*forward)   (struct layer*);
+    void (*backward)  (struct layer*);
     void (*update)    (struct layer*, int, float, float, float);
 #ifdef GPU
-    void (*forward_gpu)   (struct layer*, struct network*);
-    void (*backward_gpu)  (struct layer*, struct network*);
+    void (*forward_gpu)   (struct layer*);
+    void (*backward_gpu)  (struct layer*);
     void (*update_gpu)    (struct layer*, int, float, float, float);
 #endif
     int batch_normalize;

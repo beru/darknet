@@ -91,8 +91,9 @@ void backward_maxpool_layer_kernel(int n, int in_h, int in_w, int in_c,
 }
 
 extern "C"
-void forward_maxpool_layer_gpu(maxpool_layer *layer, network *net)
+void forward_maxpool_layer_gpu(maxpool_layer *layer)
 {
+    network *net = layer->net;
     int h = layer->out_h;
     int w = layer->out_w;
     int c = layer->c;
@@ -107,8 +108,9 @@ void forward_maxpool_layer_gpu(maxpool_layer *layer, network *net)
 }
 
 extern "C"
-void backward_maxpool_layer_gpu(maxpool_layer *layer, network *net)
+void backward_maxpool_layer_gpu(maxpool_layer *layer)
 {
+    network *net = layer->net;
     size_t n = layer->h * layer->w * layer->c * layer->batch;
 
     backward_maxpool_layer_kernel<<<cuda_gridsize(n), BLOCK>>>(

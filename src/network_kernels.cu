@@ -43,7 +43,7 @@ void forward_network_gpu(network *net)
         if (l->delta_gpu) {
             fill_ongpu(l->outputs * l->batch, 0, l->delta_gpu, 1);
         }
-        l->forward_gpu(l, net);
+        l->forward_gpu(l);
         net->input_gpu = l->output_gpu;
         net->input = l->output;
         if (l->truth) {
@@ -71,7 +71,7 @@ void backward_network_gpu(network *net)
             net->delta_gpu = prev->delta_gpu;
         }
         net->index = i;
-        l->backward_gpu(l, net);
+        l->backward_gpu(l);
     }
 }
 

@@ -189,8 +189,9 @@ void resize_deconvolutional_layer(layer *l, int h, int w)
     l->workspace_size = get_workspace_size(l);
 }
 
-void forward_deconvolutional_layer(layer *l, network *net)
+void forward_deconvolutional_layer(layer *l)
 {
+    network *net = l->net;
     int m = l->size * l->size * l->n;
     int n = l->h * l->w;
     int k = l->c;
@@ -207,19 +208,20 @@ void forward_deconvolutional_layer(layer *l, network *net)
         col2im_cpu(net->workspace, l->out_c, l->out_h, l->out_w, l->size, l->stride, l->pad, l->output + i * l->outputs);
     }
     if (l->batch_normalize) {
-        forward_batchnorm_layer(l, net);
+        forward_batchnorm_layer(l);
     }else {
         add_bias(l->output, l->biases, l->batch, l->n, l->out_w * l->out_h);
     }
     activate_array(l->output, l->batch * l->n * l->out_w * l->out_h, l->activation);
 }
 
-void backward_deconvolutional_layer(layer *l, network *net)
+void backward_deconvolutional_layer(layer *l)
 {
+    network *net = l->net;
     gradient_array(l->output, l->outputs * l->batch, l->activation, l->delta);
 
     if (l->batch_normalize) {
-        backward_batchnorm_layer(l, net);
+        backward_batchnorm_layer(l);
     }else {
         backward_bias(l->bias_updates, l->delta, l->batch, l->n, l->out_w * l->out_h);
     }

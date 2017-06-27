@@ -47,8 +47,9 @@ void make_detection_layer(detection_layer *l,
     srand(0);
 }
 
-void forward_detection_layer(detection_layer *l, network *net)
+void forward_detection_layer(detection_layer *l)
 {
+    network *net = l->net;
     int locations = l->side * l->side;
     memcpy(l->output, net->input, l->outputs * l->batch * sizeof(float));
     //if (l->reorg) reorg(l->output, l->w * l->h, size * l->n, l->batch, 1);
@@ -223,9 +224,9 @@ void forward_detection_layer(detection_layer *l, network *net)
     }
 }
 
-void backward_detection_layer(detection_layer *l, network *net)
+void backward_detection_layer(detection_layer *l)
 {
-    axpy_cpu(l->batch*l->inputs, 1, l->delta, 1, net->delta, 1);
+    axpy_cpu(l->batch*l->inputs, 1, l->delta, 1, l->net->delta, 1);
 }
 
 void get_detection_boxes(layer *l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness)
@@ -258,8 +259,9 @@ void get_detection_boxes(layer *l, int w, int h, float thresh, float **probs, bo
 
 #ifdef GPU
 
-void forward_detection_layer_gpu(detection_layer *l, network *net)
+void forward_detection_layer_gpu(detection_layer *l)
 {
+    network *net = l->net;
     if (!net->train) {
         copy_ongpu(l->batch * l->inputs, net->input_gpu, 1, l->output_gpu, 1);
         return;
@@ -268,13 +270,14 @@ void forward_detection_layer_gpu(detection_layer *l, network *net)
     //float *in_cpu = xplat_malloc(l->batch*l->inputs, sizeof(float));
     //float *truth_cpu = 0;
 
-    forward_detection_layer(l, net);
+    forward_detection_layer(l);
     cuda_push_array(l->output_gpu, l->output, l->batch * l->outputs);
     cuda_push_array(l->delta_gpu, l->delta, l->batch * l->inputs);
 }
 
-void backward_detection_layer_gpu(detection_layer *l, network *net)
+void backward_detection_layer_gpu(detection_layer *l)
 {
+    network *net = l->net;
     axpy_ongpu(l->batch * l->inputs, 1, l->delta_gpu, 1, net->delta_gpu, 1);
     //copy_ongpu(l->batch*l->inputs, l->delta_gpu, 1, net->delta_gpu, 1);
 }

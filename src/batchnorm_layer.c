@@ -129,8 +129,9 @@ void resize_batchnorm_layer(layer *layer, int w, int h)
     fprintf(stderr, "Not implemented\n");
 }
 
-void forward_batchnorm_layer(layer *l, network *net)
+void forward_batchnorm_layer(layer *l)
 {
+    network *net = l->net;
     if (l->type == BATCHNORM) {
         copy_cpu(l->outputs * l->batch, net->input, 1, l->output, 1);
     }
@@ -153,8 +154,9 @@ void forward_batchnorm_layer(layer *l, network *net)
     add_bias(l->output, l->biases, l->batch, l->out_c, l->out_h * l->out_w);
 }
 
-void backward_batchnorm_layer(layer *l, network *net)
+void backward_batchnorm_layer(layer *l)
 {
+    network *net = l->net;
     if (!net->train) {
         l->mean = l->rolling_mean;
         l->variance = l->rolling_variance;
@@ -187,8 +189,9 @@ void push_batchnorm_layer(layer *l)
     cuda_push_array(l->rolling_variance_gpu, l->rolling_variance, l->c);
 }
 
-void forward_batchnorm_layer_gpu(layer *l, network *net)
+void forward_batchnorm_layer_gpu(layer *l)
 {
+    network *net = l->net;
     if (l->type == BATCHNORM) {
         copy_ongpu(l->outputs * l->batch, net->input_gpu, 1, l->output_gpu, 1);
     }
@@ -238,8 +241,9 @@ void forward_batchnorm_layer_gpu(layer *l, network *net)
 
 }
 
-void backward_batchnorm_layer_gpu(layer *l, network *net)
+void backward_batchnorm_layer_gpu(layer *l)
 {
+    network *net = l->net;
     if (!net->train) {
         l->mean_gpu = l->rolling_mean_gpu;
         l->variance_gpu = l->rolling_variance_gpu;

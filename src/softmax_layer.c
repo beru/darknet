@@ -33,8 +33,9 @@ void make_softmax_layer(softmax_layer *l, int batch, int inputs, int groups)
 #endif
 }
 
-void forward_softmax_layer(softmax_layer *l, network *net)
+void forward_softmax_layer(softmax_layer *l)
 {
+    network *net = l->net;
     if (l->softmax_tree) {
         int count = 0;
         for (int i = 0; i < l->softmax_tree->groups; ++i) {
@@ -49,9 +50,9 @@ void forward_softmax_layer(softmax_layer *l, network *net)
     }
 }
 
-void backward_softmax_layer(softmax_layer *l, network *net)
+void backward_softmax_layer(softmax_layer *l)
 {
-    axpy_cpu(l->inputs * l->batch, 1, l->delta, 1, net->delta, 1);
+    axpy_cpu(l->inputs * l->batch, 1, l->delta, 1, l->net->delta, 1);
 }
 
 #ifdef GPU
@@ -61,8 +62,9 @@ void pull_softmax_layer_output(softmax_layer *layer)
     cuda_pull_array(layer->output_gpu, layer->output, layer->inputs * layer->batch);
 }
 
-void forward_softmax_layer_gpu(softmax_layer *l, network *net)
+void forward_softmax_layer_gpu(softmax_layer *l)
 {
+    network *net = l->net;
     if (l->softmax_tree) {
         int count = 0;
         for (int i = 0; i < l->softmax_tree->groups; ++i) {
@@ -82,9 +84,9 @@ void forward_softmax_layer_gpu(softmax_layer *l, network *net)
     }
 }
 
-void backward_softmax_layer_gpu(softmax_layer *layer, network *net)
+void backward_softmax_layer_gpu(softmax_layer *layer)
 {
-    axpy_ongpu(layer->batch * layer->inputs, 1, layer->delta_gpu, 1, net->delta_gpu, 1);
+    axpy_ongpu(layer->batch * layer->inputs, 1, layer->delta_gpu, 1, layer->net->delta_gpu, 1);
 }
 
 #endif  // #ifdef GPU

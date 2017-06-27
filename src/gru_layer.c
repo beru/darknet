@@ -117,10 +117,9 @@ void update_gru_layer(layer *l, int batch, float learning_rate, float momentum, 
     update_connected_layer(l->output_layer, batch, learning_rate, momentum, decay);
 }
 
-void forward_gru_layer(layer *l, network *net)
+void forward_gru_layer(layer *l)
 {
-    network s = *net;
-    s.train = net->train;
+    network *net = l->net;
     layer *input_z_layer = l->input_z_layer;
     layer *input_r_layer = l->input_r_layer;
     layer *input_h_layer = l->input_h_layer;
@@ -142,15 +141,15 @@ void forward_gru_layer(layer *l, network *net)
     }
 
     for (int i = 0; i < l->steps; ++i) {
-        s.input = l->state;
-        forward_connected_layer(state_z_layer, &s);
-        forward_connected_layer(state_r_layer, &s);
+        float *input_org = net->input;
+        net->input = l->state;
+        forward_connected_layer(state_z_layer);
+        forward_connected_layer(state_r_layer);
 
-        s.input = net->input;
-        forward_connected_layer(input_z_layer, &s);
-        forward_connected_layer(input_r_layer, &s);
-        forward_connected_layer(input_h_layer, &s);
-
+        net->input = input_org;
+        forward_connected_layer(input_z_layer);
+        forward_connected_layer(input_r_layer);
+        forward_connected_layer(input_h_layer);
 
         copy_cpu(l->outputs * l->batch, input_z_layer->output, 1, l->z_cpu, 1);
         axpy_cpu(l->outputs * l->batch, 1, state_z_layer->output, 1, l->z_cpu, 1);
@@ -164,8 +163,8 @@ void forward_gru_layer(layer *l, network *net)
         copy_cpu(l->outputs * l->batch, l->state, 1, l->forgot_state, 1);
         mul_cpu(l->outputs * l->batch, l->r_cpu, 1, l->forgot_state, 1);
 
-        s.input = l->forgot_state;
-        forward_connected_layer(state_h_layer, &s);
+        net->input = l->forgot_state;
+        forward_connected_layer(state_h_layer);
 
         copy_cpu(l->outputs * l->batch, input_h_layer->output, 1, l->h_cpu, 1);
         axpy_cpu(l->outputs * l->batch, 1, state_h_layer->output, 1, l->h_cpu, 1);
@@ -180,6 +179,7 @@ void forward_gru_layer(layer *l, network *net)
 
         copy_cpu(l->outputs * l->batch, l->output, 1, l->state, 1);
 
+        net->input = input_org;
         net->input += l->inputs * l->batch;
         l->output += l->outputs * l->batch;
         increment_layer(input_z_layer, 1);
@@ -192,7 +192,7 @@ void forward_gru_layer(layer *l, network *net)
     }
 }
 
-void backward_gru_layer(layer *l, network *net)
+void backward_gru_layer(layer *l)
 {
 }
 
@@ -216,10 +216,9 @@ void update_gru_layer_gpu(layer *l, int batch, float learning_rate, float moment
     update_connected_layer_gpu(l->state_h_layer, batch, learning_rate, momentum, decay);
 }
 
-void forward_gru_layer_gpu(layer *l, network *net)
+void forward_gru_layer_gpu(layer *l)
 {
-    network s = *net;
-    s.train = net->train;
+    network *net = l->net;
     layer *input_z_layer = l->input_z_layer;
     layer *input_r_layer = l->input_r_layer;
     layer *input_h_layer = l->input_h_layer;
@@ -241,15 +240,15 @@ void forward_gru_layer_gpu(layer *l, network *net)
     }
 
     for (int i = 0; i < l->steps; ++i) {
-        s.input_gpu = l->state_gpu;
-        forward_connected_layer_gpu(state_z_layer, &s);
-        forward_connected_layer_gpu(state_r_layer, &s);
+        float *input_gpu_org = net->input_gpu;
+        net->input_gpu = l->state_gpu;
+        forward_connected_layer_gpu(state_z_layer);
+        forward_connected_layer_gpu(state_r_layer);
 
-        s.input_gpu = net->input_gpu;
-        forward_connected_layer_gpu(input_z_layer, &s);
-        forward_connected_layer_gpu(input_r_layer, &s);
-        forward_connected_layer_gpu(input_h_layer, &s);
-
+        net->input_gpu = input_gpu_org;
+        forward_connected_layer_gpu(input_z_layer);
+        forward_connected_layer_gpu(input_r_layer);
+        forward_connected_layer_gpu(input_h_layer);
 
         copy_ongpu(l->outputs * l->batch, input_z_layer->output_gpu, 1, l->z_gpu, 1);
         axpy_ongpu(l->outputs * l->batch, 1, state_z_layer->output_gpu, 1, l->z_gpu, 1);
@@ -263,8 +262,8 @@ void forward_gru_layer_gpu(layer *l, network *net)
         copy_ongpu(l->outputs * l->batch, l->state_gpu, 1, l->forgot_state_gpu, 1);
         mul_ongpu(l->outputs * l->batch, l->r_gpu, 1, l->forgot_state_gpu, 1);
 
-        s.input_gpu = l->forgot_state_gpu;
-        forward_connected_layer_gpu(state_h_layer, &s);
+        net->input_gpu = l->forgot_state_gpu;
+        forward_connected_layer_gpu(state_h_layer);
 
         copy_ongpu(l->outputs * l->batch, input_h_layer->output_gpu, 1, l->h_gpu, 1);
         axpy_ongpu(l->outputs * l->batch, 1, state_h_layer->output_gpu, 1, l->h_gpu, 1);
@@ -279,6 +278,7 @@ void forward_gru_layer_gpu(layer *l, network *net)
 
         copy_ongpu(l->outputs * l->batch, l->output_gpu, 1, l->state_gpu, 1);
 
+        net->input_gpu = input_gpu_org;
         net->input_gpu += l->inputs * l->batch;
         l->output_gpu += l->outputs * l->batch;
         increment_layer(input_z_layer, 1);
@@ -291,10 +291,9 @@ void forward_gru_layer_gpu(layer *l, network *net)
     }
 }
 
-void backward_gru_layer_gpu(layer *l, network *net)
+void backward_gru_layer_gpu(layer *l)
 {
-    network s = *net;
-    s.train = net->train;
+    network *net = l->net;
     layer *input_z_layer = l->input_z_layer;
     layer *input_r_layer = l->input_r_layer;
     layer *input_h_layer = l->input_h_layer;
@@ -361,10 +360,12 @@ void backward_gru_layer_gpu(layer *l, network *net)
         mul_ongpu(l->outputs * l->batch, l->r_gpu, 1, l->forgot_state_gpu, 1);
         fill_ongpu(l->outputs * l->batch, 0, l->forgot_delta_gpu, 1);
 
-        s.input_gpu = l->forgot_state_gpu;
-        s.delta_gpu = l->forgot_delta_gpu;
+        float *input_gpu_org = net->input_gpu;
+        float *delta_gpu_org = net->delta_gpu;
+        net->input_gpu = l->forgot_state_gpu;
+        net->delta_gpu = l->forgot_delta_gpu;
         
-        backward_connected_layer_gpu(state_h_layer, &s);
+        backward_connected_layer_gpu(state_h_layer);
         if (prev_delta_gpu) {
             mult_add_into_gpu(l->outputs * l->batch, l->forgot_delta_gpu, l->r_gpu, prev_delta_gpu);
         }
@@ -376,19 +377,18 @@ void backward_gru_layer_gpu(layer *l, network *net)
         gradient_array_ongpu(l->z_gpu, l->outputs * l->batch, LOGISTIC, input_z_layer->delta_gpu);
         copy_ongpu(l->outputs * l->batch, input_z_layer->delta_gpu, 1, state_z_layer->delta_gpu, 1);
         
-        s.input_gpu = l->prev_state_gpu;
-        s.delta_gpu = prev_delta_gpu;
+        net->input_gpu = l->prev_state_gpu;
+        net->delta_gpu = prev_delta_gpu;
         
-        backward_connected_layer_gpu(state_r_layer, &s);
-        backward_connected_layer_gpu(state_z_layer, &s);
+        backward_connected_layer_gpu(state_r_layer);
+        backward_connected_layer_gpu(state_z_layer);
 
-        s.input_gpu = net->input_gpu;
-        s.delta_gpu = net->delta_gpu;
+        net->input_gpu = input_gpu_org;
+        net->delta_gpu = delta_gpu_org;
         
-        backward_connected_layer_gpu(input_h_layer, &s);
-        backward_connected_layer_gpu(input_r_layer, &s);
-        backward_connected_layer_gpu(input_z_layer, &s);
-
+        backward_connected_layer_gpu(input_h_layer);
+        backward_connected_layer_gpu(input_r_layer);
+        backward_connected_layer_gpu(input_z_layer);
 
         net->input_gpu -= l->inputs * l->batch;
         if (net->delta_gpu) {

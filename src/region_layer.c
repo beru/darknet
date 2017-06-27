@@ -143,8 +143,9 @@ int entry_index(layer *l, int batch, int location, int entry)
     return batch * l->outputs + n * l->w * l->h * (l->coords + l->classes + 1) + entry * l->w * l->h + loc;
 }
 
-void forward_region_layer(layer *l, network *net)
+void forward_region_layer(layer *l)
 {
+    network *net = l->net;
     memcpy(l->output, net->input, l->outputs * l->batch * sizeof(float));
 
 #ifndef GPU
@@ -330,9 +331,10 @@ void forward_region_layer(layer *l, network *net)
            avg_anyobj / (l->w * l->h * l->n * l->batch), recall / count, count);
 }
 
-void backward_region_layer(layer *l, network *net)
+void backward_region_layer(layer *l)
 {
     /*
+        network *net = l->net;
        int b;
        int size = l->coords + l->classes + 1;
        for (b = 0; b < l->batch*l->n; ++b) {
@@ -458,8 +460,9 @@ void get_region_boxes(layer *l, int w, int h, int netw, int neth,
 
 #ifdef GPU
 
-void forward_region_layer_gpu(layer *l, network *net)
+void forward_region_layer_gpu(layer *l)
 {
+    network *net = l->net;
     copy_ongpu(l->batch * l->inputs, net->input_gpu, 1, l->output_gpu, 1);
     for (int b = 0; b < l->batch; ++b) {
         for (int n = 0; n < l->n; ++n) {
@@ -548,7 +551,7 @@ void forward_region_layer_gpu(layer *l, network *net)
         cuda_pull_array(net->truth_gpu, truth_cpu, num_truth);
     }
     cuda_pull_array(l->output_gpu, net->input, l->batch*l->inputs);
-    forward_region_layer(l, net);
+    forward_region_layer(l);
     //cuda_push_array(l->output_gpu, l->output, l->batch*l->outputs);
     if (!net->train) {
         return;
@@ -556,8 +559,9 @@ void forward_region_layer_gpu(layer *l, network *net)
     cuda_push_array(l->delta_gpu, l->delta, l->batch * l->outputs);
 }
 
-void backward_region_layer_gpu(layer *l, network *net)
+void backward_region_layer_gpu(layer *l)
 {
+    network *net = l->net;
     for (int b = 0; b < l->batch; ++b) {
         for (int n = 0; n < l->n; ++n) {
             int index = entry_index(l, b, n * l->w * l->h, 0);

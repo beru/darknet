@@ -177,7 +177,7 @@ void forward_network(network *net)
             fill_cpu(l->outputs * l->batch, 0, l->delta, 1);
         }
 double t0 = what_time_is_it_now();
-        l->forward(l, net);
+        l->forward(l);
 double t1 = what_time_is_it_now();
 printf("[%d] %s %f\n", i, get_layer_string(l->type), t1 - t0);
         net->input = l->output;
@@ -234,7 +234,7 @@ void backward_network(network *net)
             net->delta = prev->delta;
         }
         net->index = i;
-        l->backward(l, net);
+        l->backward(l);
     }
 }
 
@@ -324,7 +324,7 @@ int resize_network(network *net, int w, int h)
             resize_region_layer(l, w, h);
             break;
         case ROUTE:
-            resize_route_layer(l, net);
+            resize_route_layer(l);
             break;
         case REORG:
             resize_reorg_layer(l, w, h);

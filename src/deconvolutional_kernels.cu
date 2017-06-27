@@ -15,8 +15,9 @@ extern "C" {
 }
 
 extern "C"
-void forward_deconvolutional_layer_gpu(layer *l, network *net)
+void forward_deconvolutional_layer_gpu(layer *l)
 {
+    network *net = l->net;
     int m = l->size * l->size * l->n;
     int n = l->h * l->w;
     int k = l->c;
@@ -33,7 +34,7 @@ void forward_deconvolutional_layer_gpu(layer *l, network *net)
         col2im_ongpu(net->workspace, l->out_c, l->out_h, l->out_w, l->size, l->stride, l->pad, l->output_gpu + i * l->outputs);
     }
     if (l->batch_normalize) {
-        forward_batchnorm_layer_gpu(l, net);
+        forward_batchnorm_layer_gpu(l);
     }else {
         add_bias_gpu(l->output_gpu, l->biases_gpu, l->batch, l->n, l->out_w * l->out_h);
     }
@@ -41,13 +42,14 @@ void forward_deconvolutional_layer_gpu(layer *l, network *net)
 }
 
 extern "C"
-void backward_deconvolutional_layer_gpu(layer *l, network *net)
+void backward_deconvolutional_layer_gpu(layer *l)
 {
+    network *net = l->net;
     constrain_ongpu(l->outputs * l->batch, 1, l->delta_gpu, 1);
     gradient_array_ongpu(l->output_gpu, l->outputs * l->batch, l->activation, l->delta_gpu);
 
     if (l->batch_normalize) {
-        backward_batchnorm_layer_gpu(l, net);
+        backward_batchnorm_layer_gpu(l);
     }else {
         backward_bias_gpu(l->bias_updates_gpu, l->delta_gpu, l->batch, l->n, l->out_w * l->out_h);
     }

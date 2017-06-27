@@ -37,30 +37,30 @@ void make_activation_layer(layer *l,
     fprintf(stderr, "Activation Layer: %d inputs\n", inputs);
 }
 
-void forward_activation_layer(layer *l, network *net)
+void forward_activation_layer(layer *l)
 {
-    copy_cpu(l->outputs * l->batch, net->input, 1, l->output, 1);
+    copy_cpu(l->outputs * l->batch, l->net->input, 1, l->output, 1);
     activate_array(l->output, l->outputs * l->batch, l->activation);
 }
 
-void backward_activation_layer(layer *l, network *net)
+void backward_activation_layer(layer *l)
 {
     gradient_array(l->output, l->outputs * l->batch, l->activation, l->delta);
-    copy_cpu(l->outputs * l->batch, l->delta, 1, net->delta, 1);
+    copy_cpu(l->outputs * l->batch, l->delta, 1, l->net->delta, 1);
 }
 
 #ifdef GPU
 
-void forward_activation_layer_gpu(layer *l, network *net)
+void forward_activation_layer_gpu(layer *l)
 {
-    copy_ongpu(l->outputs * l->batch, net->input_gpu, 1, l->output_gpu, 1);
+    copy_ongpu(l->outputs * l->batch, l->net->input_gpu, 1, l->output_gpu, 1);
     activate_array_ongpu(l->output_gpu, l->outputs * l->batch, l->activation);
 }
 
-void backward_activation_layer_gpu(layer *l, network *net)
+void backward_activation_layer_gpu(layer *l)
 {
     gradient_array_ongpu(l->output_gpu, l->outputs * l->batch, l->activation, l->delta_gpu);
-    copy_ongpu(l->outputs * l->batch, l->delta_gpu, 1, net->delta_gpu, 1);
+    copy_ongpu(l->outputs * l->batch, l->delta_gpu, 1, l->net->delta_gpu, 1);
 }
 
 #endif  // #ifdef GPU

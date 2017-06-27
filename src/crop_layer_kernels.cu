@@ -187,8 +187,9 @@ void forward_crop_layer_kernel(float *input, float *rand, int size, int c, int h
 }
 
 extern "C"
-void forward_crop_layer_gpu(crop_layer *layer, network *net)
+void forward_crop_layer_gpu(crop_layer *layer)
 {
+    network *net = layer->net;
     cuda_random(layer->rand_gpu, layer->batch * 8);
 
     float radians = layer->angle * 3.14159265 / 180.;

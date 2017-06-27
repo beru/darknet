@@ -214,8 +214,7 @@ void parse_crnn(layer *l, list *options, size_params params)
     make_crnn_layer(l,
                     params.batch, params.w, params.h, params.c,
                     hidden_filters, output_filters, params.time_steps,
-                    activation, batch_normalize,
-                    params.net.train);
+                    activation, batch_normalize);
 
     l->shortcut = option_find_int_quiet(options, "shortcut", 0);
 }

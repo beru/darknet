@@ -35,8 +35,9 @@ void resize_dropout_layer(dropout_layer *l, int inputs)
 #endif
 }
 
-void forward_dropout_layer(dropout_layer *l, network *net)
+void forward_dropout_layer(dropout_layer *l)
 {
+    network *net = l->net;
     if (!net->train) return;
     for (int i = 0; i < l->batch * l->inputs; ++i) {
         float r = rand_uniform(0, 1);
@@ -46,8 +47,9 @@ void forward_dropout_layer(dropout_layer *l, network *net)
     }
 }
 
-void backward_dropout_layer(dropout_layer *l, network *net)
+void backward_dropout_layer(dropout_layer *l)
 {
+    network *net = l->net;
     if (!net->delta) return;
     for (int i = 0; i < l->batch * l->inputs; ++i) {
         float r = l->rand[i];

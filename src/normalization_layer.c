@@ -65,8 +65,9 @@ void resize_normalization_layer(layer *layer, int w, int h)
 #endif  // #ifdef GPU
 }
 
-void forward_normalization_layer(layer *l, network *net)
+void forward_normalization_layer(layer *l)
 {
+    network *net = l->net;
     int k, b;
     int w = l->w;
     int h = l->h;
@@ -96,11 +97,12 @@ void forward_normalization_layer(layer *l, network *net)
     mul_cpu(w*h*c*l->batch, net->input, 1, l->output, 1);
 }
 
-void backward_normalization_layer(layer *l, network *net)
+void backward_normalization_layer(layer *l)
 {
     // TODO This is approximate ;-)
     // Also this should add in to delta instead of overwritting.
 
+    network *net = l->net;
     int w = l->w;
     int h = l->h;
     int c = l->c;
@@ -109,8 +111,9 @@ void backward_normalization_layer(layer *l, network *net)
 }
 
 #ifdef GPU
-void forward_normalization_layer_gpu(layer *l, network *net)
+void forward_normalization_layer_gpu(layer *l)
 {
+    network *net = l->net;
     int k, b;
     int w = l->w;
     int h = l->h;
@@ -140,10 +143,11 @@ void forward_normalization_layer_gpu(layer *l, network *net)
     mul_ongpu(w * h * c * l->batch, net->input_gpu, 1, l->output_gpu, 1);
 }
 
-void backward_normalization_layer_gpu(layer *l, network *net)
+void backward_normalization_layer_gpu(layer *l)
 {
     // TODO This is approximate ;-)
 
+    network *net = l->net;
     int w = l->w;
     int h = l->h;
     int c = l->c;
